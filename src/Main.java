@@ -1,37 +1,28 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int caseNumber = Integer.parseInt(br.readLine());
+        String[] words = br.readLine().split("");
 
-        int count = 0;
+        int[] results = new int[26];
+        for (int i = 0; i < results.length; i++) {
+            results[i] = -1;
+        }
 
-        for (int i = 1; i <= caseNumber; i++) {
-            if(isNumber(i)) {
-                count++;
+        for (int i = 0; i < words.length; i++) {
+            int a = (int)words[i].charAt(0) - 97;
+            if(results[a] == -1) {
+                results[a] = i;
             }
         }
-        System.out.println(count);
-    }
 
-    public static boolean isNumber(int a) {
-        if(a < 100) {
-            return true;
+        for (int result : results) {
+            System.out.print(result + " ");
         }
 
-        int[] numbers = Arrays.stream((String.valueOf(a).split(""))).mapToInt(Integer::parseInt).toArray();
-        int dif = numbers[1] - numbers[0];
-        boolean result = false;
-        for (int i = 1; i < numbers.length-1; i++) {
-            result = (dif == numbers[i + 1] - numbers[i]);
-        }
-
-        return result;
     }
-
 }
