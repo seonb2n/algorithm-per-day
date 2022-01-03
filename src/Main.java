@@ -2,35 +2,35 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashSet;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int caseNumber = Integer.parseInt(br.readLine());
 
-        HashSet<Integer> set = new HashSet<>();
+        int count = 0;
 
-        for (int i = 0; i < 9999; i++) {
-            set.add(i+1);
+        for (int i = 1; i <= caseNumber; i++) {
+            if(isNumber(i)) {
+                count++;
+            }
         }
-
-        for (int i = 0; i < 10000; i++) {
-            set.remove(getNumber(i));
-        }
-
-        for (Integer integer : set) {
-            System.out.println(integer);
-        }
-
+        System.out.println(count);
     }
 
-    public static int getNumber(int a) {
-        int[] numbers = Arrays.stream(String.valueOf(a).split("")).mapToInt(Integer::parseInt).toArray();
-        int result = 0;
-        for (int number : numbers) {
-            result += number;
+    public static boolean isNumber(int a) {
+        if(a < 100) {
+            return true;
         }
-        result += a;
+
+        int[] numbers = Arrays.stream((String.valueOf(a).split(""))).mapToInt(Integer::parseInt).toArray();
+        int dif = numbers[1] - numbers[0];
+        boolean result = false;
+        for (int i = 1; i < numbers.length-1; i++) {
+            result = (dif == numbers[i + 1] - numbers[i]);
+        }
+
         return result;
     }
 
