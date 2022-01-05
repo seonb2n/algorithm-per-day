@@ -1,36 +1,57 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.OptionalInt;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int totalNumber = Integer.parseInt(br.readLine());
+        String word = br.readLine();
+        word = word.toUpperCase();
+        String[] letters = word.split("");
 
-        int[] wordNumber = new int[totalNumber];
-        String[] words = new String[totalNumber];
+        int[] alphabets = new int[26];
+        Arrays.fill(alphabets, 0);
 
-        for (int i = 0; i < totalNumber; i++) {
-            String read = br.readLine();
-            int blank = read.indexOf(" ");
-            wordNumber[i] = Integer.parseInt(read.substring(0, blank));
-            words[i] = read.substring(blank+1);
+        int maxCount = 0;
+
+        for (int i = 0; i < letters.length; i++) {
+            alphabets[letterToNumber(letters[i])]++;
         }
 
-        for (int i = 0; i < totalNumber; i++) {
-            printNumber(wordNumber, words, i);
-            System.out.println();
-        }
-    }
+        //최대 값 찾는 알고리즘
+        int max = 0;
+        int maxIndex = 0;
+        boolean isMaxOne = true;
 
-    private static void printNumber(int[] wordNumber, String[] words, int i) {
-        for (int j = 0; j < words[i].length(); j++) {
-            String[] temp = new String[words[i].length()];
-            temp = words[i].split("");
-            for (int k = 0; k < wordNumber[i]; k++) {
-                System.out.print(temp[j]);
+        for (int i = 0; i < alphabets.length; i++) {
+            if(alphabets[i] == max) {
+                isMaxOne = true;
+            }
+
+            if(alphabets[i] > max) {
+                max = alphabets[i];
+                maxIndex = i;
+                isMaxOne = false;
             }
         }
+
+        if(isMaxOne) {
+            System.out.println("?");
+        } else {
+            System.out.println(numberToLetter(maxIndex));
+        }
+
+    }
+
+    private static int letterToNumber(String a) {
+        return (int)a.charAt(0) - 65;
+    }
+
+    private static char numberToLetter(int a) {
+        return (char)(a + 65);
     }
 }
