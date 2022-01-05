@@ -10,15 +10,21 @@ public class Main {
         String word = br.readLine();
         int[] numbers = Arrays.stream(word.split(" ")).mapToInt(Integer::parseInt).toArray();
 
-        System.out.println(Math.max(reverseNumber(numbers[0]), reverseNumber(numbers[1])));
+        int price = numbers[0];
+        int fixedCost = numbers[1];
+        int variableCost = numbers[2];
 
-    }
+        int stockNumber;
 
-    private static int reverseNumber(int number) {
-        int result = number / 100;
-        result += number / 10 % 10 * 10;
-        result += number % 10 * 100;
-
-        return result;
+        if(variableCost == fixedCost) {
+            System.out.println(-1);
+        } else {
+            stockNumber = (int) Math.floor(price / (variableCost - fixedCost)) + 1;
+            if(stockNumber > 0 ) {
+                System.out.println(stockNumber);
+            } else {
+                System.out.println(-1);
+            }
+        }
     }
 }
