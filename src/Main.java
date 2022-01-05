@@ -6,23 +6,31 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String[] words = br.readLine().split("");
+        int totalNumber = Integer.parseInt(br.readLine());
 
-        int[] results = new int[26];
-        for (int i = 0; i < results.length; i++) {
-            results[i] = -1;
+        int[] wordNumber = new int[totalNumber];
+        String[] words = new String[totalNumber];
+
+        for (int i = 0; i < totalNumber; i++) {
+            String read = br.readLine();
+            int blank = read.indexOf(" ");
+            wordNumber[i] = Integer.parseInt(read.substring(0, blank));
+            words[i] = read.substring(blank+1);
         }
 
-        for (int i = 0; i < words.length; i++) {
-            int a = (int)words[i].charAt(0) - 97;
-            if(results[a] == -1) {
-                results[a] = i;
+        for (int i = 0; i < totalNumber; i++) {
+            printNumber(wordNumber, words, i);
+            System.out.println();
+        }
+    }
+
+    private static void printNumber(int[] wordNumber, String[] words, int i) {
+        for (int j = 0; j < words[i].length(); j++) {
+            String[] temp = new String[words[i].length()];
+            temp = words[i].split("");
+            for (int k = 0; k < wordNumber[i]; k++) {
+                System.out.print(temp[j]);
             }
         }
-
-        for (int result : results) {
-            System.out.print(result + " ");
-        }
-
     }
 }
