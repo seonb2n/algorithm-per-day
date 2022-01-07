@@ -1,28 +1,36 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String word = br.readLine();
+        int testNumber = Integer.parseInt(br.readLine());
 
-        long[] numbers = Arrays.stream(word.split(" ")).mapToLong(Long::parseLong).toArray();
+        int[] floor = new int[testNumber];
+        int[] room = new int[testNumber];
 
-        long dayHeight = numbers[0];
-        long nightHeight = numbers[1];
-        long treeHeight = numbers[2];
-
-        long a = treeHeight - nightHeight;
-        long b= dayHeight - nightHeight;
-
-        long num = a /b;
-        if(a % b == 0) {
-            System.out.println(num);
-        } else {
-            System.out.println(num + 1);
+        for (int i = 0; i < testNumber; i++) {
+            floor[i] = Integer.parseInt(br.readLine());
+            room[i] = Integer.parseInt(br.readLine());
         }
+
+        for (int i = 0; i < testNumber; i++) {
+            System.out.println(findPeopleNumber(floor[i], room[i]));
+        }
+    }
+
+    public static int findPeopleNumber(int floor, int room) {
+        if(floor == 0) {
+            return room;
+        }
+
+        if(room == 1) {
+            return 1;
+        }
+
+        return findPeopleNumber(floor, room - 1) + findPeopleNumber(floor - 1, room);
+
     }
 }
