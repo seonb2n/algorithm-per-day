@@ -9,16 +9,37 @@ public class Main {
         String word = br.readLine();
         int inputNumber = Integer.parseInt(word);
 
-        int result = 0;
-        while(result * (result + 1) * 3 + 2 < inputNumber) {
-            result++;
+        int n = 1;
+        int x = 0;
+        int y = 0;
+        int distance = 0;
+
+        while(calcaulateStartN(n) <= inputNumber) {
+            n++;
         }
 
-        if(result * (result + 1) * 3 + 2 == inputNumber) {
-            System.out.println(result+2);
+        n = n - 1;
+
+        if(n % 2 == 0) {
+            x = n - 1;
+            y = 0;
+            distance = inputNumber - calcaulateStartN(n);
+            x = x-distance;
+            y = y + distance;
         } else {
-            System.out.println(result+1);
+            x = 0;
+            y = n -1;
+            distance = inputNumber - calcaulateStartN(n);
+            x = x + distance;
+            y = y - distance;
         }
 
+        System.out.println((y+1) + "/" + (x+1));
+
+
+    }
+
+    public static int calcaulateStartN(int n) {
+        return (n * n - n + 2) / 2;
     }
 }
