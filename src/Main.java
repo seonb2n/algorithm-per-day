@@ -1,46 +1,56 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.StringTokenizer;
 
 public class Main {
+
+    static StringBuilder sb = new StringBuilder();
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int testCaseNumber = Integer.parseInt(br.readLine());
-        long[] nowPosition = new long[testCaseNumber];
-        long[] endPosition = new long[testCaseNumber];
 
-        for (int i = 0; i < testCaseNumber; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            nowPosition[i] = Long.parseLong(st.nextToken());
-            endPosition[i] = Long.parseLong(st.nextToken());
-        }
+        makePattern(testCaseNumber);
 
-        for (int i = 0; i < testCaseNumber; i++) {
-            System.out.println(calculateResult(nowPosition[i], endPosition[i]));
+        System.out.print(sb);
+
+    }
+
+    public static void makePattern(int totalNumber) {
+        for (int i = 1; i <= totalNumber; i++) {
+            drawLine(totalNumber, i);
+            sb.append("\n");
         }
     }
 
-    public static long calculateResult(long nowPosition, long endPosition) {
-        long result;
-        long distance = endPosition - nowPosition;
+    //주어진 n 의 값에 해당하는 줄 그리기
+    public static void drawLine(int totalNUmber, int currentNumber) {
 
-        if(distance == 1) {
-            return 1;
+        if(totalNUmber == 1) {
+            sb.append("*");
+        } else {
+            totalNUmber = totalNUmber / 3;
+            //만약 지금 줄이 공백이 포함된 줄이면
+            if(currentNumber >= totalNUmber + 1 && currentNumber <= totalNUmber * 2) {
+                //3번 호출하는 것이 아니라, 1번 띄고 1번 호출
+                currentNumber = currentNumber % totalNUmber;
+                drawLine(totalNUmber, currentNumber);
+                drawBlank(totalNUmber);
+                drawLine(totalNUmber, currentNumber);
+            } else {
+                //공백이 포함되지 않은 줄이면, 하위 패턴의 줄 그리기
+                currentNumber = currentNumber % totalNUmber;
+                drawLine(totalNUmber, currentNumber);
+                drawLine(totalNUmber, currentNumber);
+                drawLine(totalNUmber, currentNumber);
+            }
         }
-
-        if(distance == 2) {
-            return 2;
-        }
-
-        result = calculateStartOddNumber(distance);
-
-        return result;
     }
 
-    public static long calculateStartOddNumber(long number) {
-        double a = Math.sqrt(4 * number - 3) ;
-        return (long)a;
+    public static void drawBlank(int totalNumber) {
+        for (int i = 0; i < totalNumber; i++) {
+            sb.append(" ");
+        }
     }
+
 }
