@@ -1,37 +1,21 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int testNumber = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        List<BigInteger> numbers = new ArrayList<>(2);
+        numbers.add(new BigInteger(st.nextToken()));
+        numbers.add(new BigInteger(st.nextToken()));
 
-        int five = 0;
-        int three = 0;
-
-        five = testNumber / 5;
-
-        while(five >= 0) {
-            if((testNumber - three * 3) % 5 == 0) {
-                break;
-            }
-
-            three++;
-
-        }
-
-        if(testNumber - three * 3 >= 0) {
-            five = (testNumber - three * 3) / 5;
-        }
-
-        if(testNumber == five * 5 + three * 3) {
-            System.out.println(five + three);
-        } else{
-            System.out.println(-1);
-        }
-
+        System.out.println(numbers.get(0).add(numbers.get(1)));
     }
 
 }
