@@ -3,50 +3,59 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class Main {
 
-    static StringBuilder sb = new StringBuilder();
-    static int count = 0;
+
+    static List<Person> personList = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int testCaseNumber = Integer.parseInt(br.readLine());
-        List<String> plates = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < testCaseNumber; i++) {
-            plates.add(String.valueOf(i + 1));
+            StringTokenizer stringTokenizer = new StringTokenizer(br.readLine(), " ");
+            personList.add(
+                    new Person(Integer.parseInt(stringTokenizer.nextToken()), Integer.parseInt(stringTokenizer.nextToken()))
+            );
         }
 
-        movePlates(testCaseNumber, "1", "3");
-
-        System.out.println(count);
-        System.out.print(sb);
-    }
-
-    public static void movePlates(int platesNumber, String fromTop, String toTop) {
-        if (platesNumber == 1) {
-            sb.append(fromTop + " " + toTop);
-            sb.append("\n");
-            count++;
-        } else {
-
-            String middleTop = getMiddleTop(fromTop, toTop);
-            //n - 1번째 까지의 원판을 fromTop -> middleTop 으로 옮긴다.
-            movePlates((platesNumber - 1), fromTop, middleTop);
-
-            //n 번째 원판을 fromTop > toTop 으로 옮긴다.
-            sb.append(fromTop + " " + toTop);
-            sb.append("\n");
-            count++;
-
-            //n - 1번째 까지의 원판을 middleTop -> toTop으로 옮긴다.
-            movePlates((platesNumber - 1), middleTop, toTop);
-
+        for (Person person : personList) {
+            person.rank = getRank(person);
+            sb.append(person.rank + " ");
         }
+
+        System.out.println(sb);
+
+
+
     }
 
-    public static String getMiddleTop(String toTop, String fromTop) {
-        return String.valueOf(6 - Integer.parseInt(toTop) - Integer.parseInt(fromTop));
+    private static int getRank(Person person) {
+        int result = 1;
+
+        for (int i = 0; i < personList.size(); i++) {
+            if(person.height < personList.get(i).height && person.weight < personList.get(i).weight) {
+                result++;
+            }
+        }
+
+        return result;
     }
+}
+
+class Person {
+
+    public Person(int weight, int height) {
+        this.weight = weight;
+        this.height = height;
+        rank = 0;
+    }
+
+    int weight;
+    int height;
+    int rank;
+
 }
