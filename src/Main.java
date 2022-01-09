@@ -1,8 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Main {
 
@@ -10,61 +9,35 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int testCaseNumber = Integer.parseInt(br.readLine());
         StringBuilder sb = new StringBuilder();
+        StringTokenizer stringTokenizer = new StringTokenizer(br.readLine(), " ");
+        int[] values = new int[testCaseNumber];
 
-        int[] numbers = new int[8001];
-        List<Integer> sortedNumber = new ArrayList<>();
-
-        double mean = 0;
-        int median;
-        int mode = 0;
-        int range;
-
-        //가장 많이 존재하는 값
-        int max = 0;
-        //겹칠 때, 두번째임을 확인
-        boolean isSecond = false;
-
+        //값 부여
         for (int i = 0; i < testCaseNumber; i++) {
-            int number = Integer.parseInt(br.readLine());
-            numbers[number + 4000]++;
-            mean += number;
+            int number = Integer.parseInt(stringTokenizer.nextToken());
+            values[i] = number;
         }
 
-        //평균 구하기
-        mean =Math.round(mean / testCaseNumber);
-        sb.append((int) mean + "\n");
+        
+        int[] sortedValues = values.clone();
+        Arrays.sort(sortedValues);
 
-        for (int i = 0; i < numbers.length; i++) {
-            if(numbers[i] != 0) {
+        HashMap<Integer, Integer> hashMap = new HashMap<>();
+        int rank = 0;
 
-                if(numbers[i] > max) {
-                    max = numbers[i];
-                    mode = i-4000;
-                    isSecond = false;
-                } else if(numbers[i] == max) {
-                    if(!isSecond) {
-                        max = numbers[i];
-                        mode = i-4000;
-                        isSecond = true;
-                    }
-                }
-
-                for (int j = 0; j < numbers[i]; j++) {
-                    sortedNumber.add(i - 4000);
-                }
+        hashMap.put(sortedValues[0], rank);
+        for (int i = 1; i < sortedValues.length; i++) {
+            if(sortedValues[i] != sortedValues[i-1]) {
+                rank++;
             }
+            hashMap.put(sortedValues[i], rank);
         }
-        //중앙값 구하기
-        median = sortedNumber.get(testCaseNumber / 2);
-        sb.append(median + "\n");
 
-        sb.append(mode + "\n");
+        for (int i = 0; i < values.length; i++) {
+            sb.append(hashMap.get(values[i]) + " ");
+        }
 
-
-        //범위 구하기
-        range = sortedNumber.get(sortedNumber.size() - 1) - sortedNumber.get(0);
-        sb.append(range);
-
-        System.out.println(sb + "\n");
+        System.out.println(sb);
     }
+
 }
