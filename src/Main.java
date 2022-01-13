@@ -6,127 +6,83 @@ import java.util.Arrays;
 public class Main {
 
     static StringBuilder sb;
-    static int[][] problems = new int[9][9];
+    static int[] numbers;
+    static int[] symbols;
+
+    static int max;
+    static int min;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
 
-        //주어진 입력에 대해서 이중 배열로 처리
-        for (int i = 0; i < 9; i++) {
-            problems[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        }
+        int numberCount = Integer.parseInt(br.readLine());
 
-        //배열 내의 각각의 0 에 대해서 값을 탐색
+        numbers = new int[numberCount];
+        symbols = new int[4];
+        max = -999999999;
+        min = 999999999;
+
+        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        symbols = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+
         backTracking(0, 0);
 
+        sb.append(max);
+        sb.append("\n");
+        sb.append(min);
         System.out.print(sb);
     }
 
-    private static void backTracking(int row, int col) {
+    private static void backTracking(int numberCount, int result) {
+        if (numberCount == numbers.length) {
+            //마지막 숫자까지 연산을 끝냈다면 값을 반환
+            if (max < result) {
+                max = result;
+            }
 
-        //해당 row의 행이 다 채워진 경우는 다음 row로
-        if(col == 9) {
-            backTracking(row+1, 0);
-            //해당 함수가 끝났다는 것은, 모든 줄이 다 채워진 것이므로 return
+            if (min > result) {
+                min = result;
+            }
+            //계산 결과 값이 최댓값 혹은 최솟값인지 검증 필요
             return;
         }
-
-        //행과 줄이 모두 채워졌기 때문에 출력 후 종료
-        if(row == 9) {
-            for (int i = 0; i < 9; i++) {
-                for (int j = 0; j < 9; j++) {
-                    sb.append(problems[i][j]);
-                    sb.append(" ");
-                }
-                sb.append("\n");
-            }
-            System.out.println(sb);
-            //하나의 경우만 출력하므로 시스템 종료
-            System.exit(0);
+        if (numberCount == 0) {
+            result = numbers[0];
+            numberCount++;
         }
 
-        //해당 위치의 값이 0이라면 가능한 값 탐색
-        if(problems[row][col] == 0) {
-            boolean[] impossibleNumber = new boolean[9];
-            verticalImPossible(col, impossibleNumber);
-            horizontalImPossible(row, impossibleNumber);
-            rectangleImPossible(col, row, impossibleNumber);
-            //값이 false 로 남아있는 경우만 가능한 값이다.
-            for (int i = 0; i < 9; i++) {
-                if(!impossibleNumber[i]) {
-                    problems[row][col] = i+1;
-                    //해당 줄에 다음 0을 탐색한다.
-                    backTracking(row, col+1);
-                }
+        //for 문으로 4개 중에 하나를 택함
+        for (int i = 0; i < 4; i++) {
+            //4개 중에 0이 아닌 첫번째 값을 택함
+            if (symbols[i] != 0) {
+                //해당 symbol 로 계산하고 그 결과와 함께 다음 함수 호출
+                int result2 = calculate(i, numbers[numberCount], result);
+                //해당 symbol 은 사용됐으므로 값 -
+                symbols[i]--;
+                backTracking(numberCount + 1, result2);
+                //해당 symbol 을 사용한 줄기는 끝났으므로 다시 값 +
+                symbols[i]++;
             }
-            //해당하는 합당한 값이 없으면 해당 값을 0 으로 비워두고 다시 이전 노드로 돌아간다.
-            problems[row][col] = 0;
-            return;
         }
 
-        //이전까지 알맞은 값이 들어가있으면 다음 줄로 넘어간다.
-        backTracking(row, col+1);
     }
 
-
-
-    private static void rectangleImPossible(int columnNumber, int rowNumber, boolean[] impossibleNumbers) {
-        int rectangleNumber = getRectangleNumber(columnNumber, rowNumber);
-
-        for (int j = 0; j < 3; j++) {
-            for (int k = 0; k < 3; k++) {
-                if (problems[j + ((rectangleNumber / 3) * 3)][k + ((rectangleNumber % 3) * 3)] != 0) {
-                    impossibleNumbers[problems[j + ((rectangleNumber / 3) * 3)][k + ((rectangleNumber % 3) * 3)] - 1] = true;
-                }
-            }
+    private static int calculate(int symbol, int number, int result) {
+        switch (symbol) {
+            case 0:
+                result = result + number;
+                break;
+            case 1:
+                result = result - number;
+                break;
+            case 2:
+                result = result * number;
+                break;
+            case 3:
+                result = result / number;
+                break;
         }
+        return result;
     }
-
-    private static int getRectangleNumber(int columnNumber, int rowNumber) {
-        if(rowNumber < 3) {
-            if(columnNumber < 3) {
-                return 0;
-            } else if(columnNumber < 6) {
-                return 1;
-            } else if(columnNumber < 9) {
-                return 2;
-            }
-        } else if(rowNumber < 6) {
-            if(columnNumber < 3) {
-                return 3;
-            } else if(columnNumber < 6) {
-                return 4;
-            } else if(columnNumber < 9) {
-                return 5;
-            }
-        } else if(rowNumber < 9) {
-            if(columnNumber < 3) {
-                return 6;
-            } else if(columnNumber < 6) {
-                return 7;
-            } else if(columnNumber < 9) {
-                return 8;
-            }
-        }
-
-        return 0;
-    }
-
-    private static void horizontalImPossible(int rowNumber, boolean[] impossibleNumbers) {
-        for (int j = 0; j < 9; j++) {
-            if (problems[rowNumber][j] != 0) {
-                impossibleNumbers[problems[rowNumber][j] - 1] = true;
-            }
-        }
-    }
-
-    private static void verticalImPossible(int columnNumber, boolean[] impossibleNumbers) {
-        for (int j = 0; j < 9; j++) {
-            if(problems[j][columnNumber] != 0) {
-                impossibleNumbers[problems[j][columnNumber] - 1] = true;
-            }
-        }
-    }
-
 }
