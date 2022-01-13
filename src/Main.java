@@ -6,83 +6,77 @@ import java.util.Arrays;
 public class Main {
 
     static StringBuilder sb;
-    static int[] numbers;
-    static int[] symbols;
-
-    static int max;
+    static int[][] abilityArr;
     static int min;
+    static int numberCount;
+    static int[] team_start;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
 
-        int numberCount = Integer.parseInt(br.readLine());
+        numberCount = Integer.parseInt(br.readLine());
+        abilityArr = new int[numberCount][numberCount];
+        team_start = new int[numberCount];
+        min = 99999;
 
-        numbers = new int[numberCount];
-        symbols = new int[4];
-        max = -999999999;
-        min = 999999999;
+        for (int i = 0; i < numberCount; i++) {
+            abilityArr[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        }
 
-        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        symbols = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        dfs(0, 0);
 
-        backTracking(0, 0);
-
-        sb.append(max);
-        sb.append("\n");
-        sb.append(min);
-        System.out.print(sb);
+        System.out.println(min);
     }
 
-    private static void backTracking(int numberCount, int result) {
-        if (numberCount == numbers.length) {
-            //마지막 숫자까지 연산을 끝냈다면 값을 반환
-            if (max < result) {
-                max = result;
+    private static void dfs(int startNumber, int depth) {
+        //절반의 플레이어를 뽑았을 때 차이값 계산
+        if (depth == numberCount/2) {
+            //team_link 명단 계산
+            int[] team_link = new int[numberCount];
+            for (int i = 0; i < team_start.length; i++) {
+                if(team_start[i] == 0) {
+                    team_link[i] = i+1;
+                }
             }
+            //team_start 의 능력치 계산
+            int teamStartAbility = calculateAbility(team_start);
 
-            if (min > result) {
+            //team_link 의 능력치 계산
+            int teamLinkAbility = calculateAbility(team_link);
+
+            int result = Math.abs(teamLinkAbility - teamStartAbility);
+            if(result < min) {
                 min = result;
             }
-            //계산 결과 값이 최댓값 혹은 최솟값인지 검증 필요
+
             return;
         }
-        if (numberCount == 0) {
-            result = numbers[0];
-            numberCount++;
+
+        //players 중에 한명을 뽑음
+        for (int i = startNumber; i < numberCount; i++) {
+            team_start[i] = i+1;
+            dfs(i+1, depth + 1);
+            team_start[i] = 0;
         }
 
-        //for 문으로 4개 중에 하나를 택함
-        for (int i = 0; i < 4; i++) {
-            //4개 중에 0이 아닌 첫번째 값을 택함
-            if (symbols[i] != 0) {
-                //해당 symbol 로 계산하고 그 결과와 함께 다음 함수 호출
-                int result2 = calculate(i, numbers[numberCount], result);
-                //해당 symbol 은 사용됐으므로 값 -
-                symbols[i]--;
-                backTracking(numberCount + 1, result2);
-                //해당 symbol 을 사용한 줄기는 끝났으므로 다시 값 +
-                symbols[i]++;
+    }
+
+    private static int calculateAbility(int[] team) {
+        int result = 0;
+
+        for (int i = 0; i < team.length; i++) {
+            if(team[i] != 0) {
+                for (int j = 0; j < team.length; j++) {
+                    if(j != i && team[j] != 0) {
+                        result += abilityArr[team[i]-1][team[j]-1];
+                    }
+                }
             }
         }
 
-    }
-
-    private static int calculate(int symbol, int number, int result) {
-        switch (symbol) {
-            case 0:
-                result = result + number;
-                break;
-            case 1:
-                result = result - number;
-                break;
-            case 2:
-                result = result * number;
-                break;
-            case 3:
-                result = result / number;
-                break;
-        }
         return result;
     }
+
+
 }
