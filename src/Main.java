@@ -1,74 +1,98 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class Main {
 
     static StringBuilder sb;
-    static int[] memoOfZero;
-    static int[] memoOfOne;
-    static boolean[] calculatedValueForZero;
-    static boolean[] calculatedValueForOne;
+    static List<wLocalVariable> resultList;
+    static int a;
+    static int b;
+    static int c;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        memoOfZero = new int[41];
-        memoOfOne = new int[41];
-        calculatedValueForZero = new boolean[41];
-        calculatedValueForOne = new boolean[41];
+        resultList = new ArrayList<>();
 
-        memoOfZero[0] = 1;
-        memoOfZero[1] = 0;
-        memoOfOne[0] = 0;
-        memoOfOne[1] = 1;
-        calculatedValueForZero[0] = true;
-        calculatedValueForZero[1] = true;
-        calculatedValueForOne[0] = true;
-        calculatedValueForOne[1] = true;
-
-        int testCaseNumber = Integer.parseInt(br.readLine());
-
-        for (int i = 0; i < testCaseNumber; i++) {
-            int number = Integer.parseInt(br.readLine());
-            sb.append(fibonacciForZero(number));
-            sb.append(" ");
-            sb.append(fibonacciForOne(number));
+        while (!(a==-1 & b==-1 & c==-1)) {
+            int[] numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            a = numbers[0];
+            b = numbers[1];
+            c = numbers[2];
+            if(a== -1 & b== -1 & c==-1) {
+                break;
+            }
+            wLocalVariable wLocalVariable = new wLocalVariable(a, b, c);
+            sb.append(wLocalVariable);
+            sb.append(getW(wLocalVariable));
             sb.append("\n");
         }
 
-        System.out.println(sb);
 
+        System.out.println(sb);
     }
 
-    //0이 총 몇번 호출됐는지를 구하는 함수
-    private static int fibonacciForZero(int nowNumber) {
+    private static int getW(wLocalVariable wLocalVariable) {
+        if(wLocalVariable.a <= 0 || wLocalVariable.b <= 0 || wLocalVariable.c <= 0) {
+            return 1;
+        }
 
-        //nowNumber 가 이미 존재하는 값이라면,
-        //값을 반환
-        if(calculatedValueForZero[nowNumber]) {
-            return memoOfZero[nowNumber];
+        Optional<wLocalVariable> w = resultList.stream().filter(o ->
+            o.a == wLocalVariable.a && o.b == wLocalVariable.b && o.c == wLocalVariable.c)
+                .findFirst();
+
+        if(w.isPresent()) {
+            return w.get().result;
         } else {
-            //nowNumber 가 아직 계산되지 않은 값이라면,
-            //쪼개서 계산하고, 계산된 값을 반환
-            //계산이 됐기 때문에 calculated 를 true 로 변환
-            memoOfZero[nowNumber] = fibonacciForZero(nowNumber-1) + fibonacciForZero(nowNumber-2);
-            calculatedValueForZero[nowNumber] = true;
-            return memoOfZero[nowNumber];
+           return callMethodW(wLocalVariable);
         }
     }
 
+    private static int callMethodW(wLocalVariable wLocalVariable) {
+        int a = wLocalVariable.a;
+        int b = wLocalVariable.b;
+        int c = wLocalVariable.c;
 
-    private static int fibonacciForOne(int nowNumber) {
-        if(calculatedValueForOne[nowNumber]) {
-            return memoOfOne[nowNumber];
+        if(a > 20 || b > 20 || c > 20) {
+            wLocalVariable localVariable = new wLocalVariable(20, 20, 20);
+            localVariable.result = getW(localVariable);
+            resultList.add(localVariable);
+            return localVariable.result;
+
+        } else if(a < b && b < c) {
+            wLocalVariable localVariable = new wLocalVariable(a, b, c);
+            localVariable.result = getW(new wLocalVariable(a, b, c-1)) + getW(new wLocalVariable(a, b-1, c-1)) - getW(new wLocalVariable(a, b-1, c));
+            resultList.add(localVariable);
+            return localVariable.result;
         } else {
-            //nowNumber 가 아직 계산되지 않은 값이라면,
-            //쪼개서 계산하고, 계산된 값을 반환
-            //계산이 됐기 때문에 calculated 를 true 로 변환
-            memoOfOne[nowNumber] = fibonacciForOne(nowNumber-1) + fibonacciForOne(nowNumber-2);
-            calculatedValueForOne[nowNumber] = true;
-            return memoOfOne[nowNumber];
+            wLocalVariable localVariable = new wLocalVariable(a, b, c);
+            localVariable.result = getW(new wLocalVariable(a-1, b, c)) + getW(new wLocalVariable(a-1, b-1, c)) + getW(new wLocalVariable(a-1, b, c-1)) - getW(new wLocalVariable(a-1, b-1, c-1));
+            resultList.add(localVariable);
+            return localVariable.result;
+        }
+
+    }
+
+    static class wLocalVariable {
+        int a;
+        int b;
+        int c;
+        public wLocalVariable(int a, int b, int c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        int result;
+
+        @Override
+        public String toString() {
+            return "w(" + a + ", "+ b +", "+ c + ") = ";
         }
     }
 }
