@@ -1,82 +1,74 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 public class Main {
 
     static StringBuilder sb;
-    static int[][] abilityArr;
-    static int min;
-    static int numberCount;
-    static int[] team_start;
+    static int[] memoOfZero;
+    static int[] memoOfOne;
+    static boolean[] calculatedValueForZero;
+    static boolean[] calculatedValueForOne;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
+        memoOfZero = new int[41];
+        memoOfOne = new int[41];
+        calculatedValueForZero = new boolean[41];
+        calculatedValueForOne = new boolean[41];
 
-        numberCount = Integer.parseInt(br.readLine());
-        abilityArr = new int[numberCount][numberCount];
-        team_start = new int[numberCount];
-        min = 99999;
+        memoOfZero[0] = 1;
+        memoOfZero[1] = 0;
+        memoOfOne[0] = 0;
+        memoOfOne[1] = 1;
+        calculatedValueForZero[0] = true;
+        calculatedValueForZero[1] = true;
+        calculatedValueForOne[0] = true;
+        calculatedValueForOne[1] = true;
 
-        for (int i = 0; i < numberCount; i++) {
-            abilityArr[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        int testCaseNumber = Integer.parseInt(br.readLine());
+
+        for (int i = 0; i < testCaseNumber; i++) {
+            int number = Integer.parseInt(br.readLine());
+            sb.append(fibonacciForZero(number));
+            sb.append(" ");
+            sb.append(fibonacciForOne(number));
+            sb.append("\n");
         }
 
-        dfs(0, 0);
-
-        System.out.println(min);
-    }
-
-    private static void dfs(int startNumber, int depth) {
-        //절반의 플레이어를 뽑았을 때 차이값 계산
-        if (depth == numberCount/2) {
-            //team_link 명단 계산
-            int[] team_link = new int[numberCount];
-            for (int i = 0; i < team_start.length; i++) {
-                if(team_start[i] == 0) {
-                    team_link[i] = i+1;
-                }
-            }
-            //team_start 의 능력치 계산
-            int teamStartAbility = calculateAbility(team_start);
-
-            //team_link 의 능력치 계산
-            int teamLinkAbility = calculateAbility(team_link);
-
-            int result = Math.abs(teamLinkAbility - teamStartAbility);
-            if(result < min) {
-                min = result;
-            }
-
-            return;
-        }
-
-        //players 중에 한명을 뽑음
-        for (int i = startNumber; i < numberCount; i++) {
-            team_start[i] = i+1;
-            dfs(i+1, depth + 1);
-            team_start[i] = 0;
-        }
+        System.out.println(sb);
 
     }
 
-    private static int calculateAbility(int[] team) {
-        int result = 0;
+    //0이 총 몇번 호출됐는지를 구하는 함수
+    private static int fibonacciForZero(int nowNumber) {
 
-        for (int i = 0; i < team.length; i++) {
-            if(team[i] != 0) {
-                for (int j = 0; j < team.length; j++) {
-                    if(j != i && team[j] != 0) {
-                        result += abilityArr[team[i]-1][team[j]-1];
-                    }
-                }
-            }
+        //nowNumber 가 이미 존재하는 값이라면,
+        //값을 반환
+        if(calculatedValueForZero[nowNumber]) {
+            return memoOfZero[nowNumber];
+        } else {
+            //nowNumber 가 아직 계산되지 않은 값이라면,
+            //쪼개서 계산하고, 계산된 값을 반환
+            //계산이 됐기 때문에 calculated 를 true 로 변환
+            memoOfZero[nowNumber] = fibonacciForZero(nowNumber-1) + fibonacciForZero(nowNumber-2);
+            calculatedValueForZero[nowNumber] = true;
+            return memoOfZero[nowNumber];
         }
-
-        return result;
     }
 
 
+    private static int fibonacciForOne(int nowNumber) {
+        if(calculatedValueForOne[nowNumber]) {
+            return memoOfOne[nowNumber];
+        } else {
+            //nowNumber 가 아직 계산되지 않은 값이라면,
+            //쪼개서 계산하고, 계산된 값을 반환
+            //계산이 됐기 때문에 calculated 를 true 로 변환
+            memoOfOne[nowNumber] = fibonacciForOne(nowNumber-1) + fibonacciForOne(nowNumber-2);
+            calculatedValueForOne[nowNumber] = true;
+            return memoOfOne[nowNumber];
+        }
+    }
 }
