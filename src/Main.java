@@ -6,74 +6,60 @@ import java.util.Arrays;
 public class Main {
 
     static StringBuilder sb;
-    static int houseNumber;
-    static int[][] costs;
-    static int[][] result;
+    static int[][] triangle;
+    static int[][] maxResults;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        houseNumber = Integer.parseInt(br.readLine());
-        costs = new int[houseNumber + 1][3];
-        result = new int[houseNumber + 1][3];
+        int caseNumber = Integer.parseInt(br.readLine());
+        triangle = new int[caseNumber+1][caseNumber+1];
+        maxResults = new int[caseNumber+1][caseNumber+1];
 
-
-        for (int i = 0; i < houseNumber; i++) {
-            costs[i + 1] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        for (int i = 1; i <= caseNumber; i++) {
+            triangle[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
         }
-        for (int i = 1; i <= houseNumber; i++) {
-            for (int j = 0; j < 3; j++) {
-                getMinCostIf(i,j);
+
+        for (int i = 1; i <= caseNumber; i++) {
+            for (int j = 0; j < i; j++) {
+                maxResults[i][j] = getMax(i, j);
             }
         }
 
-        sb.append(getMinThreeNumber(result[houseNumber][0], result[houseNumber][1], result[houseNumber][2]));
+        int max = 0;
+        for (int i = 0; i < caseNumber; i++) {
+            if(max < maxResults[caseNumber][i]) {
+                max = maxResults[caseNumber][i];
+            }
+        }
+
+        sb.append(max);
 
         System.out.println(sb);
     }
 
-    static int getMinTwoNumber(int a, int b) {
-        return Math.min(a, b);
-    }
+    private static int getMax(int i, int j) {
+        //i 번째 줄의, j+1 번째 숫자까지의 최대값을 구하는 함수
+        int result = 0;
 
-    static int getMinThreeNumber(int a, int b, int c) {
-        return Math.min(Math.min(a, b), c);
-    }
-
-    //n 호까지의 색깔은, (n-1,0) + n 1또는 2, (n-1,1) + n 0 또는 2, (n-1,2) + n 0 또는 1 중에 최솟값이다.
-    static void getMinCostIf(int houseNumber, int nowHouseColor) {
-
-        if (houseNumber > 1) {
-            switch (nowHouseColor) {
-                case 0:
-                    result[houseNumber][0]
-                            = getMinTwoNumber(result[houseNumber-1][1], result[houseNumber-1][2]) + costs[houseNumber][nowHouseColor];
-                    break;
-                case 1:
-                    result[houseNumber][1]
-                            = getMinTwoNumber(result[houseNumber-1][0], result[houseNumber-1][2]) + costs[houseNumber][nowHouseColor];
-                    break;
-                case 2:
-                    result[houseNumber][2]
-                            = getMinTwoNumber(result[houseNumber-1][0], result[houseNumber-1][1]) + costs[houseNumber][nowHouseColor];
-                    break;
-            }
+        //첫째 줄이라면 자기 자신 값 return
+        if(i == 1) {
+            return triangle[i][j];
         } else {
-            //첫번째 집일 때
-            switch (nowHouseColor) {
-                case 0:
-                    result[houseNumber][0]
-                            = costs[houseNumber][nowHouseColor];
-                    break;
-                case 1:
-                    result[houseNumber][1]
-                            = costs[houseNumber][nowHouseColor];
-                    break;
-                case 2:
-                    result[houseNumber][2]
-                            = costs[houseNumber][nowHouseColor];
-                    break;
+            //그 이후일 때
+            //첫 번째 수, 가운데 수, 마지막 수 나눠야 함
+            //이전 줄
+            int k = i-1;
+            if(j == 0) {
+                result = maxResults[k][0] + triangle[i][j];
+            } else if (j == k) {
+                result = maxResults[k][k-1] + triangle[i][j];
+            } else {
+                result = Math.max(maxResults[k][j-1], maxResults[k][j]) + triangle[i][j];
             }
         }
+
+        return result;
     }
+
 }
