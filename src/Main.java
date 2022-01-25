@@ -2,39 +2,44 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 public class Main {
 
     static StringBuilder sb;
-    static int number;
-    static int[] numbers;
-    static long[] dp;
-    static long max;
+    static int coinType;
+    static int total;
+    static int[] coins;
+    static int min;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
         sb = new StringBuilder();
-        number = Integer.parseInt(br.readLine());
-        dp = new long[100001];
-        numbers = new int[number + 1];
-        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
 
-        dp[0] = numbers[0];
-        max = dp[0];
+        coinType = Integer.parseInt(st.nextToken());
+        total = Integer.parseInt(st.nextToken());
+        coins = new int[coinType + 1];
+        min = 0;
 
-        for (int i = 1; i < number; i++) {
-            dp[i] = getMax(i);
-            if(max < dp[i]) {
-                max = dp[i];
-            }
+        for (int i = 1; i <= coinType; i++) {
+            coins[i] = Integer.parseInt(br.readLine());
         }
 
-        System.out.println(max);
+        for (int i = coinType; i >= 1; i--) {
+            getCoinNumber(coins[i]);
+        }
+
+        System.out.println(min);
     }
 
-    //i 번째에 대해서 i를 포함한 최댓값을 dp[i] 에 할당한다.
-    private static long getMax(int i) {
-        return Math.max(numbers[i], dp[i-1] + numbers[i]);
+    private static void getCoinNumber(int value) {
+        //동전의 가치가 합보다 작다면
+        if(value <= total) {
+            int temp = total / value;
+            min += temp;
+            total = (total-(temp * value));
+        }
     }
 }
 
