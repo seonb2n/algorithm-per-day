@@ -1,47 +1,49 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class Main {
 
     static BufferedReader br;
     static StringTokenizer st;
+    static String[] plusGroup;
+    static int[] calculatedGroup;
+    static int min;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
-        int caseNumber = Integer.parseInt(br.readLine());
-        int[][] timeTable = new int[caseNumber][2];
 
-        for(int i = 0; i < caseNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            timeTable[i][0] = Integer.parseInt(st.nextToken());	// 시작시간
-            timeTable[i][1] = Integer.parseInt(st.nextToken());	// 종료시간
+        plusGroup = new String[51];
+        calculatedGroup = new int[51];
+        min = 0;
+
+        //들어온 값을 - , + 로 쪼개야 한다.
+        st = new StringTokenizer(br.readLine(), "-");
+        int tokenNumber = st.countTokens();
+
+        for (int i = 0; i < tokenNumber; i++) {
+            plusGroup[i] = st.nextToken();
         }
 
-        Arrays.sort(timeTable, (o1, o2) -> {
-            // 종료시간이 같을 경우 시작시간이 빠른순으로 정렬
-            if(o1[1] == o2[1]) {
-                return o1[0] - o2[0];
+        for (int i = 0; i < tokenNumber; i++) {
+            int temp = 0;
+            st = new StringTokenizer(plusGroup[i], "+");
+            int number = st.countTokens();
+            for (int j = 0; j < number; j++) {
+                temp = temp + Integer.parseInt(st.nextToken());
             }
-            // 종료시간이 빠른 순으로 정렬
-            return o1[1] - o2[1];
-        });
-
-        int max = 0;
-        int nowEndTime = 0;
-
-        for(int i = 0; i < caseNumber; i++) {
-            if(nowEndTime <= timeTable[i][0]) {
-                nowEndTime = timeTable[i][1];
-                max++;
-            }
+            calculatedGroup[i] = temp;
         }
 
-        System.out.println(max);
+        min = calculatedGroup[0];
+
+        for (int i = 1; i < tokenNumber; i++) {
+            min = min - calculatedGroup[i];
+        }
+
+        System.out.println(min);
     }
-
 }
 
