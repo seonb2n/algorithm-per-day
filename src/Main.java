@@ -2,60 +2,66 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
 public class Main {
 
     static BufferedReader br;
-    static StringTokenizer st;
     static int caseNumber;
-    static long[] oilPrices;
-    static long[] roadPrices;
-    static long lowOilPrice;
-    static int lowOilPoint;
-    static long min;
+    static StringTokenizer st;
+    static StringBuilder sb;
+    static Stack<Integer> stack;
+    static int[] numbers;
+    static int[] results;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
+        sb = new StringBuilder();
+        stack = new Stack<>();
+
         caseNumber = Integer.parseInt(br.readLine());
+        numbers = new int[caseNumber+1];
+        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        results = new int[caseNumber];
+        for (int i = 0; i < caseNumber; i++) {
+            results[i] = -1;
+        }
 
-        oilPrices = new long[caseNumber+1];
-        roadPrices = new long[caseNumber+1];
+        getNGE();
 
-        roadPrices = Arrays.stream(br.readLine().split(" ")).mapToLong(Long::parseLong).toArray();
-        oilPrices = Arrays.stream(br.readLine().split(" ")).mapToLong(Long::parseLong).toArray();
-
-        min = 0;
-        greedy();
-
-        System.out.println(min);
+        for (int i = 0; i < caseNumber; i++) {
+            sb.append(results[i]);
+            sb.append(" ");
+        }
+        System.out.println(sb);
     }
 
-    private static void greedy() {
-        //만약 i 번째 지점의 기름값 < j번째 지점의 기름값
-        //i부터 j 까지는 i 기름으로 간다.
-        lowOilPrice = oilPrices[0];
-        lowOilPoint = 0;
-
+    private static void getNGE() {
+        //stack 을 순회한다.
+        stack.push(0);
         for (int i = 1; i < caseNumber; i++) {
-            if(oilPrices[i] <= lowOilPrice) {
-                //지금까지의 거리는 lowOilPrice 로 달린다.
-                for (int j = lowOilPoint; j < i; j++) {
-                    min += roadPrices[j] * lowOilPrice;
-                }
-                lowOilPrice = oilPrices[i];
-                lowOilPoint = i;
+            if(numbers[i] <= numbers[i-1]) {
+                stack.push(i);
             }
+            //i 번째 숫자가 i-1 숫자보다 커지면,
+            else {
+                //stack 에 들어있는 값들을 확인하며, 해당 값이 i 번째 보다 작다면 results 에 numbers[i] 를 대입한다.
+                while(!stack.empty()) {
+                    int temp = stack.pop();
+                    if(numbers[temp] < numbers[i]) {
+                        results[temp] = numbers[i];
+                    } else {
+                        stack.push(temp);
+                        break;
+                    }
+                }
+                stack.push(i);
+            }
+            //마지막까지 남아있는 값들은 -1 을 results 값으로 가진다
         }
 
-        //싼 가격이 중간에 머물고 있으면
-        //싼 가격부터 마지막까지를 모두 싼 가격으로
-        if(lowOilPoint < caseNumber - 1) {
-            for (int j = lowOilPoint; j < caseNumber-1; j++) {
-                min += roadPrices[j] * lowOilPrice;
-            }
-        }
     }
 }
 
