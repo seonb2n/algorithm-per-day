@@ -25,9 +25,6 @@ public class Main {
         numbers = new int[caseNumber+1];
         numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
         results = new int[caseNumber];
-        for (int i = 0; i < caseNumber; i++) {
-            results[i] = -1;
-        }
 
         getNGE();
 
@@ -59,9 +56,11 @@ public class Main {
                 }
                 stack.push(i);
             }
-            //마지막까지 남아있는 값들은 -1 을 results 값으로 가진다
         }
-
+        //마지막까지 남아있는 값들은 -1 을 results 값으로 가진다
+        while (!stack.empty()) {
+            results[stack.pop()] = -1;
+        }
     }
 }
 
