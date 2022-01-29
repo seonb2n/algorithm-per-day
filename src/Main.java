@@ -9,35 +9,114 @@ public class Main {
     static StringTokenizer st;
     static int caseNumber;
     static StringBuilder sb;
-    static Queue<Integer> queue;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         caseNumber = Integer.parseInt(br.readLine());
-        queue = new LinkedList<>();
+        Dequeue dequeue = new Dequeue();
 
-        getNumber();
+        for (int i = 0; i < caseNumber; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            switch (st.nextToken()) {
+                case "push_back" : dequeue.push_back(Integer.parseInt(st.nextToken())); break;
+
+                case "push_front" : dequeue.push_front(Integer.parseInt(st.nextToken())); break;
+
+                case "front" : dequeue.front(); break;
+
+                case "back" : dequeue.back(); break;
+
+                case "size" : dequeue.size(); break;
+
+                case "empty" : dequeue.empty(); break;
+
+                case "pop_front" : dequeue.pop_front(); break;
+
+                case "pop_back" : dequeue.pop_back(); break;
+            }
+        }
+
+        sb = dequeue.sb;
+        System.out.println(sb);
+    }
+}
+
+class Dequeue {
+    List<Integer> dequeue = new LinkedList<>();
+    int size = 0;
+    StringBuilder sb;
+
+    public Dequeue() {
+        sb = new StringBuilder();
     }
 
-    private static void getNumber() {
-        int cardNumber = caseNumber;
-        //카드를 순서대로 쌓아둔다.
-        for (int i = 0; i < cardNumber; i++) {
-            queue.add(i+1);
-        }
+    public void push_front(int x) {
+        dequeue.add(0, x);
+        size++;
+    }
 
-        //card 의 개수가 1이 될 때까지 행동을 반복한다.
-        while (cardNumber != 1) {
-            //카드의 개수가 2개 이상이라면
-            if(cardNumber >= 2) {
-                //맨 위의 카드를 버린다.
-                queue.poll();
-                cardNumber--;
-            }
-            //맨 위의 카드를 가장 밑으로 넣는다.
-            queue.add(queue.poll());
+    public void push_back(int x) {
+        dequeue.add(x);
+        size++;
+    }
+
+    public void pop_front() {
+        if(size != 0) {
+            sb.append(dequeue.get(0));
+            sb.append("\n");
+            dequeue.remove(0);
+            size--;
+        } else {
+            sb.append("-1");
+            sb.append("\n");
         }
-        System.out.println(queue.poll());
+    }
+
+    public void pop_back() {
+        if(size != 0) {
+            sb.append(dequeue.get(size-1));
+            sb.append("\n");
+            dequeue.remove(size-1);
+            size--;
+        } else {
+            sb.append("-1");
+            sb.append("\n");
+        }
+    }
+
+    public void size() {
+        sb.append(size);
+        sb.append("\n");
+    }
+
+    public void empty() {
+        if(size != 0) {
+            sb.append("0");
+            sb.append("\n");
+        } else {
+            sb.append("1");
+            sb.append("\n");
+        }
+    }
+
+    public void front() {
+        if(size != 0) {
+            sb.append(dequeue.get(0));
+            sb.append("\n");
+        } else {
+            sb.append("-1");
+            sb.append("\n");
+        }
+    }
+
+    public void back() {
+        if(size != 0) {
+            sb.append(dequeue.get(size-1));
+            sb.append("\n");
+        } else {
+            sb.append("-1");
+            sb.append("\n");
+        }
     }
 }
