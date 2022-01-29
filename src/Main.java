@@ -9,114 +9,89 @@ public class Main {
     static StringTokenizer st;
     static int caseNumber;
     static StringBuilder sb;
+    static Deque<Integer> arr;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
+        sb = new StringBuilder();
         caseNumber = Integer.parseInt(br.readLine());
-        Dequeue dequeue = new Dequeue();
+        arr = new LinkedList<>();
 
         for (int i = 0; i < caseNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            switch (st.nextToken()) {
-                case "push_back" : dequeue.push_back(Integer.parseInt(st.nextToken())); break;
+            //첫째 줄에는 실행할 함수의 명령어 모음이 들어있다.
+            char[] pOrders = br.readLine().toCharArray();
 
-                case "push_front" : dequeue.push_front(Integer.parseInt(st.nextToken())); break;
+            //둘째 줄에는 배열의 크기가 들어있다.
+            int sizeOfArray = Integer.parseInt(br.readLine());
 
-                case "front" : dequeue.front(); break;
+            //셋째 줄에는 배열이 들어있다.
+            String temp = br.readLine();
+            temp = temp.substring(1, temp.length()-1);
+            st = new StringTokenizer(temp, ",");
+            for (int s = 0; s < sizeOfArray; s++) {
+                arr.add(Integer.parseInt(st.nextToken()));
+            }
 
-                case "back" : dequeue.back(); break;
+            //명령에 따라 배열을 처리하고, 결과를 sb에 추가한다.
+            doFunction(pOrders);
+            arr.clear();
+        }
 
-                case "size" : dequeue.size(); break;
+        System.out.println(sb);
+    }
 
-                case "empty" : dequeue.empty(); break;
+    private static void doFunction(char[] pOrders) {
+        int cursor = 0;
 
-                case "pop_front" : dequeue.pop_front(); break;
-
-                case "pop_back" : dequeue.pop_back(); break;
+        for (int i = 0; i < pOrders.length; i++) {
+            switch (pOrders[i]) {
+                case 'R':
+                    if (cursor == 0) {
+                        cursor = arr.size() - 1;
+                    } else {
+                        cursor = 0;
+                    }
+                    break;
+                case 'D':
+                    if (arr.size() == 0) {
+                        sb.append("error");
+                        sb.append("\n");
+                        return;
+                    } else {
+                        if (cursor != 0) {
+                            arr.removeLast();
+                        } else {
+                            arr.removeFirst();
+                        }
+                        break;
+                    }
             }
         }
 
-        sb = dequeue.sb;
-        System.out.println(sb);
-    }
-}
-
-class Dequeue {
-    List<Integer> dequeue = new LinkedList<>();
-    int size = 0;
-    StringBuilder sb;
-
-    public Dequeue() {
-        sb = new StringBuilder();
-    }
-
-    public void push_front(int x) {
-        dequeue.add(0, x);
-        size++;
-    }
-
-    public void push_back(int x) {
-        dequeue.add(x);
-        size++;
-    }
-
-    public void pop_front() {
-        if(size != 0) {
-            sb.append(dequeue.get(0));
+        if(arr.size() == 0) {
+            sb.append("[]");
             sb.append("\n");
-            dequeue.remove(0);
-            size--;
-        } else {
-            sb.append("-1");
-            sb.append("\n");
+            return;
         }
-    }
 
-    public void pop_back() {
-        if(size != 0) {
-            sb.append(dequeue.get(size-1));
-            sb.append("\n");
-            dequeue.remove(size-1);
-            size--;
-        } else {
-            sb.append("-1");
-            sb.append("\n");
+        sb.append("[");
+        int size = arr.size();
+        if(cursor != 0) {
+            for (int i = 0; i < size-1; i++) {
+                sb.append(arr.pollLast());
+                sb.append(",");
+            }
+            sb.append(arr.pop());
         }
-    }
-
-    public void size() {
-        sb.append(size);
+        else {
+            for (int i = 0; i < size-1; i++) {
+                sb.append(arr.pop());
+                sb.append(",");
+            }
+            sb.append(arr.pop());
+        }
+        sb.append("]");
         sb.append("\n");
-    }
-
-    public void empty() {
-        if(size != 0) {
-            sb.append("0");
-            sb.append("\n");
-        } else {
-            sb.append("1");
-            sb.append("\n");
-        }
-    }
-
-    public void front() {
-        if(size != 0) {
-            sb.append(dequeue.get(0));
-            sb.append("\n");
-        } else {
-            sb.append("-1");
-            sb.append("\n");
-        }
-    }
-
-    public void back() {
-        if(size != 0) {
-            sb.append(dequeue.get(size-1));
-            sb.append("\n");
-        } else {
-            sb.append("-1");
-            sb.append("\n");
-        }
     }
 }
