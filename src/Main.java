@@ -1,65 +1,103 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Stack;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
 
     static BufferedReader br;
-    static int caseNumber;
     static StringTokenizer st;
+    static long caseNumber;
     static StringBuilder sb;
-    static Stack<Integer> stack;
-    static int[] numbers;
-    static int[] results;
+
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
+        caseNumber = Long.parseLong(br.readLine());
         sb = new StringBuilder();
-        stack = new Stack<>();
-
-        caseNumber = Integer.parseInt(br.readLine());
-        numbers = new int[caseNumber+1];
-        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        results = new int[caseNumber];
-
-        getNGE();
+        Queue queue = new Queue();
 
         for (int i = 0; i < caseNumber; i++) {
-            sb.append(results[i]);
-            sb.append(" ");
+            st = new StringTokenizer(br.readLine(), " ");
+            switch (st.nextToken()) {
+                case "push" : queue.push(Integer.parseInt(st.nextToken())); break;
+
+                case "front" : queue.front(); break;
+
+                case "back" : queue.back(); break;
+
+                case "size" : queue.size(); break;
+
+                case "empty" : queue.empty(); break;
+
+                case "pop" : queue.pop(); break;
+            }
         }
+
         System.out.println(sb);
     }
+}
 
-    private static void getNGE() {
-        //stack 을 순회한다.
-        stack.push(0);
-        for (int i = 1; i < caseNumber; i++) {
-            if(numbers[i] <= numbers[i-1]) {
-                stack.push(i);
-            }
-            //i 번째 숫자가 i-1 숫자보다 커지면,
-            else {
-                //stack 에 들어있는 값들을 확인하며, 해당 값이 i 번째 보다 작다면 results 에 numbers[i] 를 대입한다.
-                while(!stack.empty()) {
-                    int temp = stack.pop();
-                    if(numbers[temp] < numbers[i]) {
-                        results[temp] = numbers[i];
-                    } else {
-                        stack.push(temp);
-                        break;
-                    }
-                }
-                stack.push(i);
-            }
+class Queue {
+    List<Integer> list;
+    int count;
+
+    public Queue() {
+        list = new LinkedList<>();
+        count = 0;
+    }
+
+
+    public void push(int x) {
+        list.add(x);
+        count++;
+    }
+
+    public void pop() {
+        if(count != 0) {
+            Main.sb.append(list.get(0));
+            Main.sb.append("\n");
+            list.remove(0);
+            count--;
+        } else {
+            Main.sb.append("-1");
+            Main.sb.append("\n");
         }
-        //마지막까지 남아있는 값들은 -1 을 results 값으로 가진다
-        while (!stack.empty()) {
-            results[stack.pop()] = -1;
+    }
+
+    public void size() {
+        Main.sb.append(count);
+        Main.sb.append("\n");
+    }
+
+    public void empty() {
+        if(count == 0) {
+            Main.sb.append(1);
+            Main.sb.append("\n");
+        } else {
+            Main.sb.append(0);
+            Main.sb.append("\n");
+        }
+    }
+
+    public void front() {
+        if(count != 0) {
+            Main.sb.append(list.get(0));
+            Main.sb.append("\n");
+        } else {
+            Main.sb.append("-1");
+            Main.sb.append("\n");
+        }
+    }
+
+    public void back() {
+        if(count != 0) {
+            Main.sb.append(list.get(count-1));
+            Main.sb.append("\n");
+        } else {
+            Main.sb.append("-1");
+            Main.sb.append("\n");
         }
     }
 }
