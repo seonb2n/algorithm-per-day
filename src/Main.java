@@ -7,98 +7,37 @@ public class Main {
 
     static BufferedReader br;
     static StringTokenizer st;
-    static long caseNumber;
+    static int caseNumber;
     static StringBuilder sb;
-
+    static Queue<Integer> queue;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
-        caseNumber = Long.parseLong(br.readLine());
-        sb = new StringBuilder();
-        Queue queue = new Queue();
+        caseNumber = Integer.parseInt(br.readLine());
+        queue = new LinkedList<>();
 
-        for (int i = 0; i < caseNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            switch (st.nextToken()) {
-                case "push" : queue.push(Integer.parseInt(st.nextToken())); break;
+        getNumber();
+    }
 
-                case "front" : queue.front(); break;
+    private static void getNumber() {
+        int cardNumber = caseNumber;
+        //카드를 순서대로 쌓아둔다.
+        for (int i = 0; i < cardNumber; i++) {
+            queue.add(i+1);
+        }
 
-                case "back" : queue.back(); break;
-
-                case "size" : queue.size(); break;
-
-                case "empty" : queue.empty(); break;
-
-                case "pop" : queue.pop(); break;
+        //card 의 개수가 1이 될 때까지 행동을 반복한다.
+        while (cardNumber != 1) {
+            //카드의 개수가 2개 이상이라면
+            if(cardNumber >= 2) {
+                //맨 위의 카드를 버린다.
+                queue.poll();
+                cardNumber--;
             }
+            //맨 위의 카드를 가장 밑으로 넣는다.
+            queue.add(queue.poll());
         }
-
-        System.out.println(sb);
+        System.out.println(queue.poll());
     }
 }
-
-class Queue {
-    List<Integer> list;
-    int count;
-
-    public Queue() {
-        list = new LinkedList<>();
-        count = 0;
-    }
-
-
-    public void push(int x) {
-        list.add(x);
-        count++;
-    }
-
-    public void pop() {
-        if(count != 0) {
-            Main.sb.append(list.get(0));
-            Main.sb.append("\n");
-            list.remove(0);
-            count--;
-        } else {
-            Main.sb.append("-1");
-            Main.sb.append("\n");
-        }
-    }
-
-    public void size() {
-        Main.sb.append(count);
-        Main.sb.append("\n");
-    }
-
-    public void empty() {
-        if(count == 0) {
-            Main.sb.append(1);
-            Main.sb.append("\n");
-        } else {
-            Main.sb.append(0);
-            Main.sb.append("\n");
-        }
-    }
-
-    public void front() {
-        if(count != 0) {
-            Main.sb.append(list.get(0));
-            Main.sb.append("\n");
-        } else {
-            Main.sb.append("-1");
-            Main.sb.append("\n");
-        }
-    }
-
-    public void back() {
-        if(count != 0) {
-            Main.sb.append(list.get(count-1));
-            Main.sb.append("\n");
-        } else {
-            Main.sb.append("-1");
-            Main.sb.append("\n");
-        }
-    }
-}
-
