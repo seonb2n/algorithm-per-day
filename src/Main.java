@@ -9,89 +9,59 @@ public class Main {
     static StringTokenizer st;
     static int caseNumber;
     static StringBuilder sb;
-    static Deque<Integer> arr;
+    static int[][] square;
+    static int white;
+    static int blue;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
         caseNumber = Integer.parseInt(br.readLine());
-        arr = new LinkedList<>();
+        square = new int[caseNumber + 1][caseNumber + 1];
 
         for (int i = 0; i < caseNumber; i++) {
-            //첫째 줄에는 실행할 함수의 명령어 모음이 들어있다.
-            char[] pOrders = br.readLine().toCharArray();
-
-            //둘째 줄에는 배열의 크기가 들어있다.
-            int sizeOfArray = Integer.parseInt(br.readLine());
-
-            //셋째 줄에는 배열이 들어있다.
-            String temp = br.readLine();
-            temp = temp.substring(1, temp.length()-1);
-            st = new StringTokenizer(temp, ",");
-            for (int s = 0; s < sizeOfArray; s++) {
-                arr.add(Integer.parseInt(st.nextToken()));
-            }
-
-            //명령에 따라 배열을 처리하고, 결과를 sb에 추가한다.
-            doFunction(pOrders);
-            arr.clear();
+            square[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
         }
 
-        System.out.println(sb);
+        divideAndConquer(caseNumber, 0, 0);
+
+        System.out.println(white);
+        System.out.println(blue);
     }
 
-    private static void doFunction(char[] pOrders) {
-        int cursor = 0;
+    private static void divideAndConquer(int size, int x, int y) {
+        //사각형의 크기와, 시작 위치를 나타내는 i 를 인자로 받는 함수
 
-        for (int i = 0; i < pOrders.length; i++) {
-            switch (pOrders[i]) {
-                case 'R':
-                    if (cursor == 0) {
-                        cursor = arr.size() - 1;
-                    } else {
-                        cursor = 0;
-                    }
-                    break;
-                case 'D':
-                    if (arr.size() == 0) {
-                        sb.append("error");
-                        sb.append("\n");
-                        return;
-                    } else {
-                        if (cursor != 0) {
-                            arr.removeLast();
-                        } else {
-                            arr.removeFirst();
-                        }
-                        break;
-                    }
+        //내부의 상태를 점검한다.
+        boolean isBlue = false;
+        boolean isWhite = false;
+
+        for (int i = x; i < size + x; i++) {
+            for (int j = y; j < size + y; j++) {
+                if (square[i][j] == 1) {
+                    isBlue = true;
+                } else {
+                    isWhite = true;
+                }
+
+                //내부에 흰색과 검은색이 섞여 있다면
+                if (isBlue && isWhite) {
+                    //4분할로 쪼갠다.
+                    divideAndConquer(size / 2, x, y);
+                    divideAndConquer(size / 2, x+size/2, y);
+                    divideAndConquer(size / 2, x, y+size/2);
+                    divideAndConquer(size / 2, x+size/2, y+size/2);
+                    return;
+                }
+
             }
         }
 
-        if(arr.size() == 0) {
-            sb.append("[]");
-            sb.append("\n");
-            return;
+        if (isBlue) {
+            blue++;
+        } else if (isWhite) {
+            white++;
         }
-
-        sb.append("[");
-        int size = arr.size();
-        if(cursor != 0) {
-            for (int i = 0; i < size-1; i++) {
-                sb.append(arr.pollLast());
-                sb.append(",");
-            }
-            sb.append(arr.pop());
-        }
-        else {
-            for (int i = 0; i < size-1; i++) {
-                sb.append(arr.pop());
-                sb.append(",");
-            }
-            sb.append(arr.pop());
-        }
-        sb.append("]");
-        sb.append("\n");
     }
 }
