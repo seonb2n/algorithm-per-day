@@ -7,61 +7,56 @@ public class Main {
 
     static BufferedReader br;
     static StringTokenizer st;
-    static int caseNumber;
+    static int size;
     static StringBuilder sb;
     static int[][] square;
-    static int white;
-    static int blue;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        caseNumber = Integer.parseInt(br.readLine());
-        square = new int[caseNumber + 1][caseNumber + 1];
+        size = Integer.parseInt(br.readLine());
+        square = new int[size][size];
 
-        for (int i = 0; i < caseNumber; i++) {
-            square[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        for (int i = 0; i < size; i++) {
+            square[i] = Arrays.stream(br.readLine().split("")).mapToInt(Integer::parseInt).toArray();
         }
 
-        divideAndConquer(caseNumber, 0, 0);
+        quadTree(size, 0, 0);
 
-        System.out.println(white);
-        System.out.println(blue);
+        System.out.println(sb);
     }
 
-    private static void divideAndConquer(int size, int x, int y) {
-        //사각형의 크기와, 시작 위치를 나타내는 i 를 인자로 받는 함수
+    private static void quadTree(int size, int startX, int startY) {
+        //해당 size 크기의 사각형이 0또는 1로만 이루어졌는지 확인
+        boolean isOne = false;
+        boolean isZero = false;
 
-        //내부의 상태를 점검한다.
-        boolean isBlue = false;
-        boolean isWhite = false;
-
-        for (int i = x; i < size + x; i++) {
-            for (int j = y; j < size + y; j++) {
-                if (square[i][j] == 1) {
-                    isBlue = true;
+        for (int i = startY; i < size+startY; i++) {
+            for (int j = startX; j < size + startX; j++) {
+                if(square[i][j] == 0) {
+                    isZero = true;
                 } else {
-                    isWhite = true;
+                    isOne = true;
                 }
 
-                //내부에 흰색과 검은색이 섞여 있다면
-                if (isBlue && isWhite) {
-                    //4분할로 쪼갠다.
-                    divideAndConquer(size / 2, x, y);
-                    divideAndConquer(size / 2, x+size/2, y);
-                    divideAndConquer(size / 2, x, y+size/2);
-                    divideAndConquer(size / 2, x+size/2, y+size/2);
+                if(isOne && isZero) {
+                    sb.append("(");
+                    quadTree(size/2, startX, startY);
+                    quadTree(size/2, startX + size/2, startY);
+                    quadTree(size/2, startX, startY + size/2);
+                    quadTree(size/2, startX + size/2, startY + size/2);
+                    sb.append(")");
                     return;
                 }
-
             }
         }
 
-        if (isBlue) {
-            blue++;
-        } else if (isWhite) {
-            white++;
+        if(isOne) {
+            sb.append(1);
+        } else if(isZero) {
+            sb.append(0);
         }
+
     }
 }
