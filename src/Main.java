@@ -7,56 +7,78 @@ public class Main {
 
     static BufferedReader br;
     static StringTokenizer st;
-    static int size;
     static StringBuilder sb;
-    static int[][] square;
+    static int arrSize;
+    static long index;
+    static int[][] arr;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        size = Integer.parseInt(br.readLine());
-        square = new int[size][size];
+        st = new StringTokenizer(br.readLine(), " ");
 
-        for (int i = 0; i < size; i++) {
-            square[i] = Arrays.stream(br.readLine().split("")).mapToInt(Integer::parseInt).toArray();
+        arrSize = Integer.parseInt(st.nextToken());
+        index = Long.parseLong(st.nextToken());
+        arr = new int[arrSize][arrSize];
+
+        for (int i = 0; i < arrSize; i++) {
+            arr[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
         }
 
-        quadTree(size, 0, 0);
+        int[][] result = getResult(arr, index);
+
+        for (int i = 0; i < arrSize; i++) {
+            for (int j = 0; j < arrSize; j++) {
+                sb.append(result[i][j]);
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
 
         System.out.println(sb);
+
     }
 
-    private static void quadTree(int size, int startX, int startY) {
-        //해당 size 크기의 사각형이 0또는 1로만 이루어졌는지 확인
-        boolean isOne = false;
-        boolean isZero = false;
+    //인자로 받은 arr 에 대해서 index 만큼 제곱하는 함수
+    private static int[][] getResult(int[][] arr, long index) {
+        if(index == 1) {
+            return divide(arr);
+        }
 
-        for (int i = startY; i < size+startY; i++) {
-            for (int j = startX; j < size + startX; j++) {
-                if(square[i][j] == 0) {
-                    isZero = true;
-                } else {
-                    isOne = true;
-                }
+        //지수의 절반만큼 제곱해준다.
+        int[][] temp = getResult(arr, index / 2);
 
-                if(isOne && isZero) {
-                    sb.append("(");
-                    quadTree(size/2, startX, startY);
-                    quadTree(size/2, startX + size/2, startY);
-                    quadTree(size/2, startX, startY + size/2);
-                    quadTree(size/2, startX + size/2, startY + size/2);
-                    sb.append(")");
-                    return;
+        if(index % 2 == 0) {
+            return divide(multiply(temp, temp));
+        } else {
+            return divide(multiply(divide(multiply(temp, temp)), arr));
+        }
+    }
+
+    private static int[][] divide(int[][] arr) {
+        int[][] temp = new int[arrSize][arrSize];
+
+        for (int i = 0; i < arrSize; i++) {
+            for (int j = 0; j < arrSize; j++) {
+                temp[i][j] = arr[i][j] % 1000;
+            }
+        }
+        return temp;
+    }
+
+    private static int[][] multiply(int[][] arr1, int[][] arr2) {
+        int[][] temp = new int[arrSize][arrSize];
+
+        for (int i = 0; i < arrSize; i++) {
+            for (int j = 0; j < arrSize; j++) {
+                for (int k = 0; k < arrSize; k++) {
+                    temp[i][j] += arr1[i][k] * arr2[k][j];
                 }
             }
         }
 
-        if(isOne) {
-            sb.append(1);
-        } else if(isZero) {
-            sb.append(0);
-        }
-
+        return temp;
     }
+
 }
