@@ -8,76 +8,70 @@ public class Main {
     static BufferedReader br;
     static StringTokenizer st;
     static StringBuilder sb;
-    static int arrSize;
-    static long index;
-    static int[][] arr;
+    static long number;
+    static long[][] arr;
+    static long[][] result;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        st = new StringTokenizer(br.readLine(), " ");
+        number = Long.parseLong(br.readLine());
 
-        arrSize = Integer.parseInt(st.nextToken());
-        index = Long.parseLong(st.nextToken());
-        arr = new int[arrSize][arrSize];
+        arr = new long[2][2];
+        arr[0][0] = 1;
+        arr[0][1] = 1;
+        arr[1][0] = 1;
 
-        for (int i = 0; i < arrSize; i++) {
-            arr[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        }
+        result = new long[2][2];
 
-        int[][] result = getResult(arr, index);
-
-        for (int i = 0; i < arrSize; i++) {
-            for (int j = 0; j < arrSize; j++) {
-                sb.append(result[i][j]);
-                sb.append(" ");
-            }
-            sb.append("\n");
-        }
-
-        System.out.println(sb);
-
+        System.out.println(fibonacci(number));
     }
 
-    //인자로 받은 arr 에 대해서 index 만큼 제곱하는 함수
-    private static int[][] getResult(int[][] arr, long index) {
-        if(index == 1) {
-            return divide(arr);
+    private static long fibonacci(long number) {
+        //number 의 크기만큼 arr 을 제곱한다.
+        if(number == 0) {
+            return 0;
+        } else {
+            result = getResult(arr, number);
+            return result[1][0];
         }
+    }
 
+    private static long[][] getResult(long[][] mArr, long index) {
+        if(index == 1) {
+            return arr;
+        }
         //지수의 절반만큼 제곱해준다.
-        int[][] temp = getResult(arr, index / 2);
-
+        long[][] temp = getResult(mArr, index / 2);
         if(index % 2 == 0) {
             return divide(multiply(temp, temp));
         } else {
-            return divide(multiply(divide(multiply(temp, temp)), arr));
+            return divide(multiply(divide(multiply(temp, temp)),  mArr));
         }
     }
 
-    private static int[][] divide(int[][] arr) {
-        int[][] temp = new int[arrSize][arrSize];
+    private static long[][] divide(long[][] arr) {
+        long[][] temp = new long[2][2];
 
-        for (int i = 0; i < arrSize; i++) {
-            for (int j = 0; j < arrSize; j++) {
-                temp[i][j] = arr[i][j] % 1000;
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                temp[i][j] = arr[i][j] % 1000000007;
             }
         }
         return temp;
     }
 
-    private static int[][] multiply(int[][] arr1, int[][] arr2) {
-        int[][] temp = new int[arrSize][arrSize];
+    private static long[][] multiply(long[][] arr1, long[][] arr2) {
+        long[][] temp = new long[2][2];
 
-        for (int i = 0; i < arrSize; i++) {
-            for (int j = 0; j < arrSize; j++) {
-                for (int k = 0; k < arrSize; k++) {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                for (int k = 0; k < 2; k++) {
                     temp[i][j] += arr1[i][k] * arr2[k][j];
                 }
             }
         }
-
         return temp;
     }
 
