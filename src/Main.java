@@ -3,59 +3,71 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.*;
 
-import static java.util.Arrays.sort;
-
 public class Main {
 
     static BufferedReader br;
     static StringTokenizer st;
     static StringBuilder sb;
+    static int K;
+    static int[] lanArr;
     static int N;
-    static int[] caseArr;
-    static int M;
-    static int[] valueArr;
+    static int max = 1;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-
-        N = Integer.parseInt(br.readLine());
-        caseArr = new int[N];
-        caseArr = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        M = Integer.parseInt(br.readLine());
-
-        sort(caseArr);
-
-        valueArr = new int[M];
-        valueArr = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-
-        for (int i = 0; i < M; i++) {
-            isValueExist(valueArr[i], 0, N-1);
+        st = new StringTokenizer(br.readLine(), " ");
+        K = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        lanArr = new int[K];
+        for (int i = 0; i < K; i++) {
+            lanArr[i] = Integer.parseInt(br.readLine());
         }
+
+        Arrays.sort(lanArr);
+
+        sb.append(getMax(1, lanArr[K-1]));
 
         System.out.println(sb);
+
     }
 
-    //값이 caseArr 안에 존재하면 1, 존재하지 않으면 0을 출력
-    private static void isValueExist(int targetNumber, int startPoint, int endPoint) {
-        if(startPoint == endPoint) {
-            if(targetNumber != caseArr[startPoint]) {
-                sb.append("0");
+    //startValue 와 endValue 사이에 있는 값 중에서 K를 만들 수 있는 값의 최댓값을 반환하는 함수
+    private static int getMax(int startValue, int endValue) {
+        int resultEndValue = 0;
+        int resultMiddleValue = 0;
+        int middleValue = (startValue + endValue) / 2;
+        for (int i = 0; i < K; i++) {
+            resultEndValue += lanArr[i] / endValue;
+            resultMiddleValue += lanArr[i] / middleValue;
+        }
+
+        //가장 큰 수로 N 개를 만들 수 있으면 반환하면 된다.
+        if(resultEndValue >= N) {
+            return endValue;
+        }
+
+        //가장 큰 수로 N개를 만들 수 없다면, 범위를 더 작게 만들어야 한다.
+        //가운데 수로 N 개를 만들 수 있는지 여부를 따져봐야 한다.
+        //가운데 수로도 N 개를 만들 수 없다면, 범위를 더 작게 만들어야 한다.
+        if(resultMiddleValue < N) {
+            if((middleValue-1 != 0)) {
+                max = Math.max(max, getMax(startValue, middleValue-1));
             } else {
-                sb.append("1");
+                max = Math.max(max, getMax(startValue, middleValue));
             }
-            sb.append("\n");
-            return;
         }
-        int middlePoint = startPoint + (endPoint - startPoint) / 2;
-        if(targetNumber == caseArr[middlePoint]) {
-            sb.append("1");
-            sb.append("\n");
-        } else if (targetNumber > caseArr[middlePoint]){
-            isValueExist(targetNumber, middlePoint+1, endPoint);
-        } else if (targetNumber < caseArr[middlePoint]) {
-            isValueExist(targetNumber, startPoint, middlePoint);
+
+        //가운데 수로는 N 개를 만들 수 있다면 끝에만 줄이면 된다.
+        else {
+            if((endValue - 1) != 0) {
+                max = Math.max(max, getMax(middleValue, endValue-1));
+            } else {
+                max = Math.max(max, getMax(middleValue, endValue));
+            }
         }
+
+        return max;
     }
 }
