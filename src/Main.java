@@ -8,66 +8,80 @@ public class Main {
     static BufferedReader br;
     static StringTokenizer st;
     static StringBuilder sb;
-    static int K;
-    static int[] lanArr;
+    static long[] treeArr;
     static int N;
-    static int max = 1;
+    static long M;
+    static long max = 0;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
         st = new StringTokenizer(br.readLine(), " ");
-        K = Integer.parseInt(st.nextToken());
+
         N = Integer.parseInt(st.nextToken());
-        lanArr = new int[K];
-        for (int i = 0; i < K; i++) {
-            lanArr[i] = Integer.parseInt(br.readLine());
+        M = Long.parseLong(st.nextToken());
+        st = new StringTokenizer(br.readLine(), " ");
+
+        treeArr = new long[N];
+        for (int i = 0; i < N; i++) {
+            long temp = Long.parseLong(st.nextToken());
+            treeArr[i] = temp;
+            if(max < temp) {
+                max = temp;
+            }
         }
 
-        Arrays.sort(lanArr);
-
-        sb.append(getMax(1, lanArr[K-1]));
+        sb.append(findMaxHeight());
 
         System.out.println(sb);
 
     }
 
-    //startValue 와 endValue 사이에 있는 값 중에서 K를 만들 수 있는 값의 최댓값을 반환하는 함수
-    private static int getMax(int startValue, int endValue) {
-        int resultEndValue = 0;
-        int resultMiddleValue = 0;
-        int middleValue = (startValue + endValue) / 2;
-        for (int i = 0; i < K; i++) {
-            resultEndValue += lanArr[i] / endValue;
-            resultMiddleValue += lanArr[i] / middleValue;
-        }
+    //min 부터 max 까지의 값을 확인하면서 필요한 나무만큼 가져가면서 높이의 최댓값을 구해야 한다.
+    private static long findMaxHeight() {
+        long min = 0;
+        long mid = 0;
+        max++;
 
-        //가장 큰 수로 N 개를 만들 수 있으면 반환하면 된다.
-        if(resultEndValue >= N) {
-            return endValue;
-        }
+        while (min < max) {
+            long count = 0;
+            mid = (min + max) / 2;
 
-        //가장 큰 수로 N개를 만들 수 없다면, 범위를 더 작게 만들어야 한다.
-        //가운데 수로 N 개를 만들 수 있는지 여부를 따져봐야 한다.
-        //가운데 수로도 N 개를 만들 수 없다면, 범위를 더 작게 만들어야 한다.
-        if(resultMiddleValue < N) {
-            if((middleValue-1 != 0)) {
-                max = Math.max(max, getMax(startValue, middleValue-1));
-            } else {
-                max = Math.max(max, getMax(startValue, middleValue));
+            //절단기의 높이가 mid 일 때, 나무를 필요한 길이만큼 가져가는지 확인한다.
+            for (int i = 0; i < N; i++) {
+                if(mid < treeArr[i]) {
+                    count += (treeArr[i] - mid);
+                }
+            }
+
+            //자른 나무가 필요한 길이보다 짧다는 뜻은 높이가 높다는 뜻
+            if(count < M) {
+                max = mid-1;
+            }
+            //자른 나무가 필요한 길이보다 길다는 뜻은 높이가 높아질 수 있다는 뜻
+            else {
+                min = mid;
+            }
+
+            //차이가 1이면 max, min 의 값이 더 이상 바뀌지 않는다.
+            if((max - min) == 1) {
+                //max 일 때 count 를 세봐야 한다.
+                count = 0;
+                for (int i = 0; i < N; i++) {
+                    if(max < treeArr[i]) {
+                        count += (treeArr[i] - max);
+                    }
+                }
+                //max 일 때 필요한 나무보다 count 가 크거나 같다면
+                if(count >= M) {
+                    return max;
+                } else {
+                    return min;
+                }
             }
         }
 
-        //가운데 수로는 N 개를 만들 수 있다면 끝에만 줄이면 된다.
-        else {
-            if((endValue - 1) != 0) {
-                max = Math.max(max, getMax(middleValue, endValue-1));
-            } else {
-                max = Math.max(max, getMax(middleValue, endValue));
-            }
-        }
-
-        return max;
+        return min;
     }
 }
