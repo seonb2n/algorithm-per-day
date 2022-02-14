@@ -8,10 +8,12 @@ public class Main {
     static BufferedReader br;
     static StringTokenizer st;
     static StringBuilder sb;
-    static long[] treeArr;
+    static long[] wifiArr;
+    static long lastAddNumber;
     static int N;
-    static long M;
-    static long max = 0;
+    static int C;
+    static long max;
+    static long min;
 
     public static void main(String[] args) throws IOException {
 
@@ -20,68 +22,78 @@ public class Main {
         st = new StringTokenizer(br.readLine(), " ");
 
         N = Integer.parseInt(st.nextToken());
-        M = Long.parseLong(st.nextToken());
-        st = new StringTokenizer(br.readLine(), " ");
+        C = Integer.parseInt(st.nextToken());
 
-        treeArr = new long[N];
+        wifiArr = new long[N];
+
         for (int i = 0; i < N; i++) {
-            long temp = Long.parseLong(st.nextToken());
-            treeArr[i] = temp;
-            if(max < temp) {
-                max = temp;
-            }
+            wifiArr[i] = Long.parseLong(br.readLine());
         }
 
-        sb.append(findMaxHeight());
+        Arrays.sort(wifiArr);
+
+        sb.append(findMaxLength());
 
         System.out.println(sb);
-
     }
 
-    //min 부터 max 까지의 값을 확인하면서 필요한 나무만큼 가져가면서 높이의 최댓값을 구해야 한다.
-    private static long findMaxHeight() {
-        long min = 0;
-        long mid = 0;
-        max++;
+    //min 부터 max 사이의 범위 중에 C개의 공유기를 설치할 때, 공유기 사이의 범위가 최대가 되도록 해야 한다.
+    private static long findMaxLength() {
+        min = wifiArr[0];
+        max = wifiArr[N-1];
+        long maxMinGap = max - min;
 
-        while (min < max) {
-            long count = 0;
-            mid = (min + max) / 2;
+        if(C == 2) {
+            return maxMinGap;
+        }
 
-            //절단기의 높이가 mid 일 때, 나무를 필요한 길이만큼 가져가는지 확인한다.
-            for (int i = 0; i < N; i++) {
-                if(mid < treeArr[i]) {
-                    count += (treeArr[i] - mid);
+        //와이파이 사이의 길이를 비교하며 길이 이상일 때만 설치한다.
+        long mid = 1;
+        while(mid < maxMinGap) {
+            //설치된 개수가 C 의 개수인 길이 중 최대의 값을 찾는다.
+            lastAddNumber = wifiArr[0];
+            mid = (max + min) / 2;
+            int count = 1;
+            for (int i = 1; i < N; i++) {
+                if((wifiArr[i] - lastAddNumber) >= mid) {
+                    count++;
+                    lastAddNumber = wifiArr[i];
+                }
+
+                if(count > C) {
+                    break;
                 }
             }
 
-            //자른 나무가 필요한 길이보다 짧다는 뜻은 높이가 높다는 뜻
-            if(count < M) {
-                max = mid-1;
+            //count 가 C보다 많다면 mid 가 너무 작다는 뜻
+            if(count > C) {
+                min = mid + 1;
             }
-            //자른 나무가 필요한 길이보다 길다는 뜻은 높이가 높아질 수 있다는 뜻
-            else {
-                min = mid;
+            //count 가 C 보다 작다면 mid 가 너무 크다는 뜻
+            else if (count < C){
+                max = mid - 1;
             }
 
-            //차이가 1이면 max, min 의 값이 더 이상 바뀌지 않는다.
-            if((max - min) == 1) {
-                //max 일 때 count 를 세봐야 한다.
-                count = 0;
-                for (int i = 0; i < N; i++) {
-                    if(max < treeArr[i]) {
-                        count += (treeArr[i] - max);
+            //count 가 C 와 같다면 max 를 검증해야 한다.
+            else {
+                lastAddNumber = wifiArr[0];
+                count = 1;
+                for (int i = 1; i < N; i++) {
+                    if((wifiArr[i] - lastAddNumber) >= max) {
+                        count++;
+                        lastAddNumber = wifiArr[i];
                     }
                 }
-                //max 일 때 필요한 나무보다 count 가 크거나 같다면
-                if(count >= M) {
+
+                if(count == C) {
                     return max;
                 } else {
-                    return min;
+                    max--;
+                    min = mid;
                 }
             }
         }
 
-        return min;
+        return max;
     }
 }
