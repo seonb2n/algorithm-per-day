@@ -8,85 +8,95 @@ public class Main {
     static BufferedReader br;
     static StringTokenizer st;
     static StringBuilder sb;
-    static long[] wifiArr;
-    static long lastAddNumber;
     static int N;
-    static int C;
-    static long max;
-    static long min;
+    static long K;
+    static long minCount;
+    static long maxCount;
+    static long possibleMinMid;
+    static long possibleMaxMid;
+    static long possibleValue;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        st = new StringTokenizer(br.readLine(), " ");
 
-        N = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(br.readLine());
+        K = Long.parseLong(br.readLine());
 
-        wifiArr = new long[N];
-
-        for (int i = 0; i < N; i++) {
-            wifiArr[i] = Long.parseLong(br.readLine());
-        }
-
-        Arrays.sort(wifiArr);
-
-        sb.append(findMaxLength());
+        sb.append(getKNumber());
 
         System.out.println(sb);
     }
 
-    //min 부터 max 사이의 범위 중에 C개의 공유기를 설치할 때, 공유기 사이의 범위가 최대가 되도록 해야 한다.
-    private static long findMaxLength() {
-        //거리가 가질 수 있는 최소 범위
+    //K 가 존재할 수 있는 범위를 탐색해나가는 함수
+    static long getKNumber() {
+        if(K == 1) {
+            return 1;
+        }
+        else if(K == N * N) {
+            return N * N;
+        }
+
+        long min;
+        long max;
         min = 1;
+        max = N * N;
 
-        //거리가 가질 수 있는 최대 범위
-        max = wifiArr[N-1] - wifiArr[0];
+        while (min < max) {
+            //숫자가 mid 일 때, 해당 숫자가 몇 번 째로 큰 숫자인지를 알아내야 한다.
+            long mid = (min + max) / 2;
+            getK(mid);
 
-        if(C == 2) {
-            return max;
-        }
-
-        //와이파이 사이의 길이를 비교하며 길이 이상일 때만 설치한다.
-        while(min < max) {
-            //설치된 개수가 C 의 개수인 길이 중 최대의 값을 찾는다.
-            long mid = (max + min) / 2;
-
-            int count = countNumber(mid);
-
-            //count 가 C보다 많거나 같다면 mid 를 키우면 된다.
-            if(count >= C) {
-                //최솟값이 mid 이상일 수 있다.
-                min = mid + 1;
-                //min = mid+1 인 경우가 딱 최대일 수도 있다.
+            //mid 를 값으로 하는 숫자의 경우가 처음 등장하는 것보다 K가 앞에 있다면
+            if(K <= minCount) {
+                //mid 보다 작은 가장 큰 수
+                max = possibleMaxMid;
             }
-            //count 가 C 보다 작다면 mid 가 너무 크다는 뜻
+            //mid 를 값으로 하는 숫자의 최대 범위보다 K 가 더 크다면
+            else if(maxCount < K){
+                //mid 보다 큰 가장 작은 수
+                min = possibleMinMid;
+            }
+            //mid 를 값으로 할 때, 숫자의 범위가 해당 범위 내에 존재한다면
             else {
-                max = mid;
+                //가능한 범위 내의 값을 전달
+                return possibleValue;
             }
         }
 
-        return min-1;
+        return min;
+
     }
 
-    //주어진 길이에 대해서 몇개의 공유기가 설치 가능한지 구하는 함수
-    private static int countNumber(long distance) {
-        int count = 1;
-        lastAddNumber = wifiArr[0];
-
-        for (int i = 1; i < N; i++) {
-            if((wifiArr[i] - lastAddNumber) >= distance) {
-                count++;
-                lastAddNumber = wifiArr[i];
-            }
-
-            if(count > C) {
-                return count;
+    //주어진 number 에 대해서 number 가 몇 번째 숫자인지 찾아야 한다.
+    static void getK(long number) {
+        minCount = 0;
+        maxCount = 0;
+        //number 보다 작은 수 중 가장 큰 수
+        possibleMaxMid = 0;
+        //number 보다 큰 수 중 가장 작은 수
+        possibleMinMid = 999999999;
+        for (int i = 1; i <= N; i++) {
+            for (int j = 1; j <= N; j++) {
+                long temp = i * j;
+                if(temp < number) {
+                    minCount++;
+                    maxCount++;
+                    if(possibleMaxMid < temp) {
+                        possibleMaxMid = temp;
+                        possibleValue = temp;
+                    }
+                } else if(temp == number) {
+                    maxCount++;
+                    possibleValue = temp;
+                } else {
+                    if(temp < possibleMinMid) {
+                        possibleMinMid = temp;
+                    }
+                    break;
+                }
             }
         }
-
-        return count;
     }
 }
