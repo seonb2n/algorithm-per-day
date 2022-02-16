@@ -9,8 +9,7 @@ public class Main {
     static StringTokenizer st;
     static StringBuilder sb;
     static int N;
-    static long K;
-    static long numberCount;
+    static int[] A;
 
     public static void main(String[] args) throws IOException {
 
@@ -18,54 +17,55 @@ public class Main {
         sb = new StringBuilder();
 
         N = Integer.parseInt(br.readLine());
-        K = Long.parseLong(br.readLine());
 
-        sb.append(getKNumber());
+        st = new StringTokenizer(br.readLine(), " ");
 
-        System.out.println(sb);
+        A = new int[N];
+
+        for (int i = 0; i < N; i++) {
+            A[i] = Integer.parseInt(st.nextToken());
+        }
+
+        System.out.println(getLCS());
+
     }
 
-    //K 가 존재할 수 있는 범위를 탐색해나가는 함수
-    static long getKNumber() {
+    //해당 범위 내 증가하는 수열의 길이를 반환하는 함수
+    public static int getLCS() {
+        int[] result;
+        result = new int[N];
+        int lastAddPoint = 0;
 
-        long max = ((long) N) * N;
+        result[0] = A[0];
 
-        if(K == 1) {
-            return 1;
-        }
-        else if(K == max) {
-            return max;
-        }
-
-        long min = 1;
-
-        while (min < max) {
-
-            long mid = (min+max) / 2;
-            long count = getK(mid);
-
-            if(count >= K) {
-                max = mid;
+        for (int i = 1; i < N; i++) {
+            //만약 수열에 추가하고자 하는 수가 result 의 마지막 수보다 크다면 그대로 값을 추가해준다.
+            if(result[lastAddPoint] < A[i]) {
+                lastAddPoint++;
+                result[lastAddPoint] = A[i];
             }
 
+            //수열에 추가하고자 하는 수가 마지막 수보다 크지 않다면, 새로운 수가 들어갈 적절한 위치를 찾아줘야 한다.
             else {
-                min = mid + 1;
+                //새로운 수는 자기보다 작은 result 의 수 바로 앞의 수를 대체한다.
+                //upper Bound 로 추가하고자 하는 수를 초과한 값이 처음 나오는 위치를 찾아야 한다.
+                int min = 0;
+                int max = lastAddPoint;
+                int temp = A[i];
+                while(min < max) {
+
+                    int mid = (min + max) / 2;
+                    if(result[mid] < temp) {
+                        min = mid+1;
+                    } else {
+                        max = Math.max(0, mid);
+                    }
+
+                }
+                result[min] = temp;
             }
-
         }
 
-        return min;
-    }
-
-    //i, j에 위치한 숫자에 대해서 해당 숫자가 몇 번째 숫자인지를 구해야 한다.
-    static long getK(long temp) {
-        numberCount = 0;
-        numberCount += Math.min(N, temp);
-
-        for (int k = 2; k <= N; k++) {
-            numberCount+= Math.min(temp / k, N);
-        }
-
-        return numberCount;
+        return lastAddPoint+1;
     }
 }
