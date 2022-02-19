@@ -7,98 +7,91 @@ public class Main {
 
     static BufferedReader br;
     static StringBuilder sb;
+    static StringTokenizer st;
     static int N;
-    static Map<Integer, Integer> numberList;
-    static int nodeNumber;
+    static int M;
+    static int[] numberList;
+    static int[] resultList;
+
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        numberList = new HashMap<>();
 
         N = Integer.parseInt(br.readLine());
-
+        st = new StringTokenizer(br.readLine(), " ");
+        numberList = new int[N];
         for (int i = 0; i < N; i++) {
-            int temp =  Integer.parseInt(br.readLine());
-            if (temp == 0) {
-                if(nodeNumber == 0) {
-                    sb.append(0);
-                    sb.append("\n");
-                } else {
-                    sb.append(popNumber());
-                    sb.append("\n");
-                }
-            }
+            numberList[i] = Integer.parseInt(st.nextToken());
+        }
 
-            else {
-                addNumber(temp);
-            }
+        M = Integer.parseInt(br.readLine());
+        st = new StringTokenizer(br.readLine(), " ");
+        resultList = new int[M];
+        for (int i = 0; i < M; i++) {
+            resultList[i] = Integer.parseInt(st.nextToken());
+        }
+
+        Arrays.sort(numberList);
+
+        for (int i = 0; i < M; i++) {
+            findNumber(resultList[i]);
         }
 
         System.out.println(sb);
-
     }
 
-    //루트 노드를 제거한 후에 배열을 재정렬하는 메서드
-    private static int popNumber() {
-        int result = numberList.get(1);
-        numberList.replace(1, 0);
-        swap(1, nodeNumber);
-        nodeNumber--;
-        if(nodeNumber > 1) {
-            int cursor = 1;
-            //자신의 자식 노드와 값을 비교해가며, 자식이 자신보다 크면 위치를 바꾼다.
-            while (true) {
-                //왼쪽 자식과 오른쪽 자식을 비교해서 더 큰 녀석과 자리를 바꿔야 한다.
-                if(numberList.containsKey(cursor * 2) && numberList.get(cursor * 2) > numberList.get(cursor)) {
-                    if(numberList.containsKey(cursor * 2 +1) && numberList.get(cursor * 2 + 1) > numberList.get(cursor * 2)) {
-                        swap(cursor * 2 + 1, cursor);
-                        cursor = cursor * 2 + 1;
-                    } else {
-                        swap(cursor * 2, cursor);
-                        cursor = cursor * 2;
-                    }
-                }
-                else if(numberList.containsKey(cursor * 2 + 1) && numberList.get(cursor * 2 + 1) > numberList.get(cursor)) {
-                    swap(cursor * 2 + 1, cursor);
-                    cursor = cursor * 2 + 1;
-                }
-                else {
-                    break;
-                }
-            }
-        }
+    //주어진 숫자 i 에 대해서 개수를 찾아내는 알고리즘
+    private static void findNumber(int n) {
+        //lower bound
+        int first = lowerBound(n);
 
-        return result;
-    }
-
-    //주어진 숫자를 numberList 를 최대 힙의 형태로 정렬해서 추가하는 메서드
-    public static void addNumber(int number) {
-        if(nodeNumber == 0) {
-            nodeNumber = 1;
+        if(numberList[first] != n) {
+            sb.append(0);
+            sb.append(" ");
         } else {
-            nodeNumber++;
+            //upper bound
+            int last = upperBound(n);
+            sb.append(last - first);
+            sb.append(" ");
         }
-        numberList.put(nodeNumber, number);
+    }
 
-        //부모 노드와 비교해서 자신이 부모보다 크면 부모 노드와 swap
-        //이 과정을 자신이 루트 노드에 다다를 때까지 반복
-        int cursor = nodeNumber;
-        while (cursor != 1) {
-            if(numberList.get(cursor / 2) < numberList.get(cursor)) {
-                swap(cursor / 2, cursor);
-                cursor = cursor / 2;
+    //원하는 값 이상이 처음 나오는 위치
+    public static int lowerBound(int n) {
+        int start = 0;
+        int end = N-1;
+
+        while (start < end) {
+            int mid = (start + end) / 2;
+            if(numberList[mid] < n) {
+                start = mid+1;
             } else {
-                break;
+                end = mid;
             }
         }
+
+        return start;
     }
 
-    public static void swap(int a, int b) {
-        int temp = numberList.get(a);
-        numberList.replace(a, numberList.get(b));
-        numberList.replace(b, temp);
-    }
+    //원하는 값을 초과한 값이 처음 나오는 위치
+    public static int upperBound(int n) {
+        int start = 0;
+        int end = N-1;
 
+        while (start < end) {
+            int mid = (start + end) / 2;
+            if(numberList[mid] <= n ) {
+                start = mid + 1;
+            } else {
+                end = mid;
+            }
+        }
+        if(numberList[N-1] == n) {
+            return N;
+        } else {
+            return start;
+        }
+    }
 }
