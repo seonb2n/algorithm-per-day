@@ -9,89 +9,66 @@ public class Main {
     static StringBuilder sb;
     static StringTokenizer st;
     static int N;
-    static int M;
-    static int[] numberList;
-    static int[] resultList;
+    static PriorityQueue<Number> x;
 
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-
         N = Integer.parseInt(br.readLine());
-        st = new StringTokenizer(br.readLine(), " ");
-        numberList = new int[N];
+
+        x = new PriorityQueue<Number>();
+
         for (int i = 0; i < N; i++) {
-            numberList[i] = Integer.parseInt(st.nextToken());
+            int temp = Integer.parseInt(br.readLine());
+
+            if(temp == 0) {
+                if(x.isEmpty()) {
+                    sb.append(0);
+                    sb.append("\n");
+                } else {
+                    sb.append(x.poll().number);
+                    sb.append("\n");
+                }
+            } else {
+                Number n = new Number(temp);
+                x.add(n);
+            }
+
         }
-
-        M = Integer.parseInt(br.readLine());
-        st = new StringTokenizer(br.readLine(), " ");
-        resultList = new int[M];
-        for (int i = 0; i < M; i++) {
-            resultList[i] = Integer.parseInt(st.nextToken());
-        }
-
-        Arrays.sort(numberList);
-
-        for (int i = 0; i < M; i++) {
-            findNumber(resultList[i]);
-        }
-
         System.out.println(sb);
     }
 
-    //주어진 숫자 i 에 대해서 개수를 찾아내는 알고리즘
-    private static void findNumber(int n) {
-        //lower bound
-        int first = lowerBound(n);
+    public static class Number implements Comparable<Number> {
 
-        if(numberList[first] != n) {
-            sb.append(0);
-            sb.append(" ");
-        } else {
-            //upper bound
-            int last = upperBound(n);
-            sb.append(last - first);
-            sb.append(" ");
+        public Number(int n) {
+            this.number = n;
         }
-    }
 
-    //원하는 값 이상이 처음 나오는 위치
-    public static int lowerBound(int n) {
-        int start = 0;
-        int end = N-1;
+        int number;
 
-        while (start < end) {
-            int mid = (start + end) / 2;
-            if(numberList[mid] < n) {
-                start = mid+1;
-            } else {
-                end = mid;
+        @Override
+        public int compareTo(Number o) {
+            int a = number;
+            int b = o.number;
+
+            if(number < 0) {
+                a = a * (-1);
             }
-        }
 
-        return start;
-    }
-
-    //원하는 값을 초과한 값이 처음 나오는 위치
-    public static int upperBound(int n) {
-        int start = 0;
-        int end = N-1;
-
-        while (start < end) {
-            int mid = (start + end) / 2;
-            if(numberList[mid] <= n ) {
-                start = mid + 1;
-            } else {
-                end = mid;
+            if(o.number < 0) {
+                b = b * (-1);
             }
-        }
-        if(numberList[N-1] == n) {
-            return N;
-        } else {
-            return start;
+
+            //절대값이 동일한 경우에는 음수인 값을 왼쪽으로
+            if(a == b) {
+                return number > o.number ? 1 : -1;
+            }
+
+            //number 의 절대값을 비교해서, 오름차순 정렬
+            return a > b ? 1 : -1;
         }
     }
+
 }
