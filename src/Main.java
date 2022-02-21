@@ -9,8 +9,8 @@ public class Main {
     static StringBuilder sb;
     static StringTokenizer st;
     static int N;
-    static PriorityQueue<Number> x;
-
+    static LinkedList<Integer> x;
+    static int size = 0;
 
     public static void main(String[] args) throws IOException {
 
@@ -18,57 +18,45 @@ public class Main {
         sb = new StringBuilder();
         N = Integer.parseInt(br.readLine());
 
-        x = new PriorityQueue<Number>();
+        x = new LinkedList<>();
 
-        for (int i = 0; i < N; i++) {
+        x.add(Integer.parseInt(br.readLine()));
+        sb.append(x.get(0));
+        sb.append("\n");
+        size++;
+
+        for (int i = 1; i < N; i++) {
             int temp = Integer.parseInt(br.readLine());
+            addNumber(temp);
 
-            if(temp == 0) {
-                if(x.isEmpty()) {
-                    sb.append(0);
-                    sb.append("\n");
-                } else {
-                    sb.append(x.poll().number);
-                    sb.append("\n");
-                }
-            } else {
-                Number n = new Number(temp);
-                x.add(n);
+            if(size % 2 == 0) {
+                sb.append(x.get(size / 2 - 1));
             }
-
+            else {
+                sb.append(x.get((size-1) / 2));
+            }
+            sb.append("\n");
         }
         System.out.println(sb);
     }
 
-    public static class Number implements Comparable<Number> {
+    public static void addNumber(int number) {
+        //이분탐색 알고리즘으로 number 가 들어갈 위치를 찾는다.
+        int min = 0;
+        int max = size;
+        int mid;
 
-        public Number(int n) {
-            this.number = n;
+        while(min < max) {
+            mid = (min + max) / 2;
+
+            if(x.get(mid) < number) {
+                min = mid+1;
+            }
+            else {
+                max = mid;
+            }
         }
-
-        int number;
-
-        @Override
-        public int compareTo(Number o) {
-            int a = number;
-            int b = o.number;
-
-            if(number < 0) {
-                a = a * (-1);
-            }
-
-            if(o.number < 0) {
-                b = b * (-1);
-            }
-
-            //절대값이 동일한 경우에는 음수인 값을 왼쪽으로
-            if(a == b) {
-                return number > o.number ? 1 : -1;
-            }
-
-            //number 의 절대값을 비교해서, 오름차순 정렬
-            return a > b ? 1 : -1;
-        }
+        x.add(min, number);
+        size++;
     }
-
 }
