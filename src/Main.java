@@ -9,54 +9,64 @@ public class Main {
     static StringBuilder sb;
     static StringTokenizer st;
     static int N;
-    static LinkedList<Integer> x;
-    static int size = 0;
+    static PriorityQueue<Integer> minQueue;
+    static int minSize = 0;
+    static PriorityQueue<Integer> maxQueue;
+    static int maxSize = 0;
+    static int middleNumber;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
         N = Integer.parseInt(br.readLine());
+        //오름 차순 정렬된 큐
+        minQueue = new PriorityQueue<>();
+        //내림차순 정렬된 큐
+        maxQueue = new PriorityQueue<>(Collections.reverseOrder());
 
-        x = new LinkedList<>();
-
-        x.add(Integer.parseInt(br.readLine()));
-        sb.append(x.get(0));
+        middleNumber = Integer.parseInt(br.readLine());
+        sb.append(middleNumber);
         sb.append("\n");
-        size++;
 
         for (int i = 1; i < N; i++) {
-            int temp = Integer.parseInt(br.readLine());
-            addNumber(temp);
-
-            if(size % 2 == 0) {
-                sb.append(x.get(size / 2 - 1));
-            }
-            else {
-                sb.append(x.get((size-1) / 2));
-            }
+            addNumber(Integer.parseInt(br.readLine()));
+            sb.append(middleNumber);
             sb.append("\n");
         }
+
         System.out.println(sb);
     }
 
+    //middle number 를 기준으로 값을 적절한 큐에 할당하는 함수
     public static void addNumber(int number) {
-        //이분탐색 알고리즘으로 number 가 들어갈 위치를 찾는다.
-        int min = 0;
-        int max = size;
-        int mid;
-
-        while(min < max) {
-            mid = (min + max) / 2;
-
-            if(x.get(mid) < number) {
-                min = mid+1;
+        if(number >= middleNumber) {
+            if(maxSize == minSize) {
+                minQueue.add(number);
+                minSize++;
             }
             else {
-                max = mid;
+                maxQueue.add(middleNumber);
+                maxSize++;
+                minQueue.add(number);
+                middleNumber = minQueue.poll();
             }
         }
-        x.add(min, number);
-        size++;
+
+        else {
+            if(maxSize == minSize) {
+                minQueue.add(middleNumber);
+                minSize++;
+                maxQueue.add(number);
+                middleNumber = maxQueue.poll();
+            }
+            else {
+                maxQueue.add(number);
+                maxQueue.add(middleNumber);
+                middleNumber = maxQueue.poll();
+                maxSize++;
+            }
+        }
     }
+
 }
