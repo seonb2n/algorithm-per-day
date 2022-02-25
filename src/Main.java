@@ -7,6 +7,7 @@ public class Main {
 
     static BufferedReader br;
     static StringBuilder sb;
+    static StringTokenizer st;
     static int T;
     static int testCaseNumber;
     static int[] fileSize;
@@ -18,21 +19,23 @@ public class Main {
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
         T = Integer.parseInt(br.readLine());
-
         for (int i = 0; i < T; i++) {
             testCaseNumber = Integer.parseInt(br.readLine());
             fileSize = new int[testCaseNumber];
             dp = new int[testCaseNumber][testCaseNumber];
             sum = new int[testCaseNumber];
-            fileSize = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-
-            sum[0] = fileSize[0];
-            for (int k = 1; k < fileSize.length; k++) {
-                sum[k] = sum[k-1] + fileSize[k];
+            st = new StringTokenizer(br.readLine(), " ");
+            for (int j = 0; j < testCaseNumber; j++) {
+                fileSize[j] = Integer.parseInt(st.nextToken());
+                if(j == 0) {
+                    sum[0] = fileSize[0];
+                }
+                else {
+                    sum[j] = sum[j-1] + fileSize[j];
+                    dp[j-1][j] = fileSize[j-1] + fileSize[j];
+                }
             }
-
-            sb.append(getDp(0, testCaseNumber-1));
-            sb.append("\n");
+            sb.append(getDp(0, testCaseNumber-1)).append("\n");
          }
         System.out.println(sb);
     }
@@ -43,20 +46,17 @@ public class Main {
         if(gap == 0) {
             return dp[startPoint][endPoint];
         }
-        else if(gap == 1) {
-            if(dp[startPoint][endPoint] == 0) {
-                dp[startPoint][endPoint] = fileSize[startPoint] + fileSize[endPoint];
-            }
+        if(gap == 1) {
             return dp[startPoint][endPoint];
         }
-        else {
-            dp[startPoint][endPoint] = Integer.MAX_VALUE;
-            for (int i = startPoint; i < endPoint; i++) {
-                int tempSum = getDp(startPoint, i) + getDp(i+1, endPoint) + getSum(startPoint, endPoint);
-                dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempSum);
-            }
-            return dp[startPoint][endPoint];
+
+        dp[startPoint][endPoint] = Integer.MAX_VALUE;
+        for (int i = startPoint; i < endPoint; i++) {
+            int tempSum = getDp(startPoint, i) + getDp(i+1, endPoint) + getSum(startPoint, endPoint);
+            dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempSum);
         }
+        return dp[startPoint][endPoint];
+
     }
 
     public static int getSum(int startPoint, int endPoint) {
