@@ -50,11 +50,14 @@ public class Main {
             return dp[startPoint][endPoint];
         }
 
-        dp[startPoint][endPoint] = Integer.MAX_VALUE;
-        for (int i = startPoint; i < endPoint; i++) {
-            int tempSum = getDp(startPoint, i) + getDp(i+1, endPoint) + getSum(startPoint, endPoint);
-            dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempSum);
+        if(dp[startPoint][endPoint] == 0) {
+            dp[startPoint][endPoint] = Integer.MAX_VALUE;
+            for (int i = startPoint; i < endPoint; i++) {
+                int tempSum = getDp(startPoint, i) + getDp(i+1, endPoint) + getSum(startPoint, endPoint);
+                dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempSum);
+            }
         }
+
         return dp[startPoint][endPoint];
 
     }
