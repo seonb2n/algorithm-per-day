@@ -8,67 +8,59 @@ public class Main {
     static BufferedReader br;
     static StringBuilder sb;
     static StringTokenizer st;
-    static int T;
     static int testCaseNumber;
-    static int[] fileSize;
+    static Arr[] arrArray;
     static int[][] dp;
-    static int[] sum;
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        T = Integer.parseInt(br.readLine());
-        for (int i = 0; i < T; i++) {
-            testCaseNumber = Integer.parseInt(br.readLine());
-            fileSize = new int[testCaseNumber];
-            dp = new int[testCaseNumber][testCaseNumber];
-            sum = new int[testCaseNumber];
+        testCaseNumber = Integer.parseInt(br.readLine());
+
+        arrArray = new Arr[testCaseNumber];
+        dp = new int[testCaseNumber][testCaseNumber];
+
+        for (int i = 0; i < testCaseNumber; i++) {
             st = new StringTokenizer(br.readLine(), " ");
-            for (int j = 0; j < testCaseNumber; j++) {
-                fileSize[j] = Integer.parseInt(st.nextToken());
-                if(j == 0) {
-                    sum[0] = fileSize[0];
-                }
-                else {
-                    sum[j] = sum[j-1] + fileSize[j];
-                    dp[j-1][j] = fileSize[j-1] + fileSize[j];
-                }
-            }
-            sb.append(getDp(0, testCaseNumber-1)).append("\n");
-         }
-        System.out.println(sb);
+            arrArray[i] = new Arr(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()));
+        }
+
+        System.out.println(getMinCost(0, testCaseNumber-1));
     }
 
-    //startPoint 부터 endPoint 까지 파일을 합치는 비용의 최소 비용을 구하는 함수
-    public static int getDp(int startPoint, int endPoint) {
-        int gap = endPoint - startPoint;
-        if(gap == 0) {
-            return dp[startPoint][endPoint];
-        }
-        if(gap == 1) {
-            return dp[startPoint][endPoint];
+    //시작점부터 끝점에 있는 행렬에 대해서 곱셈의 최솟값을 반환하는 함수
+    private static int getMinCost(int startPoint, int endPoint) {
+        if(startPoint == endPoint) {
+            return 0;
         }
 
-        if(dp[startPoint][endPoint] == 0) {
-            dp[startPoint][endPoint] = Integer.MAX_VALUE;
-            for (int i = startPoint; i < endPoint; i++) {
-                int tempSum = getDp(startPoint, i) + getDp(i+1, endPoint) + getSum(startPoint, endPoint);
-                dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempSum);
+        else if(endPoint-startPoint == 1) {
+            if(dp[startPoint][endPoint] == 0) {
+                dp[startPoint][endPoint] = arrArray[startPoint].i * arrArray[startPoint].j * arrArray[endPoint].j;
             }
-        }
-
-        return dp[startPoint][endPoint];
-
-    }
-
-    public static int getSum(int startPoint, int endPoint) {
-        if(startPoint == 0) {
-            return sum[endPoint];
+            return dp[startPoint][endPoint];
         }
 
         else {
-            return sum[endPoint] - sum[startPoint-1];
+            if(dp[startPoint][endPoint] == 0) {
+                dp[startPoint][endPoint] = Integer.MAX_VALUE;
+                for (int i = startPoint; i < endPoint; i++) {
+                    int tempCost = getMinCost(startPoint, i) + getMinCost(i+1, endPoint) + arrArray[startPoint].i * arrArray[i+1].i * arrArray[endPoint].j;
+                    dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempCost);
+                }
+            }
+            return dp[startPoint][endPoint];
+        }
+    }
+
+    public static class Arr {
+        int i;
+        int j;
+
+        public Arr(int i, int j) {
+            this.i = i;
+            this.j = j;
         }
     }
 }
