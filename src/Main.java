@@ -8,59 +8,80 @@ public class Main {
     static BufferedReader br;
     static StringBuilder sb;
     static StringTokenizer st;
-    static int testCaseNumber;
-    static Arr[] arrArray;
+    static int mapWidth;
+    static int mapHeight;
+    static int[][] map;
     static int[][] dp;
+
 
     public static void main(String[] args) throws IOException {
 
         br = new BufferedReader(new InputStreamReader(System.in));
         sb = new StringBuilder();
-        testCaseNumber = Integer.parseInt(br.readLine());
+        st = new StringTokenizer(br.readLine(), " ");
+        mapHeight = Integer.parseInt(st.nextToken());
+        mapWidth = Integer.parseInt(st.nextToken());
 
-        arrArray = new Arr[testCaseNumber];
-        dp = new int[testCaseNumber][testCaseNumber];
+        map = new int[mapHeight][mapWidth];
+        dp = new int[mapHeight][mapWidth];
 
-        for (int i = 0; i < testCaseNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            arrArray[i] = new Arr(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()));
+        //dp : 시작 지점에서 i,j 를 거쳐서 목표 지점까지 가는 경우의 수에 대한 메모
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
+                dp[i][j] = -1;
+            }
         }
 
-        System.out.println(getMinCost(0, testCaseNumber-1));
+        for (int i = 0; i < mapHeight; i++) {
+            map[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        }
+
+        int result = findWay(mapHeight-1, mapWidth-1);
+        System.out.println(result);
     }
 
-    //시작점부터 끝점에 있는 행렬에 대해서 곱셈의 최솟값을 반환하는 함수
-    private static int getMinCost(int startPoint, int endPoint) {
-        if(startPoint == endPoint) {
+    //시작 지점에서 Y, X 를 거쳐서 목표 지점까지 가는 경우의 수를 구하는 함수
+    private static int findWay(int pointY, int pointX) {
+        if(pointY == 0 && pointX==0 ) {
             return 0;
         }
 
-        else if(endPoint-startPoint == 1) {
-            if(dp[startPoint][endPoint] == 0) {
-                dp[startPoint][endPoint] = arrArray[startPoint].i * arrArray[startPoint].j * arrArray[endPoint].j;
-            }
-            return dp[startPoint][endPoint];
+        if(dp[pointY][pointX] != -1) {
+            return dp[pointY][pointX];
         }
 
         else {
-            if(dp[startPoint][endPoint] == 0) {
-                dp[startPoint][endPoint] = Integer.MAX_VALUE;
-                for (int i = startPoint; i < endPoint; i++) {
-                    int tempCost = getMinCost(startPoint, i) + getMinCost(i+1, endPoint) + arrArray[startPoint].i * arrArray[i+1].i * arrArray[endPoint].j;
-                    dp[startPoint][endPoint] = Math.min(dp[startPoint][endPoint], tempCost);
+            //시작 지점에서 해당 포인트까지 오는 경우의 수를 구해야 한다.
+            //시작 지점에서 한 칸 떨어진 경우고 아직 탐색을 안한 부분이라면
+            if((pointY+pointX) == 1) {
+                if(map[pointY][pointX] < map[0][0]) {
+                    dp[pointY][pointX] = 1;
+                } else {
+                    dp[pointY][pointX] = 0;
                 }
             }
-            return dp[startPoint][endPoint];
-        }
-    }
 
-    public static class Arr {
-        int i;
-        int j;
+            else {
+                int tempSum = 0;
+                if(pointY != 0 && map[pointY-1][pointX] > map[pointY][pointX]) {
+                    tempSum += findWay(pointY-1, pointX);
+                }
+                if(pointX != 0 && map[pointY][pointX-1] > map[pointY][pointX]) {
+                    tempSum += findWay(pointY, pointX -1);
+                }
 
-        public Arr(int i, int j) {
-            this.i = i;
-            this.j = j;
+                if(pointX+1 < mapWidth && map[pointY][pointX+1] > map[pointY][pointX]) {
+                    tempSum += findWay(pointY, pointX+1);
+                }
+
+                if(pointY+1 < mapHeight && map[pointY+1][pointX] > map[pointY][pointX]) {
+                    tempSum += findWay(pointY+1, pointX);
+                }
+
+                dp[pointY][pointX] = tempSum;
+            }
+
+            return dp[pointY][pointX];
         }
     }
 }
