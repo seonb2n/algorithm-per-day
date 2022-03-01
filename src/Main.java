@@ -11,8 +11,14 @@ public class Main {
     static int mapWidth;
     static int mapHeight;
     static int[][] map;
-    static int[][] dp;
+    static int[][] tempWayMap;
+    static int swanAX;
+    static int swanAY;
 
+    static int swanBX;
+    static int swanBY;
+
+    static int day = 0;
 
     public static void main(String[] args) throws IOException {
 
@@ -23,65 +29,125 @@ public class Main {
         mapWidth = Integer.parseInt(st.nextToken());
 
         map = new int[mapHeight][mapWidth];
-        dp = new int[mapHeight][mapWidth];
+        tempWayMap = new int[mapHeight][mapWidth];
 
-        //dp : 시작 지점에서 i,j 를 거쳐서 목표 지점까지 가는 경우의 수에 대한 메모
+        boolean isFirst = false;
+
         for (int i = 0; i < mapHeight; i++) {
-            for (int j = 0; j < mapWidth; j++) {
-                dp[i][j] = -1;
+            String[] str = br.readLine().split("");
+            for (int j = 0; j < str.length; j++) {
+                String temp = str[j];
+                if(temp.equals(".")) {
+                    map[i][j] = 1;
+                }
+                else if(temp.equals("X")) {
+                    map[i][j] = 0;
+                }
+                else {
+                   if(!isFirst) {
+                       swanAY = i;
+                       swanAX = j;
+                       isFirst = true;
+                   }
+                   else {
+                       swanBY = i;
+                       swanBX = j;
+                   }
+                   map[i][j] = 0;
+                }
             }
         }
 
-        for (int i = 0; i < mapHeight; i++) {
-            map[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        }
+        System.out.println(getDateToMeet());
 
-        int result = findWay(mapHeight-1, mapWidth-1);
-        System.out.println(result);
     }
 
-    //시작 지점에서 Y, X 를 거쳐서 목표 지점까지 가는 경우의 수를 구하는 함수
-    private static int findWay(int pointY, int pointX) {
-        if(pointY == 0 && pointX==0 ) {
+    // 두 백조가 만나는 날을 계산하는 프로그램
+    private static int getDateToMeet() {
+
+        if(isSwanCanMeet()) {
             return 0;
         }
 
-        if(dp[pointY][pointX] != -1) {
-            return dp[pointY][pointX];
+        while (!isSwanCanMeet()) {
+            changeDay();
         }
 
-        else {
-            //시작 지점에서 해당 포인트까지 오는 경우의 수를 구해야 한다.
-            //시작 지점에서 한 칸 떨어진 경우고 아직 탐색을 안한 부분이라면
-            if((pointY+pointX) == 1) {
-                if(map[pointY][pointX] < map[0][0]) {
-                    dp[pointY][pointX] = 1;
-                } else {
-                    dp[pointY][pointX] = 0;
-                }
+        return day;
+    }
+
+    //시간이 지나서 얼음이 녹은 형태로 구현
+    private static void changeDay() {
+        day++;
+        int[][] tempMap = new int[mapHeight][mapWidth];
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
+                tempMap[i][j] = map[i][j];
             }
-
-            else {
-                int tempSum = 0;
-                if(pointY != 0 && map[pointY-1][pointX] > map[pointY][pointX]) {
-                    tempSum += findWay(pointY-1, pointX);
-                }
-                if(pointX != 0 && map[pointY][pointX-1] > map[pointY][pointX]) {
-                    tempSum += findWay(pointY, pointX -1);
-                }
-
-                if(pointX+1 < mapWidth && map[pointY][pointX+1] > map[pointY][pointX]) {
-                    tempSum += findWay(pointY, pointX+1);
-                }
-
-                if(pointY+1 < mapHeight && map[pointY+1][pointX] > map[pointY][pointX]) {
-                    tempSum += findWay(pointY+1, pointX);
-                }
-
-                dp[pointY][pointX] = tempSum;
-            }
-
-            return dp[pointY][pointX];
         }
+
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
+                //해당 칸이 얼음일 때, 주변에 물이 하나라도 있으면 물로 바꾼다.
+                if(tempMap[i][j] == 0) {
+                    if(i+1<mapHeight && tempMap[i+1][j] == 1) {
+                        map[i][j] = 1;
+                    }
+                    else if(i-1 >= 0 && tempMap[i-1][j] == 1) {
+                        map[i][j] = 1;
+                    }
+                    else if(j+1<mapWidth && tempMap[i][j+1] == 1) {
+                        map[i][j] = 1;
+                    }
+                    else if(j-1 >= 0 && tempMap[i][j-1] == 1) {
+                        map[i][j] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    //백조가 서로 만날 수 있는지를 탐색하는 알고리즘
+    private static boolean isSwanCanMeet() {
+        //1인 경우는 물이기 때문에 통행이 가능하다.
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
+                tempWayMap[i][j] = map[i][j];
+            }
+        }
+
+        return isWay(swanAX, swanAY);
+    }
+
+    //현재 위치에서 목표 지점인 swanBX, swanBY 까지 가는 경로가 있는지 탐색하는 알고리즘
+    //지나온 길을 다시 지나서는 안된다.
+    private static boolean isWay(int nowX, int nowY) {
+        if(nowX == swanBX && nowY == swanBY) {
+            return true;
+        }
+
+        tempWayMap[nowY][nowX] = -1;
+
+        //오른쪽 칸 탐색
+        if(nowX + 1 < mapWidth && tempWayMap[nowY][nowX+1] == 1) {
+            return isWay(nowX+1, nowY);
+        }
+
+        //왼쪽 칸 탐색
+        if(nowX - 1 >= 0 && tempWayMap[nowY][nowX-1] == 1) {
+            return isWay(nowX-1, nowY);
+        }
+
+        //아래쪽 칸 탐색
+        if(nowY + 1 < mapHeight && tempWayMap[nowY+1][nowX] == 1) {
+            return isWay(nowX, nowY+1);
+        }
+
+        //위쪽 칸 탐색
+        if(nowY - 1 >= 0 && tempWayMap[nowY-1][nowX] == 1) {
+            return isWay(nowX, nowY-1);
+        }
+
+        return false;
     }
 }
