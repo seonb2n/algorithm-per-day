@@ -37,11 +37,13 @@ public class Main {
             String[] str = br.readLine().split("");
             for (int j = 0; j < str.length; j++) {
                 String temp = str[j];
+                //물은 0
                 if(temp.equals(".")) {
-                    map[i][j] = 1;
-                }
-                else if(temp.equals("X")) {
                     map[i][j] = 0;
+                }
+                //얼음은 1
+                else if(temp.equals("X")) {
+                    map[i][j] = 1;
                 }
                 else {
                    if(!isFirst) {
@@ -58,9 +60,99 @@ public class Main {
             }
         }
 
+        //map 의 모든 얼음을 몇 턴 뒤에 녹을 얼음일지로 치환한다.
+        for (int i = 0; i < mapHeight; i++) {
+            for (int j = 0; j < mapWidth; j++) {
+                //해당 칸이 얼음일 때
+                if(map[i][j] == 1) {
+                    //주위 4칸이 모두 1이상이면, 가장 가까운 0 까지의 거리로 해당 값이 정해짐
+                    int temp = getLeft(i,j);
+                    if(temp > 1) {
+                       map[i][j] = temp;
+                       temp = getRight(i, j);
+                       if(temp > 1) {
+                           map[i][j] = Math.min(temp, map[i][j]);
+                           temp = getTop(i, j);
+                           if(temp > 1) {
+                               map[i][j] = Math.min(temp, map[i][j]);
+                               temp = getBottom(i, j);
+                               if(temp > 1) {
+                                   map[i][j] = Math.min(temp, map[i][j]);
+                               }  else {
+                                   map[i][j] = 1;
+                               }
+                           } else {
+                               map[i][j] = 1;
+                           }
+                       } else {
+                           map[i][j] = 1;
+                       }
+                    }
+                }
+            }
+        }
+
+        System.out.println(map);
+
         System.out.println(getDateToMeet());
 
     }
+
+    //i, j 에서 밑으로 가까운 0까지의 거리를 구하는 함수
+    private static int getBottom(int i, int j) {
+        if(i == mapHeight-1) {
+            return 1501;
+        }
+        int result = 0;
+        while(i<mapHeight && map[i][j] != 0) {
+            result++;
+            i++;
+        }
+
+        return result;
+    }
+
+    private static int getTop(int i, int j) {
+        if(i == 0) {
+            return 1501;
+        }
+        int result = 0;
+        while(i>=0 && map[i][j] != 0) {
+            result++;
+            i--;
+        }
+
+        return result;
+    }
+
+    private static int getRight(int i, int j) {
+        if(j == mapWidth-1) {
+            return 1501;
+        }
+        int result = 0;
+        while(j<mapWidth && map[i][j] != 0) {
+            result++;
+            j++;
+        }
+
+        return result;
+    }
+
+    private static int getLeft(int i, int j) {
+        if(j == 0) {
+            return 1501;
+        }
+        int result = 0;
+        while(j>=0 && map[i][j] != 0) {
+            result++;
+            j--;
+        }
+
+        return result;
+    }
+
+    //해당 좌표에서 밑에쪽의 0까지 거리를 구하는 함수
+
 
     // 두 백조가 만나는 날을 계산하는 프로그램
     private static int getDateToMeet() {
@@ -89,18 +181,18 @@ public class Main {
         for (int i = 0; i < mapHeight; i++) {
             for (int j = 0; j < mapWidth; j++) {
                 //해당 칸이 얼음일 때, 주변에 물이 하나라도 있으면 물로 바꾼다.
-                if(tempMap[i][j] == 0) {
-                    if(i+1<mapHeight && tempMap[i+1][j] == 1) {
-                        map[i][j] = 1;
+                if(tempMap[i][j] == 1) {
+                    if(i+1<mapHeight && tempMap[i+1][j] == 0) {
+                        map[i][j] = 0;
                     }
-                    else if(i-1 >= 0 && tempMap[i-1][j] == 1) {
-                        map[i][j] = 1;
+                    else if(i-1 >= 0 && tempMap[i-1][j] == 0) {
+                        map[i][j] = 0;
                     }
-                    else if(j+1<mapWidth && tempMap[i][j+1] == 1) {
-                        map[i][j] = 1;
+                    else if(j+1<mapWidth && tempMap[i][j+1] == 0) {
+                        map[i][j] = 0;
                     }
-                    else if(j-1 >= 0 && tempMap[i][j-1] == 1) {
-                        map[i][j] = 1;
+                    else if(j-1 >= 0 && tempMap[i][j-1] == 0) {
+                        map[i][j] = 0;
                     }
                 }
             }
@@ -129,22 +221,22 @@ public class Main {
         tempWayMap[nowY][nowX] = -1;
 
         //오른쪽 칸 탐색
-        if(nowX + 1 < mapWidth && tempWayMap[nowY][nowX+1] == 1) {
+        if(nowX + 1 < mapWidth && tempWayMap[nowY][nowX+1] == 0) {
             return isWay(nowX+1, nowY);
         }
 
         //왼쪽 칸 탐색
-        if(nowX - 1 >= 0 && tempWayMap[nowY][nowX-1] == 1) {
+        if(nowX - 1 >= 0 && tempWayMap[nowY][nowX-1] == 0) {
             return isWay(nowX-1, nowY);
         }
 
         //아래쪽 칸 탐색
-        if(nowY + 1 < mapHeight && tempWayMap[nowY+1][nowX] == 1) {
+        if(nowY + 1 < mapHeight && tempWayMap[nowY+1][nowX] == 0) {
             return isWay(nowX, nowY+1);
         }
 
         //위쪽 칸 탐색
-        if(nowY - 1 >= 0 && tempWayMap[nowY-1][nowX] == 1) {
+        if(nowY - 1 >= 0 && tempWayMap[nowY-1][nowX] == 0) {
             return isWay(nowX, nowY-1);
         }
 
