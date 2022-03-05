@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Main {
 
@@ -12,9 +14,11 @@ public class Main {
     static int mapHeight;
     static int[][] map;
     static int[][] tempWayMap;
+
+    private static int[] x_move = {1, 0, -1, 0};
+    private static int[] y_move = {0, 1, 0, -1};
     static int swanAX;
     static int swanAY;
-
     static int swanBX;
     static int swanBY;
 
@@ -180,63 +184,79 @@ public class Main {
     //해당 좌표에서 밑에쪽의 0까지 거리를 구하는 함수
     // 두 백조가 만나는 날을 계산
     private static int getDateToMeet() {
-        int left = 0;
-        int right = 1500;
+        Point swanA = new Point(swanAX, swanAY);
+        Point swanB = new Point(swanBX, swanBY);
 
-        while (left <= right) {
-            int mid = (left + right) / 2;
-            if (isSwanCanMeet(mid)) {
-                right = mid-1;
-            } else {
-                left = mid + 1;
-            }
-
-        }
-
-        return right+1;
+        return isWay(swanA, swanB);
     }
 
-    //백조가 서로 만날 수 있는지를 탐색하는 알고리즘
-    private static boolean isSwanCanMeet(int day) {
-        //1인 경우는 물이기 때문에 통행이 가능하다.
-        for (int i = 0; i < mapHeight; i++) {
-            for (int j = 0; j < mapWidth; j++) {
-                tempWayMap[i][j] = map[i][j];
+    //point1 에서 point2 까지 지정된 날 안에 방문이 가능한지를 확인하는 함수
+    //BFS 사용
+    private static int isWay(Point point1, Point point2) {
+        boolean[][] visited = new boolean[mapHeight][mapWidth];
+
+        PriorityQueue<Point> queue = new PriorityQueue<Point>();
+        queue.offer(point1);
+        visited[point1.y][point1.x] = true;
+
+        while (!queue.isEmpty()) {
+            Point point = queue.poll();
+
+            //해당 지점이 point2라면 결과를 반환한다.
+            if(point.y == point2.y && point.x == point2.x) {
+                return point.count;
+            }
+
+            for (int k = 0; k < 4; k++) {
+                //지정된 point 주위 4칸에 대해서 탐색한다.
+                int new_x = point.x + x_move[k];
+                int new_y = point.y + y_move[k];
+
+                //범위에도 벗어나지 않고 방문을 안한 경우라면
+                if (inArea(new_x, new_y) && !visited[new_y][new_x]) {
+                    visited[new_y][new_x] = true;
+
+                    //새로 방문하는 지점의 녹는 점이 더 높다면
+                    if(map[new_y][new_x] > point.count) {
+                        queue.offer(new Point(new_x, new_y, map[new_y][new_x]));
+                    }
+                    else {
+                        queue.offer(new Point(new_x, new_y, point.count));
+                    }
+                }
             }
         }
-
-        return isWay(swanAX, swanAY, day);
+        return Integer.MAX_VALUE;
     }
 
-    //현재 위치에서 목표 지점인 swanBX, swanBY 까지 가는 경로가 있는지 탐색하는 알고리즘
-    //지나온 길을 다시 지나서는 안된다.
-    private static boolean isWay(int nowX, int nowY, int day) {
-        if(nowX == swanBX && nowY == swanBY) {
-            return true;
+    private static boolean inArea(int x, int y) {
+        return x >= 0 && y >= 0 && x < mapWidth && y < mapHeight;
+    }
+
+    static class Point implements Comparable<Point>{
+        int x;
+        int y;
+        int count;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
 
-        tempWayMap[nowY][nowX] = 9999;
-
-        //오른쪽 칸 탐색
-        if(nowX + 1 < mapWidth && tempWayMap[nowY][nowX+1] <= day) {
-            return isWay(nowX+1, nowY, day);
+        public Point(int x, int y, int count) {
+            this.x = x;
+            this.y = y;
+            this.count = count;
         }
 
-        //왼쪽 칸 탐색
-        if(nowX - 1 >= 0 && tempWayMap[nowY][nowX-1] <= day) {
-            return isWay(nowX-1, nowY, day);
+        @Override
+        public int compareTo(Point o) {
+            if(this.count < o.count) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
         }
-
-        //아래쪽 칸 탐색
-        if(nowY + 1 < mapHeight && tempWayMap[nowY+1][nowX] <= day) {
-            return isWay(nowX, nowY+1, day);
-        }
-
-        //위쪽 칸 탐색
-        if(nowY - 1 >= 0 && tempWayMap[nowY-1][nowX] <= day) {
-            return isWay(nowX, nowY-1, day);
-        }
-
-        return false;
     }
 }
