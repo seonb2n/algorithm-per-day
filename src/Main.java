@@ -180,12 +180,20 @@ public class Main {
     //해당 좌표에서 밑에쪽의 0까지 거리를 구하는 함수
     // 두 백조가 만나는 날을 계산
     private static int getDateToMeet() {
-        int i = 0;
-        while (!isSwanCanMeet(i)) {
-            i++;
+        int left = 0;
+        int right = 1500;
+
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (isSwanCanMeet(mid)) {
+                right = mid-1;
+            } else {
+                left = mid + 1;
+            }
+
         }
 
-        return i;
+        return right+1;
     }
 
     //백조가 서로 만날 수 있는지를 탐색하는 알고리즘
