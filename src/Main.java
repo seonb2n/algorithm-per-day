@@ -2,8 +2,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class Main {
 
@@ -13,7 +11,9 @@ public class Main {
     static int mapWidth;
     static int mapHeight;
     static int[][] map;
-    static int[][] tempWayMap;
+    static int[][] countMeltMap;
+    static PriorityQueue<Point> countMeltQueue;
+    static boolean[][] countMeltVisited;
 
     private static int[] x_move = {1, 0, -1, 0};
     private static int[] y_move = {0, 1, 0, -1};
@@ -31,17 +31,23 @@ public class Main {
         mapWidth = Integer.parseInt(st.nextToken());
 
         map = new int[mapHeight][mapWidth];
-        tempWayMap = new int[mapHeight][mapWidth];
+        countMeltMap = new int[mapHeight][mapWidth];
+        countMeltQueue = new PriorityQueue<>();
+        countMeltVisited = new boolean[mapHeight][mapWidth];
 
         boolean isFirst = false;
 
         for (int i = 0; i < mapHeight; i++) {
+            Arrays.fill(countMeltMap[i], Integer.MAX_VALUE);
+
             String[] str = br.readLine().split("");
             for (int j = 0; j < str.length; j++) {
                 String temp = str[j];
                 //물은 0
                 if(temp.equals(".")) {
                     map[i][j] = 0;
+                    countMeltMap[i][j] = 0;
+                    countMeltQueue.offer(new Point(j, i, 0));
                 }
                 //얼음은 1
                 else if(temp.equals("X")) {
@@ -58,128 +64,40 @@ public class Main {
                        swanBX = j;
                    }
                    map[i][j] = 0;
+                   countMeltMap[i][j] = 0;
+                   countMeltQueue.offer(new Point(j, i, 0));
                 }
             }
         }
 
-        //map 의 모든 얼음을 몇 턴 뒤에 녹을 얼음일지로 치환한다.
-        for (int i = 0; i < mapHeight; i++) {
-            for (int j = 0; j < mapWidth; j++) {
-                //해당 칸이 얼음일 때
-                if(map[i][j] == 1) {
-                    //주위 4칸이 모두 1이상이면, 가장 가까운 0 까지의 거리로 해당 값이 정해짐
-                    int temp = getLeft(i,j);
-                    if(temp > 1) {
-                       map[i][j] = temp;
-                       temp = getRight(i, j);
-                       if(temp > 1) {
-                           map[i][j] = Math.min(temp, map[i][j]);
-                           temp = getTop(i, j);
-                           if(temp > 1) {
-                               map[i][j] = Math.min(temp, map[i][j]);
-                               temp = getBottom(i, j);
-                               if(temp > 1) {
-                                   map[i][j] = Math.min(temp, map[i][j]);
-                               }  else {
-                                   map[i][j] = 1;
-                               }
-                           } else {
-                               map[i][j] = 1;
-                           }
-                       } else {
-                           map[i][j] = 1;
-                       }
-                    }
-                }
-            }
-        }
-
-        //자기 주변 얼음을 확인해서 해당 값의 최솟값 + 1 로 값을 바꾼다.
-        for (int i = 0; i < mapHeight; i++) {
-            for (int j = 0; j <mapWidth; j++) {
-                if (map[i][j] != 0) {
-                    map[i][j] = getNearMinValue(i, j)+1;
-                }
-            }
-        }
-
+        //BFS 로 해당 지점의 얼음이 며칠 뒤에 녹을지 계산해야 한다.
+        countMeltDay();
         System.out.println(getDateToMeet());
 
     }
 
-    private static int getNearMinValue(int i, int j) {
-        int top = 1501;
-        int bottom = 1501;
-        int left = 1501;
-        int right = 1501;
-        if(i+1 < mapHeight) {
-            top = map[i+1][j];
-        }
-        if(i-1 >= 0) {
-            bottom = map[i-1][j];
-        }
-        if(j+1 < mapWidth) {
-            right = map[i][j+1];
-        }
-        if(j-1 >= 0) {
-            left = map[i][j-1];
-        }
+    private static void countMeltDay() {
+        //큐에는 물만 들어가 있다. 즉 물로부터 얼음에 대해서 노드 탐색을 진행한다.
+        while (!countMeltQueue.isEmpty()) {
+            Point point = countMeltQueue.poll();
+            for (int i = 0; i < 4; i++) {
+                int new_x = point.x + x_move[i];
+                int new_y = point.y + y_move[i];
 
-       return Math.min(Math.min(top, bottom), Math.min(left, right));
+                //방문하지 않은 노드이면서, 얼음인 부분 탐색
+                if(inArea(new_x, new_y) && !countMeltVisited[new_y][new_x] && map[new_y][new_x] == 1) {
+                    //PriorityQueue 이므로 물에 가까운 얼음들부터 노드 탐색이 된다.
+                    //아직 탐색이 되지 않았으므로 MAX VALUE 를 갖고 있을 것이다.
+                    if(countMeltMap[new_y][new_x] > point.count+1) {
+                        countMeltVisited[new_y][new_x] = true;
+                        countMeltMap[new_y][new_x] = point.count+1;
+                        countMeltQueue.offer(new Point(new_x, new_y, point.count+1));
+                    }
+                }
+            }
+        }
     }
 
-    //i, j 에서 밑으로 가까운 0까지의 거리를 구하는 함수
-    private static int getBottom(int i, int j) {
-        if(i == mapHeight-1) {
-            return 1501;
-        }
-        int result = 0;
-        while(i<mapHeight && map[i][j] != 0) {
-            result++;
-            i++;
-        }
-
-        return result;
-    }
-
-    private static int getTop(int i, int j) {
-        if(i == 0) {
-            return 1501;
-        }
-        int result = 0;
-        while(i>=0 && map[i][j] != 0) {
-            result++;
-            i--;
-        }
-
-        return result;
-    }
-
-    private static int getRight(int i, int j) {
-        if(j == mapWidth-1) {
-            return 1501;
-        }
-        int result = 0;
-        while(j<mapWidth && map[i][j] != 0) {
-            result++;
-            j++;
-        }
-
-        return result;
-    }
-
-    private static int getLeft(int i, int j) {
-        if(j == 0) {
-            return 1501;
-        }
-        int result = 0;
-        while(j>=0 && map[i][j] != 0) {
-            result++;
-            j--;
-        }
-
-        return result;
-    }
 
     //해당 좌표에서 밑에쪽의 0까지 거리를 구하는 함수
     // 두 백조가 만나는 날을 계산
@@ -217,8 +135,8 @@ public class Main {
                     visited[new_y][new_x] = true;
 
                     //새로 방문하는 지점의 녹는 점이 더 높다면
-                    if(map[new_y][new_x] > point.count) {
-                        queue.offer(new Point(new_x, new_y, map[new_y][new_x]));
+                    if(countMeltMap[new_y][new_x] > point.count) {
+                        queue.offer(new Point(new_x, new_y, countMeltMap[new_y][new_x]));
                     }
                     else {
                         queue.offer(new Point(new_x, new_y, point.count));
@@ -249,6 +167,7 @@ public class Main {
             this.count = count;
         }
 
+        //얼음이 녹는데 걸리는 시간이 적은 객체가 우선순위 큐의 제일 앞에 위치한다.
         @Override
         public int compareTo(Point o) {
             if(this.count < o.count) {
