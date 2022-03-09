@@ -2,107 +2,81 @@ import java.util.*;
 
 class Solution {
 
-    static int basicFee;
-    static int basicTime;
-    static int addTime;
-    static int addFee;
-    static int[] answer;
+    static int[] appeachArrow;
+    static int[] ryanArrow;
+    static int[] resultArrow;
+    static int max = 0;
 
-    public static int[] solution(int[] fees, String[] records) {
-        basicTime = fees[0];
-        basicFee = fees[1];
-        addTime = fees[2];
-        addFee = fees[3];
+    public static void main(String[] args) {
+        int[] a = {0,0,1,2,0,1,1,1,1,1,1};
+        solution(9, a);
+    }
 
-        List<Integer> carNumbers = new ArrayList<>();
-        HashMap<Integer, Car> carNumberId = new HashMap<>();
+    public static int[] solution(int n, int[] info) {
+        appeachArrow = info;
+        ryanArrow = new int[11];
+        resultArrow = new int[11];
 
-        for (int i = 0; i < records.length; i++) {
-            String[] str = records[i].split(" ");
+        DFS(10, n);
 
-            //처음 들어온 차
-            if(!carNumbers.contains(Integer.parseInt(str[1]))) {
-                carNumberId.put(Integer.parseInt(str[1]), new Car(str[1], str[0]));
-                carNumbers.add(Integer.parseInt(str[1]));
+        if (max <= 0) {
+            int[] a = {-1};
+            return a;
+        }
+
+        return resultArrow;
+    }
+
+    public static void DFS(int nowScore, int nowArrow) {
+        if(nowScore == 0) {
+            ryanArrow[10] = nowArrow;
+            int temp = numDiff(ryanArrow);
+            if(temp > max) {
+                max = temp;
+                resultArrow = ryanArrow.clone();
+                return;
             }
-            //이미 존재하는 차
-            else {
-                //나가는 경우
-                if(str[2].equals("OUT")) {
-                    Car car = carNumberId.get(Integer.parseInt(str[1]));
-                    car.carOutTime = str[0];
-                    car.carTotalTime += timeToMinutes(car.carOutTime) - timeToMinutes(car.carInTime);
-                    car.isOut = true;
+            else if(temp == max) {
+                for (int i = 10; i >= 0; i--) {
+                    if(resultArrow[i] < ryanArrow[i]) {
+                        resultArrow = ryanArrow.clone();
+                        return;
+                    }
+                    else if(resultArrow[i] > ryanArrow[i]) {
+                        return;
+                    }
                 }
-                //들어오는 경우
-                else {
-                    Car car = carNumberId.get(Integer.parseInt(str[1]));
-                    car.carInTime = str[0];
-                    car.isOut = false;
-                }
-            }
-        }
-
-        carNumbers.sort(Comparator.naturalOrder());
-        answer = new int[carNumbers.size()];
-
-        //아직 안나간 차에 대해서 totalTime 을 갱신한다.
-        for (int i = 0; i < carNumbers.size(); i++) {
-            Car car = carNumberId.get(carNumbers.get(i));
-            if (!car.isOut) {
-                car.carTotalTime += (timeToMinutes("23:59") - timeToMinutes(car.carInTime));
-            }
-            //totalTime 에 해당하는 요금을 부과한다.
-            answer[i] = calculateFee(car);
-        }
-
-        return answer;
-    }
-
-    static int calculateFee(Car car) {
-        int time = car.carTotalTime;
-        if(time <= basicTime) {
-            return basicFee;
-        } else {
-            if((time - basicTime) % addTime == 0) {
-               return basicFee + (time - basicTime) / addTime * addFee;
             }
             else {
-                return basicFee + (time - basicTime) / addTime * addFee + addFee;
+                return;
             }
         }
+
+        if(appeachArrow[10-nowScore] < nowArrow) {
+            //지금 숫자를 포함하거나 안하거나 두 가지 경우를 선택할 수 있다.
+            ryanArrow[10-nowScore] = appeachArrow[10-nowScore] + 1;
+            int tempArrow = nowArrow - ryanArrow[10-nowScore];
+            DFS(nowScore-1, tempArrow);
+        }
+
+        ryanArrow[10-nowScore] = 0;
+        DFS(nowScore-1, nowArrow);
+
     }
 
-    static int timeToMinutes(String time) {
-        String[] str = time.split(":");
-        return Integer.parseInt(str[0]) * 60 + Integer.parseInt(str[1]);
-    }
 
-    static class Car implements Comparable<Car>{
-        int fee;
-        String carNumber;
-        String carInTime;
-        String carOutTime;
-        int carTotalTime;
-        boolean isOut;
-
-        @Override
-        public int compareTo(Car o) {
-            int number1 = Integer.parseInt(carNumber);
-            int number2 = Integer.parseInt(o.carNumber);
-            if(number1 > number2) {
-                return 1;
+    public static int numDiff(int[] ryanArrow) {
+        int ryanResult = 0;
+        int appeachResult = 0;
+        for (int i = 0; i < 10; i++) {
+            if(ryanArrow[i] > appeachArrow[i]) {
+                ryanResult += (10-i);
             }
-            else {
-                return -1;
+            else if(ryanArrow[i] < appeachArrow[i]) {
+                appeachResult += (10-i);
             }
         }
 
-        public Car(String carNumber, String carInTime) {
-            fee = 0;
-            this.carNumber = carNumber;
-            this.carInTime = carInTime;
-            this.carOutTime = "23:59";
-        }
+        return ryanResult - appeachResult;
     }
 }
