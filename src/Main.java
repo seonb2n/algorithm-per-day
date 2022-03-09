@@ -1,40 +1,53 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
 import java.util.*;
 
-public class Main {
+class Solution {
+    public int[] solution(String[] id_list, String[] report, int k) {
+        User[] users = new User[id_list.length];
+        Map<String, Integer> userNameIdSet = new HashMap<>();
 
-    static BufferedReader br;
-    static StringBuilder sb;
-    static StringTokenizer st;
-    static long n;
-    static long[] dp;
-
-    public static void main(String[] args) throws IOException {
-        br = new BufferedReader(new InputStreamReader(System.in));
-        n = Long.parseLong(br.readLine());
-        final int PISANO = 1_500_000;
-        dp = new long[PISANO];
-        dp[0] = 0;
-        dp[1] = 1;
-        dp[2] = 1;
-
-        for (int i = 3; i < PISANO; i++) {
-            getDp(i);
+        for (int i = 0; i < id_list.length; i++) {
+            User new_User = new User(i, id_list[i], id_list.length);
+            users[i] = new_User;
+            userNameIdSet.put(id_list[i], i);
         }
 
-        if(n >= PISANO) {
-            n %= PISANO;
+        for (int i = 0; i < report.length; i++) {
+            String[] s = report[i].split(" ");
+            //이미 해당 유저가 신고한 경우라면 reportedNumber 는 올라가지 않는다.
+            if(!users[userNameIdSet.get(s[0])].reportUserId[userNameIdSet.get(s[1])]) {
+                users[userNameIdSet.get(s[0])].reportUserId[userNameIdSet.get(s[1])] = true;
+                users[userNameIdSet.get(s[1])].reportedNumber++;
+            }
         }
 
-        System.out.println(dp[(int) n]);
+        int[] answer = new int[id_list.length];
+
+
+        for (int i = 0; i < id_list.length; i++) {
+            if(users[i].reportedNumber >= k) {
+                //해당 유저를 정지시킨 이들을 찾아야 한다.
+                for (int j = 0; j < id_list.length; j++) {
+                    if(users[j].reportUserId[i]) {
+                        answer[j]++;
+                    }
+                }
+            }
+        }
+
+
+        return answer;
     }
 
-    public static Long getDp(int n) {
-        if (dp[n] == 0) {
-            dp[n] = (getDp(n - 1) + getDp(n - 2)) % 1_000_000;
+    public static class User {
+        int id;
+        String userName;
+        int reportedNumber;
+        boolean[] reportUserId;
+
+        public User(int id, String userName, int userNumber) {
+            this.id = id;
+            this.userName = userName;
+            reportUserId = new boolean[userNumber];
         }
-        return dp[n];
     }
 }
