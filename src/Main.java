@@ -1,53 +1,52 @@
 import java.util.*;
 
 class Solution {
-    public int[] solution(String[] id_list, String[] report, int k) {
-        User[] users = new User[id_list.length];
-        Map<String, Integer> userNameIdSet = new HashMap<>();
 
-        for (int i = 0; i < id_list.length; i++) {
-            User new_User = new User(i, id_list[i], id_list.length);
-            users[i] = new_User;
-            userNameIdSet.put(id_list[i], i);
-        }
-
-        for (int i = 0; i < report.length; i++) {
-            String[] s = report[i].split(" ");
-            //이미 해당 유저가 신고한 경우라면 reportedNumber 는 올라가지 않는다.
-            if(!users[userNameIdSet.get(s[0])].reportUserId[userNameIdSet.get(s[1])]) {
-                users[userNameIdSet.get(s[0])].reportUserId[userNameIdSet.get(s[1])] = true;
-                users[userNameIdSet.get(s[1])].reportedNumber++;
+    static HashMap<Long, Boolean> dp;
+    public static int solution(int n, int k) {
+        //n -> k진수
+        String kNumber = "";
+        if(k != 10) {
+            while (n > 0) {
+                kNumber =  (n % k) + kNumber;
+                n = n / k;
             }
+        } else {
+            kNumber = String.valueOf(n);
         }
+        int answer = 0;
 
-        int[] answer = new int[id_list.length];
-
-
-        for (int i = 0; i < id_list.length; i++) {
-            if(users[i].reportedNumber >= k) {
-                //해당 유저를 정지시킨 이들을 찾아야 한다.
-                for (int j = 0; j < id_list.length; j++) {
-                    if(users[j].reportUserId[i]) {
-                        answer[j]++;
+        //k 진수 안에서 소수 찾기
+        String[] numbers = kNumber.split("0");
+        dp = new HashMap<>();
+        for (int i = 0; i < numbers.length; i++) {
+            if(!numbers[i].equals("")) {
+                long temp = Long.parseLong(numbers[i]);
+                if(temp != 1) {
+                    if(isRight(temp)) {
+                        answer++;
                     }
                 }
             }
         }
 
-
         return answer;
     }
 
-    public static class User {
-        int id;
-        String userName;
-        int reportedNumber;
-        boolean[] reportUserId;
-
-        public User(int id, String userName, int userNumber) {
-            this.id = id;
-            this.userName = userName;
-            reportUserId = new boolean[userNumber];
+    //n이 소수인지 검증하는 메서드
+    public static boolean isRight(long n) {
+        boolean result = true;
+        if(dp.containsKey(n)) {
+            return false;
         }
+
+        for (int i = 2; i <= Math.sqrt(n); i++) {
+            if(n % i == 0) {
+                dp.put(n, false);
+                return false;
+            }
+        }
+
+        return result;
     }
 }
