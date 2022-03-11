@@ -2,81 +2,83 @@ import java.util.*;
 
 class Solution {
 
-    static int[] appeachArrow;
-    static int[] ryanArrow;
-    static int[] resultArrow;
-    static int max = 0;
+    static int maxSheepNumber = 0;
+    static Node[] nodeList;
 
-    public static void main(String[] args) {
-        int[] a = {0,0,1,2,0,1,1,1,1,1,1};
-        solution(9, a);
+    public static int solution(int[] info, int[][] edges) {
+
+        nodeList = new Node[info.length];
+        for (int i = 0; i < info.length; i++) {
+            nodeList[i] = new Node(i);
+            if(info[i] == 0) {
+                nodeList[i].isSheep = true;
+            }
+        }
+
+        for (int[] edge : edges) {
+            nodeList[edge[0]].downNodeId.add(edge[1]);
+        }
+
+        ArrayList<Integer> tempArr = new ArrayList<>();
+        tempArr.add(0);
+        BFS(0, 0, 0, tempArr);
+        return maxSheepNumber;
     }
 
-    public static int[] solution(int n, int[] info) {
-        appeachArrow = info;
-        ryanArrow = new int[11];
-        resultArrow = new int[11];
-
-        DFS(10, n);
-
-        if (max <= 0) {
-            int[] a = {-1};
-            return a;
+    //노드 방문 리스트에 있는 노드를 탐색해 나가며 sheep 의 개수를 새는 함수
+    public static void BFS(int nowSheep, int nowWolf, int visitNode, ArrayList<Integer> nodeArr) {
+        Node now_Node = nodeList[nodeArr.get(visitNode)];
+        ArrayList<Integer> tempArr = new ArrayList<>();
+        if(now_Node.isSheep) {
+            nowSheep++;
+            nodeArr.remove(visitNode);
+            tempArr.addAll(now_Node.downNodeId);
+            tempArr.addAll(nodeArr);
+        }
+        else if(nowSheep > nowWolf + 1) {
+            nowWolf++;
+            nodeArr.remove(visitNode);
+            tempArr.addAll(now_Node.downNodeId);
+            tempArr.addAll(nodeArr);
+        }
+        else {
+            maxSheepNumber = Math.max(maxSheepNumber, nowSheep);
+            return;
         }
 
-        return resultArrow;
+        if(tempArr.isEmpty()) {
+            maxSheepNumber = Math.max(maxSheepNumber, nowSheep);
+            return;
+        }
+
+        int i = 0;
+        int tempSize = tempArr.size();
+        while (!tempArr.isEmpty()) {
+            int tempI = Math.min(i, tempArr.size()-1);
+            BFS(nowSheep, nowWolf, tempI, tempArr);
+            i++;
+            if(i >= tempSize) {
+                break;
+            }
+        }
+
+//        for (int i = 0; i < tempArr.size(); i++) {
+//            BFS(nowSheep, nowWolf, i, tempArr);
+//        }
     }
+    
+    public static class Node {
+        int id;
+        boolean isSheep;
+        boolean isVisited;
+        List<Integer> downNodeId;
 
-    public static void DFS(int nowScore, int nowArrow) {
-        if(nowScore == 0) {
-            ryanArrow[10] = nowArrow;
-            int temp = numDiff(ryanArrow);
-            if(temp > max) {
-                max = temp;
-                resultArrow = ryanArrow.clone();
-                return;
-            }
-            else if(temp == max) {
-                for (int i = 10; i >= 0; i--) {
-                    if(resultArrow[i] < ryanArrow[i]) {
-                        resultArrow = ryanArrow.clone();
-                        return;
-                    }
-                    else if(resultArrow[i] > ryanArrow[i]) {
-                        return;
-                    }
-                }
-            }
-            else {
-                return;
-            }
+        public Node(int id) {
+            this.id = id;
+            isSheep = false;
+            isVisited = false;
+            downNodeId = new ArrayList<>();
         }
 
-        if(appeachArrow[10-nowScore] < nowArrow) {
-            //지금 숫자를 포함하거나 안하거나 두 가지 경우를 선택할 수 있다.
-            ryanArrow[10-nowScore] = appeachArrow[10-nowScore] + 1;
-            int tempArrow = nowArrow - ryanArrow[10-nowScore];
-            DFS(nowScore-1, tempArrow);
-        }
-
-        ryanArrow[10-nowScore] = 0;
-        DFS(nowScore-1, nowArrow);
-
-    }
-
-
-    public static int numDiff(int[] ryanArrow) {
-        int ryanResult = 0;
-        int appeachResult = 0;
-        for (int i = 0; i < 10; i++) {
-            if(ryanArrow[i] > appeachArrow[i]) {
-                ryanResult += (10-i);
-            }
-            else if(ryanArrow[i] < appeachArrow[i]) {
-                appeachResult += (10-i);
-            }
-        }
-
-        return ryanResult - appeachResult;
     }
 }
