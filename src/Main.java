@@ -29,17 +29,18 @@ class Solution {
     public static void BFS(int nowSheep, int nowWolf, int visitNode, ArrayList<Integer> nodeArr) {
         Node now_Node = nodeList[nodeArr.get(visitNode)];
         ArrayList<Integer> tempArr = new ArrayList<>();
+        ArrayList<Integer> removedArr = new ArrayList<>(nodeArr);
         if(now_Node.isSheep) {
             nowSheep++;
-            nodeArr.remove(visitNode);
+            removedArr.remove(visitNode);
             tempArr.addAll(now_Node.downNodeId);
-            tempArr.addAll(nodeArr);
+            tempArr.addAll(removedArr);
         }
         else if(nowSheep > nowWolf + 1) {
             nowWolf++;
-            nodeArr.remove(visitNode);
+            removedArr.remove(visitNode);
             tempArr.addAll(now_Node.downNodeId);
-            tempArr.addAll(nodeArr);
+            tempArr.addAll(removedArr);
         }
         else {
             maxSheepNumber = Math.max(maxSheepNumber, nowSheep);
@@ -51,20 +52,9 @@ class Solution {
             return;
         }
 
-        int i = 0;
-        int tempSize = tempArr.size();
-        while (!tempArr.isEmpty()) {
-            int tempI = Math.min(i, tempArr.size()-1);
-            BFS(nowSheep, nowWolf, tempI, tempArr);
-            i++;
-            if(i >= tempSize) {
-                break;
-            }
+        for (int i = 0; i < tempArr.size(); i++) {
+            BFS(nowSheep, nowWolf, i, tempArr);
         }
-
-//        for (int i = 0; i < tempArr.size(); i++) {
-//            BFS(nowSheep, nowWolf, i, tempArr);
-//        }
     }
     
     public static class Node {
@@ -79,6 +69,5 @@ class Solution {
             isVisited = false;
             downNodeId = new ArrayList<>();
         }
-
     }
 }
