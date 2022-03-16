@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -8,75 +7,63 @@ class Main {
     static BufferedReader br;
     static StringBuilder sb;
     static StringTokenizer st;
-    static StringTokenizer st2;
-    static int appNumber;
-    static int needMemory;
-    static App[] apps;
-    static int minCost;
+    static int N;
+    static int[] arr;
     static int[][] dp;
+    static int questionNumber;
+    static int startNumber;
+    static int endNumber;
 
     public static void main(String[]args) throws IOException {
+        sb = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(System.in));
-        st = new StringTokenizer(br.readLine(), " ");
-        appNumber = Integer.parseInt(st.nextToken());
-        needMemory = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(br.readLine());
+        dp = new int[N+1][N+1];
 
-        apps = new App[appNumber];
-
-        int maxCost = 0;
-        st = new StringTokenizer(br.readLine(), " ");
-        st2 = new StringTokenizer(br.readLine(), " ");
-        for (int i = 0; i < appNumber; i++) {
-            apps[i] = new App(Integer.parseInt(st2.nextToken()), Integer.parseInt(st.nextToken()));
-            maxCost+= apps[i].appCost;
+        for (int i = 1; i < N+1; i++) {
+            Arrays.fill(dp[i], -1);
         }
 
-        // i cost 일 경우, j 번째 app 까지 탐색할 때, 가질 수 있는 최대 메모리
-        dp = new int[maxCost+1][appNumber];
-
-        for (int i = 0; i < maxCost+1; i++) {
-            for (int j = 0; j < appNumber; j++) {
-                dp[i][j] = findMaxMemory(i, j);
-                if(dp[i][j] >= needMemory) {
-                    System.out.println(i);
-                    return;
-                }
-            }
+        arr = new int[N];
+        arr = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::new).toArray();
+        questionNumber = Integer.parseInt(br.readLine());
+        for (int i = 0; i < questionNumber; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            startNumber = Integer.parseInt(st.nextToken());
+            endNumber = Integer.parseInt(st.nextToken());
+            sb.append(isPalindrome(startNumber, endNumber));
+            sb.append("\n");
         }
+
+        System.out.println(sb);
     }
 
-    //maxCost 일 때, searchApp 까지 탐색한 경우 가질 수 있는 최대 메모리를 반환한다.
-    private static int findMaxMemory(int maxCost, int searchAppNode) {
-        App searchApp = apps[searchAppNode];
-        if(searchApp.appCost > maxCost) {
-            if(maxCost == 0 && searchAppNode == 0) {
-                return 0;
-            }
-            else if(searchAppNode == 0) {
-                return dp[maxCost-1][searchAppNode];
-            }
-            else {
-                return dp[maxCost][searchAppNode-1];
-            }
+    private static int isPalindrome(int startNumber, int endNumber) {
+        if(startNumber > endNumber) {
+            return 0;
         }
-        //해당 cost 에서 지금 노드를 포함할 수 있다면
-        else {
-           if(searchAppNode == 0) {
-               return searchApp.appSize;
-           }
-           else {
-               return Math.max(dp[maxCost][searchAppNode-1], dp[maxCost-searchApp.appCost][searchAppNode-1] + searchApp.appSize);
-           }
-        }
-    }
 
-    public static class App {
-        int appCost;
-        int appSize;
-
-        public App(int appCost, int appSize) {
-            this.appCost = appCost;
-            this.appSize = appSize;
+        if(dp[startNumber][endNumber] != -1) {
+            return dp[startNumber][endNumber];
         }
+
+        if(startNumber == endNumber) {
+            dp[startNumber][endNumber] = 1;
+            return 1;
+        }
+
+        if(endNumber - startNumber == 1) {
+            if(arr[startNumber-1] == arr[endNumber-1]) {
+                dp[startNumber][endNumber] = 1;
+                return 1;
+            }
+        }
+
+        if(isPalindrome(startNumber+1, endNumber-1) == 1 && arr[startNumber-1] == arr[endNumber-1]) {
+            dp[startNumber][endNumber] = 1;
+            return 1;
+        }
+        dp[startNumber][endNumber] = 0;
+        return 0;
     }
 }
