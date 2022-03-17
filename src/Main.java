@@ -7,63 +7,80 @@ class Main {
     static BufferedReader br;
     static StringBuilder sb;
     static StringTokenizer st;
+    static int maxResult;
     static int N;
-    static int[] arr;
-    static int[][] dp;
-    static int questionNumber;
-    static int startNumber;
-    static int endNumber;
+    static int K;
+    static int M;
+    static int[] numbers;
+    static int[] maxNumbers;
+
 
     public static void main(String[]args) throws IOException {
         sb = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(System.in));
-        N = Integer.parseInt(br.readLine());
-        dp = new int[N+1][N+1];
+        st = new StringTokenizer(br.readLine(), " ");
+        String tempN = st.nextToken();
+        N = Integer.parseInt(tempN);
+        K = Integer.parseInt(st.nextToken());
+        M = tempN.split("").length;
 
-        for (int i = 1; i < N+1; i++) {
-            Arrays.fill(dp[i], -1);
+        maxResult = 0;
+
+        List<Integer> list = new ArrayList<>();
+        list.add(N);
+
+        BFS(0, list);
+
+        if(maxResult == 0) {
+            System.out.println(-1);
+        } else {
+            System.out.println(maxResult);
         }
-
-        arr = new int[N];
-        arr = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::new).toArray();
-        questionNumber = Integer.parseInt(br.readLine());
-        for (int i = 0; i < questionNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            startNumber = Integer.parseInt(st.nextToken());
-            endNumber = Integer.parseInt(st.nextToken());
-            sb.append(isPalindrome(startNumber, endNumber));
-            sb.append("\n");
-        }
-
-        System.out.println(sb);
     }
 
-    private static int isPalindrome(int startNumber, int endNumber) {
-        if(startNumber > endNumber) {
-            return 0;
-        }
-
-        if(dp[startNumber][endNumber] != -1) {
-            return dp[startNumber][endNumber];
-        }
-
-        if(startNumber == endNumber) {
-            dp[startNumber][endNumber] = 1;
-            return 1;
-        }
-
-        if(endNumber - startNumber == 1) {
-            if(arr[startNumber-1] == arr[endNumber-1]) {
-                dp[startNumber][endNumber] = 1;
-                return 1;
+    //BFS 로 K 단계에 해당하는 만큼 진행
+    static void BFS(int nowLevel, List<Integer> numbersList) {
+        int size = numbersList.size();
+        if(nowLevel == K) {
+            for (int i = 0; i < size; i++) {
+                maxResult = Math.max(numbersList.get(i), maxResult);
             }
         }
 
-        if(isPalindrome(startNumber+1, endNumber-1) == 1 && arr[startNumber-1] == arr[endNumber-1]) {
-            dp[startNumber][endNumber] = 1;
-            return 1;
+        else {
+            List<Integer> tempList = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                int nowValue = numbersList.get(i);
+                for (int j = 0; j < M-1; j++) {
+                    for (int k = j+1; k < M; k++) {
+                        int[] newValue = numberToArr(nowValue);
+                        newValue = swap(j, k, newValue);
+                        if(!tempList.contains(arrToNumber(newValue)) && newValue[0] != 0) {
+                            tempList.add(arrToNumber(newValue));
+                        }
+                    }
+                }
+            }
+            BFS(nowLevel+1, tempList);
         }
-        dp[startNumber][endNumber] = 0;
-        return 0;
+    }
+
+    static int[] swap(int a, int b, int[] targetArr) {
+        int temp = targetArr[a];
+        targetArr[a] = targetArr[b];
+        targetArr[b] = temp;
+        return targetArr;
+    }
+
+    static int[] numberToArr(int number) {
+        return Arrays.stream(String.valueOf(number).split("")).mapToInt(Integer::new).toArray();
+    }
+
+    static int arrToNumber(int[] numberArr) {
+        String str = "";
+        for (int i = 0; i < numberArr.length; i++) {
+            str += numberArr[i];
+        }
+        return Integer.parseInt(str);
     }
 }
