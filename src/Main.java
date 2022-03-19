@@ -1,85 +1,88 @@
 import java.util.*;
 
 class Solution {
-    int n, root, cnt;
-    int[] parent, left, right, people;
+    HashMap<Integer, Integer> timeMap = new HashMap<>();
+    static int[] startTimeArr;
+    static int[] endTimeArr;
+    static int maxNumber = 0;
+    static int minStartTime;
+    static int maxEndTime;
 
-    public int solution(int k, int[] num, int[][] links) {
-        n = num.length;
-        parent = new int[n];
-        left = new int[n];
-        right = new int[n];
-        people = num;
-        int lo = 0, hi = (int) 1e9;
+    public int solution(String[] lines) {
 
-        Arrays.fill(parent, -1);
+        int n = lines.length;
+        minStartTime = Integer.MAX_VALUE;
+        maxEndTime = 0;
 
-        //각 i 별로 왼쪽 노드와 오른쪽 노드, 부모 노드를 채운다.
-        for(int i = 0; i < links.length; i++) {
-            left[i] = links[i][0];
-            right[i] = links[i][1];
+        startTimeArr = new int[n];
+        endTimeArr = new int[n];
 
-            if(left[i] != -1)
-                parent[left[i]] = i;
-            if(right[i] != -1)
-                parent[right[i]] = i;
-
-            lo = Math.max(lo, people[i]);
+        for(int i = 0; i < lines.length; i++) {
+            startTimeArr[i] = getStartTime(lines[i]);
+            minStartTime = Math.min(minStartTime, startTimeArr[i]);
+            endTimeArr[i] = getEndTime(lines[i]);
+            maxEndTime = Math.max(maxEndTime, endTimeArr[i]);
         }
 
-        //루트 노드를 찾는다.
-        for(int i = 0; i < n; i++)
-            if(parent[i] == -1) {
-                root = i;
-                break;
+        for(int i = 0; i < n; i++) {
+            int time = endTimeArr[i];
+            int cnt = 0;
+            for(int j = 0; j < n; j++) {
+                if(time <= startTimeArr[j] && startTimeArr[j] <= time + 999) {
+                    cnt++;
+                }
+                else if(time <= endTimeArr[j] && endTimeArr[j] <= time + 999) {
+                    cnt++;
+                }
+                else if(startTimeArr[j]<=time &&time+999 <= endTimeArr[j]) {
+                    cnt++;
+                }
             }
-
-        while(lo <= hi) {
-            int mid = (lo + hi) / 2;
-            if(getGroup(mid) <= k) {
-                hi = mid - 1;
-            } else {
-                lo = mid + 1;
-            }
+            maxNumber = Math.max(maxNumber, cnt);
         }
 
-        return hi + 1;
+        return maxNumber;
     }
 
-    //limit 이하의 사람 수를 가진 그룹이 몇 개가 나오는가.
-    public int getGroup(int limit) {
-        //현재 그룹 수
-        cnt = 0;
-        dfs(root, limit);
-        return cnt + 1;
+    public static int getStartTime(String log) {
+        StringTokenizer st = new StringTokenizer(log, " ");
+        st.nextToken();
+        String time = st.nextToken();
+        String millSecond = st.nextToken();
+        st = new StringTokenizer(millSecond, "s");
+        float milSec = Float.parseFloat(st.nextToken());
+
+        st = new StringTokenizer(time, ":");
+        int hour = Integer.parseInt(st.nextToken());
+        int minute = Integer.parseInt(st.nextToken());
+        float second = Float.parseFloat(st.nextToken());
+
+        if(second > milSec) {
+            second = second * 10000 / 10;
+            milSec = milSec * 10000 / 10;
+            return hour*10000000 + minute * 100000 + (int)(second-milSec) + 1;
+        }
+        if(minute == 0) {
+            hour = hour-1;
+            minute = 59;
+            second += 60;
+            return hour*10000000 + minute * 100000 + (int)((second-milSec) * 1000f) + 1;
+        }
+        else {
+            minute--;
+            second+= 60;
+            return hour*10000000 + minute * 100000 + (int)((second-milSec) * 1000f) + 1;
+        }
     }
 
-    //지금 노드에서 탐색할 때, limit 수가 넘으면 그룹을 나눈다.
-    public int dfs(int currentNode, int limit) {
-        int leftStudentNumber = 0;
-        int rightStudentNumber = 0;
-
-        //왼쪽 하위 노드로 탐색을 한다.
-        if(left[currentNode] != -1)
-            leftStudentNumber = dfs(left[currentNode], limit);
-
-        //오른쪽 하위 노드로 탐색을 한다.
-        if(right[currentNode] != -1)
-            rightStudentNumber = dfs(right[currentNode], limit);
-
-        //숫자가 작으면 지금 그룹을 유지해도 된다.
-        if(people[currentNode] + leftStudentNumber + rightStudentNumber <= limit) {
-            return people[currentNode] + leftStudentNumber + rightStudentNumber;
-        }
-
-        //숫자가 크지만, 둘 중 왼쪽과 오른쪽 중 작은쪽만 사용해도 된다면 그룹을 쪼갠다.
-        if(people[currentNode] + Math.min(leftStudentNumber, rightStudentNumber) <= limit) {
-            cnt++;
-            return people[currentNode] + Math.min(leftStudentNumber, rightStudentNumber);
-        }
-
-        //루트, 왼쪽 하위, 오른쪽 하위 3개로 그룹을 쪼개야 한다.
-        cnt += 2;
-        return people[currentNode];
+    public static int getEndTime(String log) {
+        StringTokenizer st = new StringTokenizer(log, " ");
+        st.nextToken();
+        String time = st.nextToken();
+        st = new StringTokenizer(time, ":");
+        int hour = Integer.parseInt(st.nextToken());
+        int minute = Integer.parseInt(st.nextToken());
+        float second = Float.parseFloat(st.nextToken());
+        return hour*10000000 + minute * 100000 + (int)(second*10000 / 10);
     }
 }
