@@ -1,55 +1,50 @@
 import java.util.*;
 
 class Solution {
-    static numbers[] dp;
-    static int N;
-    static int targetNumber;
+    public static PriorityQueue<CheckPoint> queue;
+    public static long timeResult;
 
-    public int solution(int n, int number) {
-        int N = n;
-        targetNumber = number;
-        dp = new numbers[9];
-        dp[1] = new numbers(1);
-        dp[1].numberList.add(N);
-
-        for(int i = 2; i<=8; i++) {
-            //N을 i 개 사용해서 만들 수 있는 수들을 추가해준다.
-            //N 을 i 개 사용해 만들 수 있는 수는, i-1 과 1의 사칙 연산, .. 1과 i-1 의 사칙연산
-            dp[i] = new numbers(i);
-            for(int j = 1; j < i; j++) {
-                Set<Integer> firstSet = dp[j].numberList;
-                Set<Integer> secondSet = dp[i-j].numberList;
-
-                for(int firstNumber : firstSet) {
-                    for(int secondNumber : secondSet) {
-                        dp[i].numberList.add(firstNumber + secondNumber);
-                        dp[i].numberList.add(firstNumber * secondNumber);
-                        dp[i].numberList.add(firstNumber - secondNumber);
-                        if(firstNumber != 0 && secondNumber != 0) {
-                            dp[i].numberList.add(firstNumber / secondNumber);
-                        }
-                    }
-                }
-            }
-            dp[i].numberList.add(Integer.parseInt(String.valueOf(N).repeat(i)));
-        }
-        for(int i = 1; i <= 8; i++) {
-            if(dp[i].numberList.contains(number)) {
-                return i;
-            }
-        }
-
-        int answer = -1;
-        return answer;
+    public static void main(String[] args) {
+        int[] time = {7, 10};
+        solution(6, time);
     }
 
-    public static class numbers {
-        int usedNumber;
-        Set<Integer> numberList;
+    public static long solution(int n, int[] times) {
+        queue = new PriorityQueue<>();
+        timeResult = 0;
+        for(int i = 0; i < times.length; i++) {
+            queue.offer(new CheckPoint(times[i]));
+        }
 
-        public numbers(int usedNumber) {
-            this.usedNumber = usedNumber;
-            numberList = new HashSet<>();
+        while(n > 0) {
+            //사람 한 명을 가장 빨리 검색이 끝나는 검문대로 보낸다.
+            CheckPoint minCheckPoint = queue.poll();
+            minCheckPoint.remainedTime += minCheckPoint.time;
+            queue.offer(minCheckPoint);
+            n--;
+        }
+
+        while(!queue.isEmpty()) {
+            timeResult = Math.max(timeResult, queue.poll().remainedTime);
+        }
+
+        return timeResult;
+    }
+
+    public static class CheckPoint implements Comparable<CheckPoint>{
+        long remainedTime;
+        int time;
+
+        public CheckPoint(int time) {
+            this.remainedTime = 0;
+            this.time = time;
+        }
+
+        @Override
+        public int compareTo(CheckPoint c) {
+            long totalTime = this.remainedTime + this.time;
+            long newTotalTime = c.remainedTime + c.time;
+            return totalTime > newTotalTime ? 1 : -1;
         }
     }
 }
