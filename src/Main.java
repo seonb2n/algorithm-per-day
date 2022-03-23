@@ -5,80 +5,68 @@ import java.util.*;
 
 class Main{
 
-    static BufferedReader br;
-    static int n;
-    static int[][] map;
-    static int[] x_move = {-1, 1, 0, 0};
-    static int[] y_move = {0, 0, 1, -1};
-    static int min;
-    static int max;
-    static int answer;
+    static int N;
+    static int M;
+    static Line[] lines;
+    static long[] dist;
 
     public static void main(String[] args) throws IOException {
-        br = new BufferedReader(new InputStreamReader(System.in));
-        n = Integer.parseInt(br.readLine());
-        map = new int[n][n];
-        answer = 0;
-        min = Integer.MAX_VALUE;
-        max = 0;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        dist = new long[N+1];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[0] = 0;
 
-        for (int i = 0; i < n; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j < n; j++) {
-                map[i][j] = Integer.parseInt(st.nextToken());
-                min = Math.min(min, map[i][j]);
-                max = Math.max(max, map[i][j]);
-            }
+        lines = new Line[M];
+
+
+        for (int i = 0; i < M; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            int from = Integer.parseInt(st.nextToken());
+            int to = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
+            lines[i] = new Line(from, to, cost);
         }
 
-        int left = 0;
-        int right = max-min;
-
-        while(left <= right) {
-            int mid = (left + right) / 2;
-            if(findWay(mid)) {
-                right = mid - 1;
-                answer = mid;
-            }
-            else {
-                left = mid + 1;
+        if(bellmanford(1)) {
+            System.out.println(-1);
+        }
+        else {
+            for (int i = 2; i < N+1; i++) {
+                if(dist[i] == Integer.MAX_VALUE) {
+                    System.out.println(-1);
+                }
+                else {
+                    System.out.println(dist[i]);
+                }
             }
         }
-        System.out.print(answer);
     }
 
-    //number 이하의 차이로 길을 찾을 수 있는지 확인해야 함.
-    public static boolean findWay(int number) {
-        //총 숫자의 범위를 확인해준다.
-        for (int i = min; i+number <= max; i++) {
-            //탐색을 진행하는 경우, 경로상 모든 숫자는 minNumber 이상 mxNumber 이하이다.
-            int minNumber = i;
-            int maxNumber = i + number;
+    public static boolean bellmanford(int start) {
+        dist[start] = 0;
 
-            //시작 점이 범위 안에 들어오는지부터 확인한다.
-            if(map[0][0] < minNumber || map[0][0] > maxNumber) {
-                //범위 안에 들어오지 않으면 다음 반복문으로 넘어간다.
-                continue;
-            }
-            Queue<Node> queue = new LinkedList<>();
-            boolean[][] isVisited = new boolean[n][n];
-            queue.offer(new Node(0, 0));
-            isVisited[0][0] = true;
+        //총 N 번 반복한다.
+        for (int i = 1; i < N + 1; i++) {
+            //매 반복마다 갈 수 있는 모든 간선을 확인한다.
+            for (int j = 0; j < M; j++) {
+                int nowNode = lines[i].from;
+                int nextNode = lines[i].to;
+                int cost = lines[i].cost;
 
-            while(!queue.isEmpty()) {
-                Node nowNode = queue.poll();
-                if(nowNode.y == (n-1) && nowNode.x == (n-1)) {
-                    return true;
+                if(dist[nowNode] == Integer.MAX_VALUE) {
+                    continue;
                 }
 
-                for (int j = 0; j < 4; j++) {
-                    int newY = nowNode.y + y_move[j];
-                    int newX = nowNode.x + x_move[j];
-                    if(inArea(newY, newX) && !isVisited[newY][newX]
-                            && minNumber <= map[newY][newX]
-                            && map[newY][newX] <= maxNumber) {
-                        queue.offer(new Node(newY, newX));
-                        isVisited[newY][newX] = true;
+                //다음 지점으로 갈 때, 현재 지점을 지나서 가는 경우가 제일 쌀 떄
+                if(dist[nextNode] > (dist[nowNode] + cost)) {
+                    dist[nextNode] = dist[nowNode] + cost;
+
+                    //N 번째 까지 왔다는 것은 은수 순환에 빠졌다는 것
+                    if(i == N) {
+                        return true;
                     }
                 }
             }
@@ -86,17 +74,15 @@ class Main{
         return false;
     }
 
-    public static boolean inArea(int y, int x) {
-        return 0 <= y && y < n && 0 <= x && x < n;
-    }
+    public static class Line {
+        int from;
+        int to;
+        int cost;
 
-    public static class Node {
-        int y;
-        int x;
-
-        public Node(int y, int x) {
-            this.y = y;
-            this.x = x;
+        public Line(int from, int to, int cost) {
+            this.from = from;
+            this.to = to;
+            this.cost = cost;
         }
     }
 }
