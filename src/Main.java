@@ -52,10 +52,11 @@ class Main{
         for (int i = 1; i < N + 1; i++) {
             //매 반복마다 갈 수 있는 모든 간선을 확인한다.
             for (int j = 0; j < M; j++) {
-                int nowNode = lines[i].from;
-                int nextNode = lines[i].to;
-                int cost = lines[i].cost;
+                int nowNode = lines[j].from;
+                int nextNode = lines[j].to;
+                int cost = lines[j].cost;
 
+                //지금 노드까지 오는 값이 무한대라면, 탐색할 필요 없다.
                 if(dist[nowNode] == Integer.MAX_VALUE) {
                     continue;
                 }
@@ -64,7 +65,7 @@ class Main{
                 if(dist[nextNode] > (dist[nowNode] + cost)) {
                     dist[nextNode] = dist[nowNode] + cost;
 
-                    //N 번째 까지 왔다는 것은 은수 순환에 빠졌다는 것
+                    //제일 마지막인 경우에 값의 업데이트가 일어났다면 음수 순환이 일어난 것이다.
                     if(i == N) {
                         return true;
                     }
