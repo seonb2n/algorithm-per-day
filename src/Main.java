@@ -6,59 +6,71 @@ import java.util.*;
 class Main{
 
     static int N;
-    static int M;
-    static int[][] dist;
-    static final int INF = 99999999;
+    static int Q;
+    static ArrayList<Node>[] dist;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-        N = Integer.parseInt(br.readLine());
-        M = Integer.parseInt(br.readLine());
-        dist = new int[N + 1][N + 1];
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        N = Integer.parseInt(st.nextToken());
+        Q = Integer.parseInt(st.nextToken());
+        dist = new ArrayList[N+1];
 
-        for (int i = 1; i <= N; i++) {
-            Arrays.fill(dist[i], INF);
-            dist[i][i] = 0;
+        for (int i = 0; i <= N; i++) {
+            dist[i] = new ArrayList<>();
         }
 
-        for (int i = 0; i < M; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        for (int i = 0; i < N-1; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
             int startPoint = Integer.parseInt(st.nextToken());
             int endPoint = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
+            int usado = Integer.parseInt(st.nextToken());
 
-            dist[startPoint][endPoint] = Math.min(dist[startPoint][endPoint], cost);
+            dist[startPoint].add(new Node(endPoint, usado));
+            dist[endPoint].add(new Node(startPoint, usado));
         }
 
-        for (int i = 1; i < N; i++) {
-            floyd();
-        }
-
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= N; j++) {
-                if (dist[i][j] == INF) {
-                    sb.append("0");
-                } else {
-                    sb.append(dist[i][j]);
-                }
-                sb.append(" ");
-            }
+        for (int i = 0; i < Q; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            int k = Integer.parseInt(st.nextToken());
+            int n = Integer.parseInt(st.nextToken());
+            sb.append(getUsado(n, k));
             sb.append("\n");
         }
+
         System.out.println(sb);
     }
 
-    public static void floyd() {
-        //플로이드 와샬 알고리즘
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= N; j++) {
-                for (int k = 1; k <= N; k++) {
-                    if (dist[i][j] > dist[i][k] + dist[k][j]) {
-                        dist[i][j] = dist[i][k] + dist[k][j];
-                    }
+    public static int getUsado(int startPoint, int maxUsado) {
+        boolean[] isVisited = new boolean[N+1];
+        isVisited[startPoint] = true;
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(startPoint);
+
+        int ans = 0;
+        while (!queue.isEmpty()) {
+            int nowNode = queue.poll();
+
+            for (int i = 0; i < dist[nowNode].size(); i++) {
+                if(!isVisited[dist[nowNode].get(i).end] && dist[nowNode].get(i).usado >= maxUsado) {
+                    queue.add(dist[nowNode].get(i).end);
+                    isVisited[dist[nowNode].get(i).end] = true;
+                    ans++;
                 }
             }
         }
+        return ans;
+    }
+
+    public static class Node {
+        int end;
+        int usado;
+
+        public Node(int end, int usado) {
+            this.end = end;
+            this.usado = usado;
+        }
+
     }
 }
