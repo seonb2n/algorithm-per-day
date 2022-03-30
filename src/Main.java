@@ -5,136 +5,115 @@ import java.util.*;
 
 class Main{
 
-    static int testCaseNumber;
-    static int N;
-    static int M;
-    static int K;
-    static int[][] dist;
-    static List<Vertex>[] airLineMap;
-    static final int INF = Integer.MAX_VALUE/2;
+    static int[][] map;
+    static Queue<Node> queue;
+    static int startY = 7;
+    static int startX = 0;
+    static boolean isWay;
+    static int[] move_x = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
+    static int[] move_y = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-        StringTokenizer st;
 
-        testCaseNumber = Integer.parseInt(br.readLine());
+        map = new int[8][8];
+        queue = new LinkedList<>();
+        isWay = false;
 
-        for (int i = 0; i < testCaseNumber; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            N = Integer.parseInt(st.nextToken());
-            M = Integer.parseInt(st.nextToken());
-            K = Integer.parseInt(st.nextToken());
-            airLineMap = new ArrayList[N+1];
-
-            for (int j = 0; j < N+1; j++) {
-                airLineMap[j] = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            String[] str = br.readLine().split("");
+            for (int k = 0; k < 8; k++) {
+                if(str[k].equals("#")) {
+                    map[i][k] = 1;
+                    queue.add(new Node(i, k));
+                }
+                else {
+                    map[i][k] = 0;
+                }
             }
-
-            for (int j = 0; j < K; j++) {
-                st = new StringTokenizer(br.readLine(), " ");
-                int startPoint = Integer.parseInt(st.nextToken());
-                int endPoint = Integer.parseInt(st.nextToken());
-                airLineMap[startPoint].add(new Vertex(endPoint, Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())));
-            }
-
-            dijkstra(1);
-
-            int min = INF;
-
-            for (int j = 1; j <= M; j++) {
-                min = Math.min(min, dist[N][j]);
-            }
-
-            if(min == INF) {
-                sb.append("Poor KCM");
-            }
-            else {
-                sb.append(min);
-            }
-            sb.append("\n");
-
         }
 
-        System.out.println(sb);
+        //bfs 로 각 칸이 몇 턴 뒤에 벽으로 변하는지 구해야 함.
+        BFS();
+
+        //dfs 로 경로를 탐색한다. 9턴 동안 살아있기만 하면 된다.
+        DFS(1, startY, startX);
+
+        if(isWay) {
+            System.out.println(1);
+        }
+        else {
+            System.out.println(0);
+        }
     }
 
-    //startPoint 로부터 M 까지 도착하는 최소 소요시간을 구한다.
-    private static void dijkstra(int startPoint) {
-        //i번째 지점에 j 만큼의 비용으로 올 수 있는 최소의 시간 값
-        dist = new int[N+1][M+1];
+    //각 칸이 몇 턴 뒤에 노드로 변하는지 계산한다.
+    public static void BFS() {
+        int nowTurn = 2;
 
-        for (int i = 0; i < N+1; i++) {
-            Arrays.fill(dist[i], INF);
-        }
+        while (!queue.isEmpty()) {
+            int nowSize = queue.size();
+            for (int i = 0; i < nowSize; i++) {
+                Node nowNode = queue.poll();
 
-        //1번 공항 초기화
-        dist[startPoint][1] = 0;
+                //지금의 벽이 아래로 한 칸씩 이동한다.
+                int nowY = nowNode.y;
+                int nowX = nowNode.x;
 
-        PriorityQueue<Vertex> queue = new PriorityQueue<>();
-        queue.offer(new Vertex(startPoint, 0, 0));
-
-        while(!queue.isEmpty()) {
-            Vertex nowVertex = queue.poll();
-            int nowDestination = nowVertex.destination;
-            int nowCost = nowVertex.cost;
-            int nowTime = nowVertex.time;
-
-            if(nowDestination == N) {
-                break;
+                if((nowY + 1) < 8) {
+                    if(map[nowY+1][nowX] != 0) {
+                        String temp = String.valueOf(map[nowY+1][nowX]);
+                        temp = temp + nowTurn;
+                        map[nowY+1][nowX] = Integer.parseInt(temp);
+                    }
+                    else {
+                        map[nowY+1][nowX] = nowTurn;
+                    }
+                    queue.add(new Node(nowY+1, nowX));
+                }
             }
+            nowTurn++;
+        }
+    }
 
-            for (Vertex vertex : airLineMap[nowDestination]) {
-                int nextDestination = vertex.destination;
-                int nextCost = nowCost + vertex.cost;
-                int nextTime = nowTime + vertex.time;
-
-                //비용이 M 을 초과하는 경우는 스킵
-                if(nextCost > M) {
-                    continue;
-                }
-
-                //이미 해당 지점에 해당 돈으로 갈 수 있는 시간이 더 작다면
-                if(dist[nextDestination][nextCost] <= nextTime) {
-                    continue;
-                }
-
-                //지금 비용 이상으로 갈 수 있는 지점은 모두 지금 시간을 최소로 하게 한다. (더 비싼 비용으로 더 시간 오래 걸리는 경우를 방지)
-                for (int i = nextCost; i <= M; i++) {
-                    if(dist[nextDestination][i] > nextTime) {
-                        dist[nextDestination][i] = nextTime;
+    public static void DFS(int nowTurn, int nowY, int nowX) {
+        if(nowTurn == 9) {
+            isWay = true;
+        }
+        else {
+            for (int i = 0; i < 9; i++) {
+                int newY = nowY+move_y[i];
+                int newX = nowX+move_x[i];
+                if(inArea(newY, newX)) {
+                    int[] temp = Arrays.stream(String.valueOf(map[newY][newX]).split("")).mapToInt(Integer::new).toArray();
+                    //nowTurn 이 temp 의 값에 해당 사항이 없을 때만 다음 단계로 탐색을 할 수 있다.
+                    boolean isContain = false;
+                    for (int j = 0; j < temp.length; j++) {
+                        if(temp[j] == nowTurn || temp[j] == nowTurn+1) {
+                            isContain = true;
+                            break;
+                        }
+                    }
+                    if(!isContain) {
+                        DFS(nowTurn+1, newY, newX);
                     }
                 }
-
-                dist[nextDestination][nextCost] = nextTime;
-                queue.offer(new Vertex(nextDestination, nextCost, nextTime));
             }
         }
     }
 
-    public static class Vertex implements Comparable<Vertex>{
-        int destination;
-        int time;
-        int cost;
+    public static boolean inArea(int y, int x) {
+        return 0<= y && y < 8 && 0 <= x && x < 8;
+    }
 
-        public Vertex(int destination, int cost, int time) {
-            this.destination = destination;
-            this.time = time;
-            this.cost = cost;
-        }
+    public static class Node {
+        int y;
+        int x;
 
-        @Override
-        public int compareTo(Vertex o) {
-            if(this.time < o.time) {
-                return -1;
-            }
-            else if(this.time == o.time) {
-                if(this.cost < o.cost) {
-                    return -1;
-                }
-                return 0;
-            }
-            return 1;
+        public Node(int y, int x) {
+            this.y = y;
+            this.x = x;
         }
     }
 }
