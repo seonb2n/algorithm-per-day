@@ -5,65 +5,80 @@ import java.util.*;
 
 class Main{
 
-    static final int INF = Integer.MAX_VALUE / 2;
-    static int V;
-    static int E;
-    static int[][] dist;
+    static int N;
+    static int M;
+    static int[][] map;
+    static Queue<Node> queue;
+    static int count;
+    static boolean[][] isVisited;
+    static int[] y_move = {-1, 1, 0, 0};
+    static int[] x_move = {0, 0, 1, -1};
+    static int[][] result;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        V = Integer.parseInt(st.nextToken());
-        E = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        dist = new int[V+1][V+1];
+        map = new int[N][M];
+        result = new int[N][M];
+        queue = new LinkedList<>();
 
-        for (int i = 1; i < V+1; i++) {
-            Arrays.fill(dist[i], INF);
-            dist[i][i] = 0;
-        }
 
-        for (int i = 0; i < E; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            int startPoint = Integer.parseInt(st.nextToken());
-            int endPoint = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
-            dist[startPoint][endPoint] = cost;
-        }
-
-        //플로이드 와샬 알고리즘을 사용해서 dist 를 각 지점에 대한 최솟값으로 계산한다.
-        //거치는 노드
-        for (int i = 1; i < V+1; i++) {
-            //출발 노드
-            for (int j = 1; j < V+1; j++) {
-                //도착 노드
-                for (int k = 1; k < V+1; k++) {
-                    if(dist[j][k] > dist[j][i] + dist[i][k]) {
-                        dist[j][k] = dist[j][i] + dist[i][k];
-                    }
+        for (int i = 0; i < N; i++) {
+            String[] str = br.readLine().split("");
+            for (int j = 0; j < M; j++) {
+                map[i][j] = Integer.parseInt(str[j]);
+                if(map[i][j] == 1) {
+                    queue.add(new Node(i, j));
                 }
             }
         }
 
-        //순환한다는 것은 a->b, b->a 가 INF 가 아니라는 것이다.
-        int answer = INF;
+        //각각의 벽에 대해서 벽을 부수고 이동할 수 있는 칸의 개수를 DFS 로 탐색한다.
+        while (!queue.isEmpty()) {
+            count = 1;
+            isVisited = new boolean[N][M];
+            Node nowNode = queue.poll();
+            DFS(nowNode.y, nowNode.x);
+            result[nowNode.y][nowNode.x] = count;
+        }
 
-        for (int i = 1; i < V + 1; i++) {
-            for (int j = 1; j < V+1; j++) {
-                if(i != j && dist[i][j] != INF && dist[j][i] != INF) {
-                    answer = Math.min(answer, dist[i][j] + dist[j][i]);
-                }
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                sb.append(result[i][j]);
+            }
+            sb.append("\n");
+        }
+
+        System.out.println(sb);
+    }
+
+    public static void DFS(int nowY, int nowX) {
+        for (int i = 0; i < 4; i++) {
+            int newY = nowY + y_move[i];
+            int newX = nowX + x_move[i];
+            if(inArea(newY, newX) && !isVisited[newY][newX] && map[newY][newX] == 0) {
+                count++;
+                isVisited[newY][newX] = true;
+                DFS(newY, newX);
             }
         }
+    }
 
-        if(answer != INF) {
-            System.out.println(answer);
-        }
-        else {
-            System.out.println(-1);
-        }
+    public static boolean inArea(int y, int x) {
+        return 0 <= y && y < N && 0 <= x && x < M;
+    }
 
+    public static class Node {
+        int y;
+        int x;
+
+        public Node(int y, int x) {
+            this.y = y;
+            this.x = x;
+        }
     }
 }
