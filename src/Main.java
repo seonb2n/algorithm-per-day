@@ -6,127 +6,112 @@ import java.util.*;
 class Main {
 
     static int N;
-    static int M;
-<<<<<<< HEAD
+    static int K;
+    static long motherNumber;
+    static long resultNumber;
+    static char[][] numbers;
+    static int[] remainedNumber;
     static BufferedReader br;
-    static Line[] lines;
+    static long[][] dp;
 
     public static void main(String[] args) throws IOException {
         br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-        lines = new Line[M];
-
-        for (int i = 0; i < M; i++) {
-            st = new StringTokenizer(br.readLine(), " ");
-            lines[i] = new Line(Integer.parseInt(st.nextToken()),
-                            Integer.parseInt(st.nextToken()),
-                            Integer.parseInt(st.nextToken()));
-        }
-
-
-
-    }
-
-    public static int DFS(int destination, int nowNode, int nowTime) {
-        if(nowNode == destination) {
-            return nowTime;
-        }
-        
-    }
-
-    public static class Line {
-        int from;
-        int to;
-        int time;
-
-        public Line(int from, int to, int time) {
-            this.from = from;
-            this.to = to;
-            this.time = time;
-        }
-=======
-    static int K;
-    static char[][] map;
-    static int[][][] dp;
-    static String targetWord;
-    static int wordSize;
-    static int answer;
-    static int[] x_move = {-1, 1, 0, 0};
-    static int[] y_move = {0, 0, -1, 1};
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-        K = Integer.parseInt(st.nextToken());
-
-        map = new char[N][M];
-
+        N = Integer.parseInt(br.readLine());
+        numbers = new char[N][];
+        remainedNumber = new int[N];
         for (int i = 0; i < N; i++) {
-            String str = br.readLine();
-            for (int j = 0; j < M; j++) {
-                map[i][j] = str.charAt(j);
-            }
+            numbers[i] = br.readLine().toCharArray();
         }
+        K = Integer.parseInt(br.readLine());
 
-        targetWord = br.readLine();
-        wordSize = targetWord.length();
-        answer = 0;
-        //해당 지점을 방문할 때, 단어를 완결지을 수 있는 경로가 몇 개 존재하는지 알려주는 dp
-        dp = new int[N][M][wordSize];
-
+        //numbers 의 각 숫자들에 대해서 나머지화해야 한다.
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                Arrays.fill(dp[i][j], -1);
-            }
+            makeRemained(i, numbers[i]);
         }
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                //0번째 자리에 있는 숫자부터 탐색 시작
-                answer += DFS(i, j, 0);
-            }
+        //분모는 N ! 이다.
+        motherNumber = 1;
+        for (int i = 2; i <= N; i++) {
+            motherNumber = motherNumber * i;
         }
 
-        System.out.println(answer);
+        //dp 를 사용해서 특정 숫자들을 사용했을 때, 해당 숫자가 나눠지는지를 마킹해야 한다.
+        //dp[i][j] 는 비트마스킹 된 i 를 이어붙인 숫자를 k 로 나눴을 때 나머지가 j 인 경우의 수이다.
+        dp = new long[1 << N][K];
+        for (int i = 0; i < (1 << N); i++) {
+            Arrays.fill(dp[i], -1);
+        }
+
+        resultNumber = DFS(0, 0);
+
+        if(resultNumber == 0) {
+            System.out.print("0/1");
+        }
+        else if(motherNumber == resultNumber) {
+            System.out.print("1/1");
+        }
+        else {
+            long gcd = findGCD(motherNumber, resultNumber);
+            motherNumber = motherNumber / gcd;
+            resultNumber = resultNumber / gcd;
+
+            System.out.print(resultNumber+"/"+motherNumber);
+        }
     }
 
-    public static int DFS(int nowY, int nowX, int target) {
-        //끝까지 도달한 경우
-        if (target == wordSize - 1) {
-            //dp 값이 1이면 방문했을 때 단어가 완성될 수 있다. 2이면 방문했는데 단어가 없다. -1이면 아직 방문하지 않았다. 0 이면 찾는 글자가 아니다.
-            return dp[nowY][nowX][target] = 1;
+    //최대 공약수를 찾는 메서드
+    private static long findGCD(long motherNumber, long resultNumber) {
+        while(motherNumber % resultNumber != 0 ) {
+            long temp = motherNumber % resultNumber;
+            motherNumber = resultNumber;
+            resultNumber = temp;
         }
-        if (dp[nowY][nowX][target] != -1) {
-            //이미 방문했던 지점을 탐색하는 경우 해당 dp 를 반환해준다.
-            return dp[nowY][nowX][target];
-        }
-        if (map[nowY][nowX] != targetWord.charAt(target)) {
-            //방문했는데 해당 글자가 찾는 글자가 아니다.
-            return dp[nowY][nowX][target] = 0;
-        }
-
-        //dp가 -1 이면 처음 방문한 경우이기 때문에 해당 지점에서부터 단어를 완성할 수 있는 경우가 몇개인지를 채워야 한다.
-        dp[nowY][nowX][target] = 0;
-        char nextTarget = targetWord.charAt(target + 1);
-        for (int i = 0; i < 4; i++) {
-            for (int j = 1; j <= K; j++) {
-                int newX = nowX + x_move[i] * j;
-                int newY = nowY + y_move[i] * j;
-                if (inArea(newY, newX) && map[newY][newX] == nextTarget) {
-                    dp[nowY][nowX][target] += DFS(newY, newX, target + 1);
-                }
-            }
-        }
-        return dp[nowY][nowX][target];
+        return resultNumber;
     }
 
-    public static boolean inArea(int y, int x) {
-        return 0 <= y && y < N && 0 <= x && x < M;
->>>>>>> 8cbdcefc233ad4303a2b83f5b93e8810cb84aaa4
+    //비트마스킹으로 처리된 방문 상태, 지금 가지고 있는 나머지를 인자로 한다.
+    //지금까지 방문한 곳이 nowStatus 이고 현재 나머지가 rest 일 때, 앞으로 빙문 안한 숫자들을 추가하면 가질 수 있는 나머지의 경우의 수를 반환한다.
+    public static long DFS(int nowStatus , int rest) {
+        //끝까지 모두 방문
+        if(nowStatus == (1 << N) -1) {
+            if (rest == 0) {
+                return 1L;
+            } else {
+                return 0;
+            }
+        }
+
+        //이미 탐색한 지점은 그대로 반환한다.
+        if(dp[nowStatus][rest] != -1) {
+            return dp[nowStatus][rest];
+        }
+
+        //지금 까지 방문하지 않은 곳들 중 하나를 방문한다.
+        for (int i = 0; i < N; i++) {
+            //방문한 곳과 방문하고자 하는 곳을 대조해서 확인한다
+            int nextNumber = 1<<i;
+            //다음 숫자를 아직 탐색하지 않았다면 탐색을 진행한다.
+            if((nowStatus & nextNumber) == 0) {
+                dp[nowStatus][rest] +=
+                        DFS(nowStatus | nextNumber, getRemainedNumber(rest, remainedNumber[i]));
+            }
+        }
+        dp[nowStatus][rest]++;
+        return dp[nowStatus][rest];
+    }
+
+    //number1 에다가 number2 를 붙인 경우의 나머지를 반환한다.
+    public static int getRemainedNumber(long number1, long number2) {
+        String str = number1 + String.valueOf(number2);
+        return Integer.parseInt(str) % K;
+    }
+
+    public static void makeRemained(int numberId, char[] number) {
+        int restNumber = Integer.parseInt(String.valueOf(number[0])) % K;
+        for (int i = 1; i < number.length; i++) {
+            int nowNumber = restNumber * 10 + Integer.parseInt(String.valueOf(number[i]));
+            restNumber = nowNumber % K;
+        }
+        remainedNumber[numberId] = restNumber;
     }
 }
