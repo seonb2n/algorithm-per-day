@@ -10,24 +10,18 @@ class Main {
     static long motherNumber;
     static long resultNumber;
     static char[][] numbers;
-    static int[] remainedNumber;
     static BufferedReader br;
     static long[][] dp;
+    static int [][] dpMod;
 
     public static void main(String[] args) throws IOException {
         br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
         numbers = new char[N][];
-        remainedNumber = new int[N];
         for (int i = 0; i < N; i++) {
             numbers[i] = br.readLine().toCharArray();
         }
         K = Integer.parseInt(br.readLine());
-
-        //numbers 의 각 숫자들에 대해서 나머지화해야 한다.
-        for (int i = 0; i < N; i++) {
-            makeRemained(i, numbers[i]);
-        }
 
         //분모는 N ! 이다.
         motherNumber = 1;
@@ -40,6 +34,12 @@ class Main {
         dp = new long[1 << N][K];
         for (int i = 0; i < (1 << N); i++) {
             Arrays.fill(dp[i], -1);
+        }
+
+        //나머지 i 에 j 번째 숫자를 더할 때 나오는 나머지를 기록한 dp 이다.
+        dpMod = new int[K][N];
+        for (int i = 0; i < K; i++) {
+            Arrays.fill(dpMod[i], -1);
         }
 
         resultNumber = DFS(0, 0);
@@ -72,6 +72,11 @@ class Main {
     //비트마스킹으로 처리된 방문 상태, 지금 가지고 있는 나머지를 인자로 한다.
     //지금까지 방문한 곳이 nowStatus 이고 현재 나머지가 rest 일 때, 앞으로 빙문 안한 숫자들을 추가하면 가질 수 있는 나머지의 경우의 수를 반환한다.
     public static long DFS(int nowStatus , int rest) {
+        //이미 탐색한 지점은 그대로 반환한다.
+        if(dp[nowStatus][rest] != -1) {
+            return dp[nowStatus][rest];
+        }
+
         //끝까지 모두 방문
         if(nowStatus == (1 << N) -1) {
             if (rest == 0) {
@@ -81,37 +86,32 @@ class Main {
             }
         }
 
-        //이미 탐색한 지점은 그대로 반환한다.
-        if(dp[nowStatus][rest] != -1) {
-            return dp[nowStatus][rest];
-        }
-
         //지금 까지 방문하지 않은 곳들 중 하나를 방문한다.
         for (int i = 0; i < N; i++) {
             //방문한 곳과 방문하고자 하는 곳을 대조해서 확인한다
             int nextNumber = 1<<i;
             //다음 숫자를 아직 탐색하지 않았다면 탐색을 진행한다.
             if((nowStatus & nextNumber) == 0) {
+
                 dp[nowStatus][rest] +=
-                        DFS(nowStatus | nextNumber, getRemainedNumber(rest, remainedNumber[i]));
+                        DFS(nowStatus | nextNumber, getRemainedNumber(rest, i));
             }
         }
         dp[nowStatus][rest]++;
         return dp[nowStatus][rest];
     }
 
-    //number1 에다가 number2 를 붙인 경우의 나머지를 반환한다.
-    public static int getRemainedNumber(long number1, long number2) {
-        String str = number1 + String.valueOf(number2);
-        return Integer.parseInt(str) % K;
-    }
-
-    public static void makeRemained(int numberId, char[] number) {
-        int restNumber = Integer.parseInt(String.valueOf(number[0])) % K;
-        for (int i = 1; i < number.length; i++) {
-            int nowNumber = restNumber * 10 + Integer.parseInt(String.valueOf(number[i]));
-            restNumber = nowNumber % K;
+    //rest 에다가 숫자들 중 targetNumberId 를 더한 값에 대한 나머지를 반환한다.
+    public static int getRemainedNumber(int rest, int targetNumberIndex) {
+        if(dpMod[rest][targetNumberIndex] != -1) {
+            return dpMod[rest][targetNumberIndex];
         }
-        remainedNumber[numberId] = restNumber;
+        int temp = rest;
+        for (int i = 0; i < numbers[targetNumberIndex].length; i++) {
+            temp *= 10;
+            temp = (temp + numbers[targetNumberIndex][i] - '0' ) % K;
+        }
+
+        return dpMod[rest][targetNumberIndex] = temp;
     }
 }
