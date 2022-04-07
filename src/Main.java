@@ -1,62 +1,85 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 
 class Main {
 
     static BufferedReader br;
     static int N;
-    static int K;
-    static int answer;
-    static int[][] dp;
-    static int mod = 1_000_000_003;
+    static int[] numbers;
+    static int[] numbersIndex;
+    static List<Integer> stack;
+    static int LCS;
+    static int[] answers;
 
     public static void main(String[] args) throws IOException {
+        StringBuilder sb = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-        K = Integer.parseInt(br.readLine());
-        answer = 0;
+        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
 
-        dp = new int[N+1][K+1];
-        for (int i = 0; i < N + 1; i++) {
-            Arrays.fill(dp[i], -1);
+        numbersIndex = new int[N];
+        Arrays.fill(numbersIndex, -999);
+        stack = new ArrayList<>();
+
+        for (int i = 0; i < N; i++) {
+            findLCS(i);
         }
 
-        for (int i = 0; i <= N; i++) {
-            dp[i][1] = i;
-            dp[i][0] = 1;
-        }
-        Arrays.fill(dp[0], 0);
+        LCS = stack.size();
+        answers = new int[LCS];
 
-        for (int i = 2; i <= N; i++) {
-            for (int j = 2; j <= K; j++) {
-                fillDp(i, j);
+        int size = answers.length;
+        for (int i = N-1; i >= 0; i--) {
+            if(numbersIndex[i] == size-1) {
+                answers[size-1] = numbers[i];
+                size--;
             }
         }
 
-        answer = (fillDp(N-3, K-1) + fillDp(N-1, K)) % mod;
-
-        System.out.println(answer);
+        System.out.println(LCS);
+        for (int i = 0; i < LCS; i++) {
+            sb.append(answers[i]);
+            sb.append(" ");
+        }
+        System.out.print(sb);
     }
 
-    public static int fillDp(int i, int j) {
-        if(dp[i][j] != -1) {
-            return dp[i][j];
+    public static void findLCS(int numberIndex) {
+        int nowNumber = numbers[numberIndex];
+        int stackSize = stack.size();
+        if(stackSize == 0) {
+            stack.add(nowNumber);
+            numbersIndex[numberIndex] = 0;
         }
-
-        if(i == j * 2 - 1) {
-            dp[i][j] = 1;
-            return 1;
+        else if(stack.get(stackSize - 1) < nowNumber) {
+            stack.add(nowNumber);
+            numbersIndex[numberIndex] = stackSize;
         }
-
-        if(i <= j * 2 - 1) {
-            dp[i][j] = 0;
-            return 0;
+        else {
+            //스택의 수를 하나씩 역순으로 본다.
+            boolean isAdded = false;
+            for (int i = stackSize-1; i >= 0; i--) {
+                int temp = stack.get(i);
+                //집어 넣고자 하는 수가 temp 보다는 작되, 최대한 앞쪽에 위치해야 한다.
+                if(temp >= nowNumber) {
+                    continue;
+                }
+                stack.remove(i+1);
+                stack.add(i+1, nowNumber);
+                numbersIndex[numberIndex] = i+1;
+                isAdded = true;
+                break;
+            }
+            if(stack.get(0) > nowNumber && !isAdded) {
+                stack.remove(0);
+                stack.add(0, nowNumber);
+                numbersIndex[numberIndex] = 0;
+            }
         }
-
-        dp[i][j] = (fillDp(i-2, j-1) + fillDp(i-1, j)) % mod;
-
-        return dp[i][j];
     }
 }
