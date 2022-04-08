@@ -4,61 +4,48 @@ import java.util.List;
 import java.util.Queue;
 
 class Solution {
-
-    static Queue<Integer> queue = new LinkedList<>();
+    static int depth;
     static List<Integer>[] nodeList;
-    static int[] dist;
-    static boolean[] isVisted;
-    static int max;
+    static int[][] dp;
 
-    public int solution(int n, int[][] edge) {
-        nodeList = new ArrayList[n + 1];
-        for (int i = 0; i <= n; i++) {
+    public static int solution(int[][] triangle) {
+        depth = triangle.length;
+        nodeList = new List[depth];
+        dp = new int[depth][depth];
+
+        for (int i = 0; i < nodeList.length; i++) {
             nodeList[i] = new ArrayList<>();
         }
 
-        dist = new int[n + 1];
-        isVisted = new boolean[n + 1];
-
-        for (int i = 0; i < edge.length; i++) {
-            int startPoint = edge[i][0];
-            int endPoint = edge[i][1];
-            nodeList[startPoint].add(endPoint);
-            nodeList[endPoint].add(startPoint);
+        for (int i = 0; i < depth; i++) {
+            for (int j = 0; j < triangle[i].length; j++) {
+                nodeList[i].add(triangle[i][j]);
+            }
         }
 
-        //bfs
-        queue.add(1);
-        isVisted[1] = true;
-        dist[1] = 0;
-        BFS(0);
+        dp[0][0] = nodeList[0].get(0);
+
+        for (int i = 1; i < depth; i++) {
+            for (int j = 0; j <= i; j++) {
+                dp[i][j] = fillDp(i, j);
+            }
+        }
 
         int answer = 0;
-        for (int i = 0; i < dist.length; i++) {
-            if (dist[i] == max) {
-                answer++;
-            }
+
+        for (int i = 0; i < depth; i++) {
+            answer = Math.max(answer, dp[depth-1][i]);
         }
 
         return answer;
     }
 
-    public static void BFS(int nowDepth) {
-        while (!queue.isEmpty()) {
-            nowDepth++;
-            int size = queue.size();
-            for (int i = 0; i < size; i++) {
-                int nowNode = queue.poll();
-                for (int j = 0; j < nodeList[nowNode].size(); j++) {
-                    int nextNode = nodeList[nowNode].get(j);
-                    if (!isVisted[nextNode]) {
-                        queue.add(nextNode);
-                        isVisted[nextNode] = true;
-                        dist[nextNode] = nowDepth;
-                    }
-                }
-            }
+    public static int fillDp(int i, int j) {
+        //위에서부터 i 번째 높이에, j 번째 위치에 있는 숫자의 비교
+        if(j == 0) {
+            return dp[i-1][j] + nodeList[i].get(j);
         }
-        max = nowDepth-1;
+
+        return Math.max(dp[i - 1][j - 1], dp[i - 1][j]) + nodeList[i].get(j);
     }
 }
