@@ -1,55 +1,52 @@
 import java.util.*;
 
 class Solution {
-    static int N;
-    static int[] newRock;
 
-    public static int solution(int distance, int[] rocks, int n) {
-        N = n;
+    public int[] solution(String[] words, String[] queries) {
+        Trie front = new Trie();
+        Trie back = new Trie();
 
-        Arrays.sort(rocks);
-        newRock = new int[rocks.length+1];
-        for (int i = 0; i < rocks.length; i++) {
-            newRock[i] = rocks[i];
-        }
-        newRock[rocks.length] = distance;
-
-        int max = distance / (rocks.length - n + 1);
-        int min = 0;
-
-        while(min < max) {
-            int mid = (min + max) / 2;
-            int removedRock = removedRock(mid, newRock);
-
-            if(removedRock > N) {
-                max = mid;
-            }
-            else {
-                min = mid+1;
-            }
+        for (String word : words) {
+            front.insert(word);
+            back.insert(reverse(word));
         }
 
-        return min-1;
+        return Arrays.stream(queries).mapToInt(
+                query -> query.charAt(0) == '?' ? back.find(reverse(query), 0)
+                        : front.find(query, 0)).toArray();
     }
 
-    public static int removedRock(int distance, int[] rocks) {
-        int removed = 0;
-        int lastRock = 0;
-        int nowRock = 0;
-        for (int i = 0; i < rocks.length; i++) {
-            nowRock = rocks[i];
-            int nowDistance = nowRock - lastRock;
-            if(nowDistance < distance) {
-                removed++;
-            }
-            else {
-                lastRock = nowRock;
-            }
-            if(removed > N) {
-                break;
+    public static class Trie {
+        //문자열의 길이를 key 로 하고, 해당 길이를 가진 문자열의 개수
+        Map<Integer, Integer> lenMap = new HashMap<>();
+        Trie[] child = new Trie[26];
+
+        void insert(String str) {
+            //지금 속해 있는 Trie Class
+            Trie node = this;
+            int len   = str.length();
+            node.lenMap.put(len, lenMap.getOrDefault(len, 0) + 1);
+
+            for (char ch : str.toCharArray()) {
+                int idx = ch - 'a';
+                if (node.child[idx] == null) {
+                    node.child[idx] = new Trie();
+                }
+                node = node.child[idx];
+                node.lenMap.put(len, node.lenMap.getOrDefault(len, 0) + 1);
             }
         }
 
-        return removed;
+        int find(String str, int i) {
+            if(str.charAt(i) == '?') {
+                return lenMap.getOrDefault(str.length(), 0);
+            }
+            int idx = str.charAt(i) - 'a';
+            return child[idx] == null ? 0 : child[idx].find(str, i + 1);
+        }
+    }
+
+    String reverse(String s) {
+        return new StringBuilder(s).reverse().toString();
     }
 }
