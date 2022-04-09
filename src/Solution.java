@@ -1,37 +1,55 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 class Solution {
-    public int[] dp;
-    static int includeFirst;
-    static int excludeFirst;
+    static int N;
+    static int[] newRock;
 
-    public int solution(int[] money) {
-        int houseNumber = money.length;
-        dp = new int[houseNumber];
+    public static int solution(int distance, int[] rocks, int n) {
+        N = n;
 
-        //첫 번째 집을 무조건 포함시켰을 때, 마지막 집까지의 최댓값
-        dp[0] = money[0];
-        dp[1] = money[0];
+        Arrays.sort(rocks);
+        newRock = new int[rocks.length+1];
+        for (int i = 0; i < rocks.length; i++) {
+            newRock[i] = rocks[i];
+        }
+        newRock[rocks.length] = distance;
 
-        for (int i = 2; i < houseNumber-1; i++) {
-            dp[i] = Math.max(dp[i-2] + money[i], dp[i-1]);
+        int max = distance / (rocks.length - n + 1);
+        int min = 0;
+
+        while(min < max) {
+            int mid = (min + max) / 2;
+            int removedRock = removedRock(mid, newRock);
+
+            if(removedRock > N) {
+                max = mid;
+            }
+            else {
+                min = mid+1;
+            }
         }
 
-        includeFirst = dp[houseNumber-2];
+        return min-1;
+    }
 
-        //첫 번째 집을 제외시켯을 때
-        dp[0] = 0;
-        dp[1] = money[1];
-
-        for (int i = 2; i < houseNumber - 1; i++) {
-            dp[i] = Math.max(dp[i-2] + money[i], dp[i-1]);
+    public static int removedRock(int distance, int[] rocks) {
+        int removed = 0;
+        int lastRock = 0;
+        int nowRock = 0;
+        for (int i = 0; i < rocks.length; i++) {
+            nowRock = rocks[i];
+            int nowDistance = nowRock - lastRock;
+            if(nowDistance < distance) {
+                removed++;
+            }
+            else {
+                lastRock = nowRock;
+            }
+            if(removed > N) {
+                break;
+            }
         }
 
-        excludeFirst = Math.max(dp[houseNumber-3] + money[houseNumber-1], dp[houseNumber-2]);
-
-        return Math.max(includeFirst, excludeFirst);
+        return removed;
     }
 }
