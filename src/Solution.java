@@ -1,72 +1,56 @@
 import java.util.*;
 
 class Solution {
-    PriorityQueue<Job> pq = new PriorityQueue<>();
-    Job[] jobArr;
 
-    public int solution(int[][] jobs) {
-        jobArr = new Job[jobs.length];
-        for (int i = 0; i < jobs.length; i++) {
-            jobArr[i] = new Job(jobs[i][0], jobs[i][1]);
-        }
-
-        Arrays.sort(jobArr, new Comparator<Job>() {
-            @Override
-            public int compare(Job o1, Job o2) {
-                return o1.requestTime - o2.requestTime;
-            }
-        });
-
-        int answer = 0;
-        int nowTime = 0;
-        int jobCount = 0;
-        //가장 먼저 들어온 job 실행한 상태
-
-        while (jobCount < jobArr.length) {
-            //하나의 작업이 완료되는 시점까지 들어온 모든 요청을 큐에 추가
-            int i = 0;
-            while (i < jobArr.length && jobArr[i].requestTime <= nowTime) {
-                if(!jobArr[i].isDone) {
-                    pq.offer(jobArr[i]);
-                    jobArr[i].isDone = true;
-                }
-                i++;
-            }
-
-            //큐가 비어있다면 작업이 없는 것
-            if(pq.isEmpty()) {
-                //다음 작업이 들어올 때까지 시간을 증가시킨다.
-                nowTime++;
-            }
-
-            //작업 진행
-            else {
-                Job nowJob = pq.poll();
-                nowTime += nowJob.taskTime;
-                answer += (nowTime - nowJob.requestTime);
-                jobCount++;
-            }
-        }
-
-        answer = answer / jobArr.length;
-
-        return answer;
+    public static void main(String[] args) {
     }
 
-    public static class Job implements Comparable<Job>{
-        int requestTime;
-        int taskTime;
-        boolean isDone;
+    public static class Trie {
+        private Node rootNode;
 
-        public Job(int requestTime, int taskTime) {
-            this.requestTime = requestTime;
-            this.taskTime = taskTime;
-            isDone = false;
+        public Trie() {
+            rootNode = new Node();
         }
 
-        @Override
-        public int compareTo(Job o) {
-            return this.taskTime - o.taskTime;
+        public void insert(String word) {
+            Node thisNode = this.rootNode;
+            for (int i = 0; i < word.length(); i++) {
+                //해당 단어를 가진 child 가 있으면 가져오고 없으면 새로운 node 를 생성(computeIfAbsent) 사용
+                thisNode = thisNode.getChildNodes().computeIfAbsent(word.charAt(i), c -> new Node());
+            }
+            thisNode.setEndOfWord(true);
+        }
+
+        public boolean search(String word) {
+            Node thisNode = this.rootNode;
+            for (int i = 0; i < word.length(); i++) {
+                char nowCharacter = word.charAt(i);
+                Node node = thisNode.getChildNodes().get(nowCharacter);
+
+                if(node == null) {
+                    return false;
+                }
+
+                thisNode = node;
+            }
+            return thisNode.isEndOfWord();
+        }
+    }
+
+    public static class Node {
+        private Map<Character, Node> childNodes = new HashMap<>();
+        boolean endOfWord;
+
+        public Map<Character, Node> getChildNodes() {
+            return childNodes;
+        }
+
+        public boolean isEndOfWord() {
+            return endOfWord;
+        }
+
+        public void setEndOfWord(boolean endOfWord) {
+            this.endOfWord = endOfWord;
         }
     }
 }
