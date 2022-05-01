@@ -1,118 +1,117 @@
 import java.util.*;
 
-public class Solution {
+class Solution {
 
+    static List<Character> nowPossibleAlphabet;
+    static HashMap<Character, ArrayList<Node>> alphabetPosition;
+    static char[][] tiles;
 
-    public static String solution(String sentence) {
-        StringBuilder answerList = new StringBuilder();
-        //HashMap과 달리 입력 순서 보장
-        LinkedHashMap<Character, ArrayList<Integer>> lowerCount = new LinkedHashMap<>();
-        String invalid = "invalid";
-        try {
-            int size = sentence.length();
+    public String solution(int m, int n, String[] board) {
+        nowPossibleAlphabet = new ArrayList<>();
+        alphabetPosition = new HashMap<>();
 
-            //소문자의 각 종류 / 위치 파악
-            for(int i=0; i<size; i++){
-                char c = sentence.charAt(i);
+        StringBuilder sb = new StringBuilder();
+        tiles = new char[m + 1][n + 1];
 
-                if(Character.isLowerCase(c)){
-                    if(!lowerCount.containsKey(c)){
-                        lowerCount.put(c, new ArrayList<Integer>());
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length(); j++) {
+                tiles[i][j] = board[i].charAt(j);
+                char temp = tiles[i][j];
+                if (Character.isUpperCase(temp)) {
+                    if (!alphabetPosition.containsKey(temp)) {
+                        alphabetPosition.put(temp, new ArrayList<>());
                     }
-                    lowerCount.get(c).add(i);
-                }
-            }
-
-            int stringIdx = 0;
-            int startChar, endChar;
-            int lastStartChar = -1, lastEndChar = -1;
-            int startWord = 0, endWord = 0;
-            int lastStartWord= -1, lastEndWord = -1;
-            int count, distance;
-            int rule = 0;
-
-            ArrayList<Integer> temp;
-            for(char c : lowerCount.keySet()){
-                temp = lowerCount.get(c);
-                count = temp.size();
-                startChar = temp.get(0);
-                endChar = temp.get(count-1);
-
-
-                //AaA, AaAaAaA...
-                if(count == 1 || count >= 3){
-                    for(int i=1; i<count; i++){
-                        //간격 2 넘어가면 x
-                        if(temp.get(i) - temp.get(i-1) != 2) return invalid;
-                    }
-                    rule = 1;
+                    alphabetPosition.get(temp).add(new Node(i, j));
                 }
 
-                else if (count == 2){
-                    distance = endChar - startChar;
-
-                    //다른 기호 안에 있음 (규칙 2와 겹침)
-                    if(distance == 2 && (endChar < lastEndChar && startChar > lastStartChar)){
-                        rule = 1;
-                    }
-                    else if(distance >= 2){
-                        rule = 2;
-                    }
-                    //소문자 연속은 x
-                    else  return invalid;
-                }
-
-                //규칙에 따른 예외
-                if(rule == 1){
-                    //기호 위치에서 앞뒤로 한칸씩
-                    startWord = startChar -1;
-                    endWord = endChar+1;
-
-                    //이전 단어 안에 포함되어 있는 경우
-                    if(lastStartWord < startWord && lastEndWord > endWord){
-                        //규칙 2 아니면 안됨
-                        if(startChar - lastStartChar  == 2 && lastEndChar - endChar == 2){
-                            continue;
-                        }
-                        else return invalid;
-                    }
-                }
-
-                else if (rule == 2){
-                    startWord = startChar;
-                    endWord = endChar;
-                    //규칙 2는 중복되면 안됨
-                    if(lastStartWord < startWord && lastEndWord > endWord) return invalid;
-                }
-
-                if(lastEndWord >= startWord) return  invalid;
-
-                //소문자 등장 이전에 존재하던 앞의 단어 추가
-                if(stringIdx < startWord){
-                    answerList.append(makeWord(sentence,stringIdx,startWord-1));
-                    answerList.append(" ");
-                }
-                answerList.append(makeWord(sentence,startWord,endWord));
-                answerList.append(" ");
-                lastStartWord = startWord;
-                lastEndWord = endWord;
-                lastStartChar = startChar;
-                lastEndChar = endChar;
-                stringIdx = endWord+1;
-            }
-            //뒤에 남는 단어들도 더하기
-            if(stringIdx < size){
-                answerList.append(makeWord(sentence,stringIdx,size-1));
             }
         }
-        catch (Exception e){
-            return invalid;
+
+        while (!alphabetPosition.isEmpty()) {
+            for (char al : alphabetPosition.keySet()) {
+                ArrayList<Node> temp = alphabetPosition.get(al);
+                findPossibleAlphabet(al, temp);
+            }
+
+            if (nowPossibleAlphabet.size() == 0) {
+                return "IMPOSSIBLE";
+            }
+
+            Collections.sort(nowPossibleAlphabet);
+            //제일 앞에 해를 추가
+            Character character = nowPossibleAlphabet.get(0);
+            sb.append(character);
+
+            //더해진 alpha 를 tiles 에서 삭제
+            tiles[alphabetPosition.get(character).get(0).y][alphabetPosition.get(character).get(0).x] = '.';
+            tiles[alphabetPosition.get(character).get(1).y][alphabetPosition.get(character).get(1).x] = '.';
+            alphabetPosition.remove(character);
+
+            //리스트 초기화
+            nowPossibleAlphabet = new ArrayList<>();
         }
-        return answerList.toString().trim();
+        return sb.toString().trim();
     }
 
-    public static String makeWord(String sentence, int start, int end){
-        String word = sentence.substring(start, end+1);
-        return word.replaceAll("[a-z]","");
+    public static void findPossibleAlphabet(char nowAlphabet, List<Node> alphaPosition) {
+        int nowY = alphaPosition.get(0).y;
+        int nowX = alphaPosition.get(0).x;
+        int targetY = alphaPosition.get(1).y;
+        int targetX = alphaPosition.get(1).x;
+
+        if (isWay(nowX, nowY, targetX, targetY, nowAlphabet)) {
+            nowPossibleAlphabet.add(nowAlphabet);
+        }
+
+    }
+
+    public static boolean isWay(int x1, int y1, int x2, int y2, char target) {
+        if (x1 < x2) {
+            //ㄱ 또는 ㄴ 경로를 탐색
+            if (horizontalCheck(x1, x2, y1, target) && verticalCheck(y1, y2, x2, target)) {
+                return true;
+            }
+            if (verticalCheck(y1, y2, x1, target) && horizontalCheck(x1, x2, y2, target)) {
+                return true;
+            }
+        } else {
+            if (horizontalCheck(x2, x1, y1, target) && verticalCheck(y1, y2, x2, target)) {
+                return true;
+            }
+            if (verticalCheck(y1, y2, x1, target) && horizontalCheck(x2, x1, y2, target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //수평상의 경로를 탐색한다. 항상 x1 보다 x2 가 더 크다.
+    public static boolean horizontalCheck(int x1, int x2, int y, char target) {
+        for (int i = x1; i < x2 + 1; i++) {
+            if (tiles[y][i] != '.' && tiles[y][i] != target) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 수직상의 경로를 탐색한다. 항상 y1 보다 y2 가 더 크다.
+    public static boolean verticalCheck(int y1, int y2, int x, char target) {
+        for (int i = y1; i < y2 + 1; i++) {
+            if (tiles[i][x] != '.' && tiles[i][x] != target) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static class Node {
+        int y;
+        int x;
+
+        public Node(int y, int x) {
+            this.y = y;
+            this.x = x;
+        }
     }
 }
