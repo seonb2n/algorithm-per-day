@@ -1,96 +1,102 @@
 import java.util.*;
 
 class Solution {
-    static int[] winCount;
-    static int[] loseCount;
-    static Node[] winMap;
-    static Node[] loseMap;
-    static HashSet<Integer> visited;
+    static int lockSize;
+    static int keySize;
+    static List<int[]> zeroPosition;
 
     public static void main(String[] args) {
-        int[][] results = {{4, 3}, {4, 2}, {3, 2}, {1, 2}, {2, 5}};
-        solution(5, results);
+        int[][] key = {{0, 0, 0}, {1, 0, 0}, {0, 1, 1}};
+        int[][] lock = {{1, 1, 1}, {1, 1, 0}, {1, 0, 1}};
+
+        solution(key, lock);
     }
 
-    public static int solution(int n, int[][] results) {
-        int answer = 0;
-        winCount = new int[n+1];
-        loseCount = new int[n+1];
+    public static boolean solution(int[][] key, int[][] lock) {
+        lockSize = lock.length;
+        keySize = key.length;
+        zeroPosition = new ArrayList<>();
 
-        winMap = new Node[n+1];
-        loseMap = new Node[n+1];
-
-        for (int i = 0; i < n + 1; i++) {
-            winMap[i] = new Node(i);
-            loseMap[i] = new Node(i);
-        }
-
-        for (int i = 0; i < results.length; i++) {
-            int winNumber = results[i][0];
-            int loseNumber = results[i][1];
-            winMap[winNumber].addVisitable(loseNumber);
-            loseMap[loseNumber].addVisitable(winNumber);
-        }
-
-        //각각의 정점에서 출발했을 때, 방문할 수 있는 모든 정점을 탐색해야 한다.
-        for (int i = 1; i <= n; i++) {
-            visited = new HashSet<>();
-            winDFS(i);
-            for (Integer number : visited) {
-                winCount[number]++;
+        for (int i = 0; i < lockSize; i++) {
+            for (int j = 0; j < lockSize; j++) {
+                if(lock[i][j] == 0) {
+                    int[] zero = {i+keySize-1, j+keySize-1};
+                    zeroPosition.add(zero);
+                }
             }
         }
 
-        for (int i = 1; i <= n; i++) {
-            visited = new HashSet<>();
-            loseDFS(i);
-            for (Integer number : visited) {
-                loseCount[number]++;
-            }
+        int zeroNumber = zeroPosition.size();
+
+        //lock 의 크기를 확장
+        int newLockSize = 2 * keySize - 2 + lockSize;
+        int[][] newLock = new int[newLockSize][newLockSize];
+
+        for (int i = 0; i < newLockSize; i++) {
+            Arrays.fill(newLock[i], -1);
         }
 
-        for (int i = 1; i <= n; i++) {
-            if(winCount[i] + loseCount[i] == (n-1)) {
-                answer++;
+        int m = 0;
+        int n = 0;
+        for (int i = keySize-1; i <= keySize-1+lockSize-1; i++) {
+            n = 0;
+            for (int j = keySize-1; j <= keySize-1+lockSize-1; j++) {
+                newLock[i][j] = lock[m][n];
+                n++;
             }
+            m++;
         }
 
-        return answer;
+        for (int i = 0; i < 4; i++) {
+            if(fullMatch(newLock, key)) {
+                return true;
+            }
+            key = rotate(key);
+        }
+
+        return false;
     }
 
-    static void winDFS(int nowPoint) {
-        int size = winMap[nowPoint].visitable.size();
-        for (int i = 0; i < size; i++) {
-            int nextNode = winMap[nowPoint].visitable.get(i);
-            if(!visited.contains(nextNode)) {
-                visited.add(nextNode);
-                winDFS(nextNode);
+    static int[][] rotate(int[][] arr) {
+        int[][] temp = new int[arr.length][arr.length];
+
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr.length; j++) {
+                temp[i][j] = arr[arr.length-j-1][i];
             }
         }
+        return temp;
     }
 
-    static void loseDFS(int nowPoint) {
-        int size = loseMap[nowPoint].visitable.size();
-        for (int i = 0; i < size; i++) {
-            int nextNode = loseMap[nowPoint].visitable.get(i);
-            if(!visited.contains(nextNode)) {
-                visited.add(nextNode);
-                loseDFS(nextNode);
+    static boolean fullMatch(int[][] lock, int[][] key) {
+        for (int i = 0; i <= lock.length - key.length; i++) {
+            for (int j = 0; j <= lock.length - key.length; j++) {
+                if(isMatch(lock, key, j, i)) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
-    static class Node{
-        int number;
-        List<Integer> visitable;
-
-        public Node(int number) {
-            this.number = number;
-            visitable = new ArrayList<>();
+    static boolean isMatch(int[][] lock, int[][] key, int startX, int startY) {
+        //모든 0 은 채워지되, 1끼리는 겹치면 안된다.
+        int zeroCount = 0;
+        int[][] temp = new int[lock.length][lock.length];
+        for (int i = 0; i < key.length; i++) {
+            for (int j = 0; j < key.length; j++) {
+                if(lock[i + startY][j + startX] == key[i][j]) {
+                    return false;
+                }
+                //내부에 있는 모든 홈을 채웠다면
+                if(lock[i+startY][j+startX] == 0 ) {
+                    zeroCount++;
+                }
+            }
         }
-
-        public void addVisitable(int nodeNumber) {
-            visitable.add(nodeNumber);
+        if(zeroCount == zeroPosition.size()) {
+            return true;
         }
+        return false;
     }
 }
