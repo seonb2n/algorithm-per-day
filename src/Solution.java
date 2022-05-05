@@ -1,102 +1,132 @@
 import java.util.*;
 
 class Solution {
-    static int lockSize;
-    static int keySize;
-    static List<int[]> zeroPosition;
+    static Stack<Integer> deletedStack;
+    static Node[] nodeList;
+    static int nowPosition;
 
-    public static void main(String[] args) {
-        int[][] key = {{0, 0, 0}, {1, 0, 0}, {0, 1, 1}};
-        int[][] lock = {{1, 1, 1}, {1, 1, 0}, {1, 0, 1}};
+    public static String solution(int n, int k, String[] cmd) {
+        deletedStack = new Stack<>();
+        nodeList = new Node[n];
+        StringBuilder sb = new StringBuilder();
 
-        solution(key, lock);
+        nodeList[0] = new Node(-1, 1);
+        for (int i = 1; i < n-1; i++) {
+            nodeList[i] = new Node(i-1, i+1);
+        }
+        nodeList[n-1] = new Node(n-2, -1);
+
+        nowPosition = k;
+
+        for (int i = 0; i < cmd.length; i++) {
+            String nowCommand = cmd[i];
+            int command = getCommand(nowCommand);
+            switch (command) {
+                case 1: goDown(nowCommand);
+                break;
+                case 2: goUp(nowCommand);
+                break;
+                case 3: delete();
+                break;
+                case 4: rollBack();
+                break;
+            }
+        }
+
+        char[] answers = new char[n];
+        for (int i = 0; i < n; i++) {
+            answers[i] = 'O';
+        }
+
+        while (!deletedStack.empty()) {
+            answers[deletedStack.pop()] = 'X';
+        }
+
+        for (int i = 0; i < n; i++) {
+            sb.append(answers[i]);
+        }
+
+        return sb.toString().trim();
     }
 
-    public static boolean solution(int[][] key, int[][] lock) {
-        lockSize = lock.length;
-        keySize = key.length;
-        zeroPosition = new ArrayList<>();
-
-        for (int i = 0; i < lockSize; i++) {
-            for (int j = 0; j < lockSize; j++) {
-                if(lock[i][j] == 0) {
-                    int[] zero = {i+keySize-1, j+keySize-1};
-                    zeroPosition.add(zero);
-                }
-            }
+    //D 1
+    //U 2
+    //C 3
+    //Z 4
+    public static int getCommand(String cmd) {
+        if(cmd.contains("D")) {
+            return 1;
         }
-
-        int zeroNumber = zeroPosition.size();
-
-        //lock 의 크기를 확장
-        int newLockSize = 2 * keySize - 2 + lockSize;
-        int[][] newLock = new int[newLockSize][newLockSize];
-
-        for (int i = 0; i < newLockSize; i++) {
-            Arrays.fill(newLock[i], -1);
+        if(cmd.contains("U")) {
+            return 2;
         }
-
-        int m = 0;
-        int n = 0;
-        for (int i = keySize-1; i <= keySize-1+lockSize-1; i++) {
-            n = 0;
-            for (int j = keySize-1; j <= keySize-1+lockSize-1; j++) {
-                newLock[i][j] = lock[m][n];
-                n++;
-            }
-            m++;
+        if(cmd.contains("C")) {
+            return 3;
         }
-
-        for (int i = 0; i < 4; i++) {
-            if(fullMatch(newLock, key)) {
-                return true;
-            }
-            key = rotate(key);
+        if(cmd.contains("Z")) {
+            return 4;
         }
-
-        return false;
+        return 0;
     }
 
-    static int[][] rotate(int[][] arr) {
-        int[][] temp = new int[arr.length][arr.length];
-
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr.length; j++) {
-                temp[i][j] = arr[arr.length-j-1][i];
-            }
+    public static void goDown(String cmd) {
+        String[] s = cmd.split(" ");
+        for (int i = 0; i < Integer.parseInt(s[1]); i++) {
+            nowPosition = nodeList[nowPosition].nextNode;
         }
-        return temp;
+
     }
 
-    static boolean fullMatch(int[][] lock, int[][] key) {
-        for (int i = 0; i <= lock.length - key.length; i++) {
-            for (int j = 0; j <= lock.length - key.length; j++) {
-                if(isMatch(lock, key, j, i)) {
-                    return true;
-                }
-            }
+    public static void goUp(String cmd) {
+        String[] s = cmd.split(" ");
+        for (int i = 0; i < Integer.parseInt(s[1]); i++) {
+            nowPosition = nodeList[nowPosition].prevNode;
         }
-        return false;
     }
 
-    static boolean isMatch(int[][] lock, int[][] key, int startX, int startY) {
-        //모든 0 은 채워지되, 1끼리는 겹치면 안된다.
-        int zeroCount = 0;
-        int[][] temp = new int[lock.length][lock.length];
-        for (int i = 0; i < key.length; i++) {
-            for (int j = 0; j < key.length; j++) {
-                if(lock[i + startY][j + startX] == key[i][j]) {
-                    return false;
-                }
-                //내부에 있는 모든 홈을 채웠다면
-                if(lock[i+startY][j+startX] == 0 ) {
-                    zeroCount++;
-                }
-            }
+    public static void delete() {
+        //지금 위치가 제일 마지막인 경우
+        if(nodeList[nowPosition].nextNode == -1) {
+            deletedStack.push(nowPosition);
+            Node nowNode = nodeList[nowPosition];
+            nodeList[nowNode.prevNode].nextNode = -1;
+            nowPosition = nowNode.prevNode;
         }
-        if(zeroCount == zeroPosition.size()) {
-            return true;
+        //지금 위치가 제일 앞인 경우
+        else if(nodeList[nowPosition].prevNode == -1) {
+            deletedStack.push(nowPosition);
+            Node nowNode = nodeList[nowPosition];
+            nodeList[nowNode.nextNode].prevNode = -1;
+            nowPosition = nowNode.nextNode;
         }
-        return false;
+        else {
+            deletedStack.push(nowPosition);
+            Node nowNode = nodeList[nowPosition];
+            nodeList[nowNode.prevNode].nextNode = nowNode.nextNode;
+            nodeList[nowNode.nextNode].prevNode = nowNode.prevNode;
+            nowPosition = nowNode.nextNode;
+        }
+
+    }
+
+    public static void rollBack() {
+        int backedNode = deletedStack.pop();
+        Node back = nodeList[backedNode];
+        if(back.prevNode != -1) {
+            nodeList[back.prevNode].nextNode = backedNode;
+        }
+        if(back.nextNode != -1) {
+            nodeList[back.nextNode].prevNode = backedNode;
+        }
+    }
+
+    public static class Node {
+        int prevNode;
+        int nextNode;
+
+        public Node(int prevNode, int nextNode) {
+            this.prevNode = prevNode;
+            this.nextNode = nextNode;
+        }
     }
 }
