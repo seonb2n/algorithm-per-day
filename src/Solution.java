@@ -1,81 +1,80 @@
 import java.util.*;
 
 class Solution {
+    static List<Long> numberList;
+    static List<Long> tempNumberList;
+    static List<Character> expList;
+    static List<Character> tempExpList;
 
-    static HashMap<Integer, Node> numberMap;
-    static boolean isLeftHand;
+    public static void main(String[] args) {
+        String s = "200-300-500-600*40+500+500";
+        solution(s);
+    }
 
-    public String solution(int[] numbers, String hand) {
-        StringBuilder answer = new StringBuilder();
+    public static long solution(String expression) {
+        String[] cases = {"+-*", "+*-", "*-+", "*+-", "-*+", "-+*"};
+        numberList = new LinkedList<>();
+        expList = new LinkedList<>();
 
-        if(hand.equals("left")) {
-            isLeftHand = true;
+        String[] split = expression.split("[*+-]");
+
+        for (int i = 0; i < split.length; i++) {
+            numberList.add(Long.parseLong(split[i]));
         }
 
-        numberMap = new HashMap<>();
+        split = expression.split("[0-9]");
 
-        numberMap.put(1, new Node(0, 0));
-        numberMap.put(2, new Node(0, 1));
-        numberMap.put(3, new Node(0, 2));
-        numberMap.put(4, new Node(1, 0));
-        numberMap.put(5, new Node(1, 1));
-        numberMap.put(6, new Node(1, 2));
-        numberMap.put(7, new Node(2, 0));
-        numberMap.put(8, new Node(2, 1));
-        numberMap.put(9, new Node(2, 2));
-        numberMap.put(0, new Node(3, 1));
-        numberMap.put(11, new Node(3, 0));
-        numberMap.put(12, new Node(3, 2));
+        for (int i = 0; i < split.length; i++) {
+            if(!split[i].equals(""))
+                expList.add(split[i].charAt(0));
+        }
 
-        Node leftFinger = numberMap.get(11);
-        Node rightFinger = numberMap.get(12);
+        long answer = 0;
 
-        for (int i = 0; i < numbers.length; i++) {
-            int nowNumber = numbers[i];
-            if(isLeftFingerGo(rightFinger, leftFinger, nowNumber)) {
-                leftFinger = numberMap.get(nowNumber);
-                answer.append("L");
+        for (int i = 0; i < 6; i++) {
+            tempNumberList = new LinkedList<>();
+            tempNumberList.addAll(numberList);
+            tempExpList = new LinkedList<>();
+            tempExpList.addAll(expList);
+            String nowCase = cases[i];
+            calculateWith(nowCase.charAt(0));
+            calculateWith(nowCase.charAt(1));
+            calculateWith(nowCase.charAt(2));
+
+            answer = Math.max(answer, Math.abs(tempNumberList.get(0)));
+        }
+
+        return answer;
+    }
+
+    public static void calculateWith(char exp) {
+
+        int i = 0;
+        while (tempExpList.contains(exp)) {
+            if(tempExpList.get(i) == exp) {
+                Long firstNumber = tempNumberList.get(i);
+                Long secondNumber = tempNumberList.get(i+1);
+                Long result = 0L;
+                switch (exp) {
+                    case '+':
+                        result = firstNumber + secondNumber;
+                        break;
+                    case '-':
+                        result = firstNumber - secondNumber;
+                        break;
+                    case '*':
+                        result = firstNumber * secondNumber;
+                        break;
+                }
+                tempNumberList.add(i, result);
+                tempNumberList.remove(i+1);
+                tempNumberList.remove(i+1);
+                tempExpList.remove(i);
             }
             else {
-                rightFinger = numberMap.get(nowNumber);
-                answer.append("R");
+                i++;
             }
         }
-
-        return answer.toString();
     }
 
-    public boolean isLeftFingerGo(Node rightPosition, Node leftPosition, int nextNumber) {
-        if(nextNumber == 1 || nextNumber == 4 || nextNumber == 7) {
-            return true;
-        }
-        if(nextNumber == 3 || nextNumber == 6 || nextNumber == 9) {
-            return false;
-        }
-        // 숫자가 2,5,8,0 인 경우 가까운 쪽이 간다.
-        Node numberPosition = numberMap.get(nextNumber);
-        if(numberPosition.getAbs(rightPosition) > numberPosition.getAbs(leftPosition)) {
-            return true;
-        }
-        if(numberPosition.getAbs(rightPosition) < numberPosition.getAbs(leftPosition)) {
-            return false;
-        }
-        //둘 사이의 거리가 같을 때는 주로 쓰는 손 쪽으로 간다.
-        return isLeftHand;
-    }
-
-
-    public static class Node {
-        int y;
-        int x;
-
-        public Node(int y, int x) {
-            this.y = y;
-            this.x = x;
-        }
-
-        public int getAbs(Node n) {
-            return Math.abs(this.y - n.y) + Math.abs(this.x - n.x);
-        }
-    }
 }
