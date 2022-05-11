@@ -2,9 +2,6 @@ import java.util.*;
 
 class Solution {
     static Set<Character> left;
-
-<<<<<<< HEAD
-=======
     public static void main(String[] args) {
         String[] gems = {"DIA", "RUBY", "RUBY", "DIA", "DIA", "EMERALD", "SAPPHIRE", "DIA"};
         solution(gems);
@@ -36,7 +33,6 @@ class Solution {
 
         return new int[]{start, start + len};
     }
->>>>>>> c0f1286166f4fb1ada435e76e49c0693eb4aee5a
 
     public static class Book {
         String serialNumber;

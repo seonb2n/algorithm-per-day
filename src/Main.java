@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-class Main {
-
-
-
-}
-=======
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -90,4 +83,3 @@ class Main {
         }
     }
 }
->>>>>>> c0f1286166f4fb1ada435e76e49c0693eb4aee5a
