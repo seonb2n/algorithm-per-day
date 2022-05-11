@@ -1,12 +1,17 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 class Solution {
+    static Set<Character> left;
 
-    public static void main(String[] args) {
-        System.out.println(3 + '3' - '0');
+
+    public static class Book {
+        String serialNumber;
+        String bookTitle;
+
+        @Override
+        public boolean equals(Object o) {
+            Book book = (Book) o;
+            return (Objects.equals(((Book) o).serialNumber, this.serialNumber));
+        }
     }
-
 }
