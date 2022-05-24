@@ -3,7 +3,6 @@ import java.util.*;
 
 class Solution {
 
-<<<<<<< HEAD
     static Map<Character, List<String>> rule;
     static Set<Integer> set;
 
@@ -19,7 +18,6 @@ class Solution {
 
         List<String> rule = new ArrayList<>();
     }
-=======
     public static String solution(int n, int t, int m, String[] timetable) {
         //셔틀은 n 번 t 분 간격으로 옴
         //마지막 셔틀에는 무조건 타야 한다.
@@ -96,5 +94,4 @@ class Solution {
             return time.compareTo(o.time);
         }
     }
->>>>>>> fa5cec385c2f00310e94ae5e1f7c68d7f7422510
 }

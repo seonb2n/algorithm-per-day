@@ -1,78 +1,89 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 class Main {
 
     static BufferedReader br;
     static int N;
-    static int[] numbers;
-
-    static List<Integer> result;
-    //numbers 의 각각의 숫자가 몇 번째 index 에 들어갔는지를 기록하는 배열
-    static int[] numberIndex;
-    static Stack<Integer> stack;
+    static int C;
+    static int E;
+    static int[][] map;
+    static int[] x_moves = {-1, 0, 1, 0};
+    static int[] y_moves = {0, -1, 0, 1};
 
     public static void main(String[] args) throws IOException {
         StringBuilder sb = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-        numbers = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        result = new ArrayList<>();
-        numberIndex = new int[numbers.length];
-        result.add(Integer.MIN_VALUE);
-        stack = new Stack<>();
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        C = Integer.parseInt(st.nextToken());
+        E = Integer.parseInt(st.nextToken());
 
-        //이분탐색을 이용해서 result 를 채워준다.
-        for (int i = 0; i < numbers.length; i++) {
-            int nowNumber = numbers[i];
+        map = new int[N][N];
 
-            //nowNumber 은 result 에 있는 숫자 중에 자기보다 작은 것 다음 위치에 들어간다.
-            int left = 0;
-            int right = result.size()-1;
-            if(nowNumber > result.get(result.size() - 1)) {
-                result.add(nowNumber);
-                numberIndex[i] = result.size() - 1;
+        if(fillC() && fillE()) {
+            System.out.println(1);
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    sb.append(map[i][j]);
+                }
+                sb.append("\n");
+            }
+            System.out.println(sb);
+        } else {
+            System.out.println(-1);
+        }
+    }
+
+    //N-1, N-1 에서부터 좌하단 방향으로 맵을 채운다.
+    private static boolean fillE() {
+        int nowY = N-1;
+        int nowX = N-1;
+        for (int i = 0; i < E; i++) {
+            if(inArea(nowY, nowX) && map[nowY][nowX] == 0 && isNear(nowY, nowX)) {
+                //맵을 채우고자 할 때, C랑 겹쳐서는 안된다.
+                map[nowY][nowX] = 2;
             }
             else {
-                while(left < right) {
-                    int mid = (left + right) / 2;
-                    if(result.get(mid) >= nowNumber) {
-                        right = mid;
-                    }
-                    else {
-                        left = mid + 1;
-                    }
-                }
-                result.set(right, nowNumber);
-                numberIndex[i] = right;
+                return false;
             }
+
+            //다음 위치로 nowY, nowX 조정
         }
 
-        sb.append(result.size()-1);
-        sb.append("\n");
+        return true;
+    }
 
-        //resultIndex 에 들어있는 것을 바탕으로 역순으로 가져온다.
-        int startSize = result.size() - 1;
-        for (int i = numberIndex.length - 1; i >= 0; i--) {
-            if(numberIndex[i] == startSize) {
-                stack.push(numbers[i]);
-                startSize--;
+    //0,0 에서부터 우상단 방향으로 맵을 채운다.
+    private static boolean fillC() {
+        int nowY = 0;
+        int nowX = 0;
+        for (int i = 0; i < C; i++) {
+            if(inArea(nowY, nowX) && map[nowY][nowX] == 0) {
+                map[nowY][nowX] = 1;
             }
-            if(startSize == 0) {
-                break;
+            else {
+                return false;
+            }
+            //다음 위치로 nowY, nowX 조정
+        }
+        return true;
+    }
+
+    private static boolean inArea(int y, int x) {
+        return 0 <= y && y < N && 0 <= x && x < N;
+    }
+
+    private static boolean isNear(int y, int x) {
+        for (int i = 0; i < 4; i++) {
+            int ny = y + y_moves[i];
+            int nx = x + x_moves[i];
+            if(map[ny][nx] == 1) {
+                return true;
             }
         }
-
-        while (!stack.empty()) {
-            sb.append(stack.pop());
-            sb.append(" ");
-        }
-
-        System.out.println(sb);
+        return false;
     }
 }
