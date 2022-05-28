@@ -42,15 +42,36 @@ class Main {
         int nowY = N-1;
         int nowX = N-1;
         for (int i = 0; i < E; i++) {
-            if(inArea(nowY, nowX) && map[nowY][nowX] == 0 && isNear(nowY, nowX)) {
+            if(inArea(nowY, nowX) && map[nowY][nowX] == 0 && !isNear(nowY, nowX)) {
                 //맵을 채우고자 할 때, C랑 겹쳐서는 안된다.
                 map[nowY][nowX] = 2;
             }
             else {
                 return false;
             }
-
             //다음 위치로 nowY, nowX 조정
+            //합이 N 보다 크다는 것은 대각선 넘어로 갔다는 뜻
+            if(nowY + nowX <= N-2) {
+                if(nowX == 0) {
+                    nowX = nowY - 1;
+                    nowY = 0;
+                }
+                else {
+                    nowX += 1;
+                    nowY -= 1;
+                }
+
+            } else {
+                if(nowY == N-1) {
+                    nowY = nowX - 1;
+                    nowX = N - 1;
+                }
+                else {
+                    nowY += 1;
+                    nowX -= 1;
+                }
+            }
+
         }
 
         return true;
@@ -68,6 +89,27 @@ class Main {
                 return false;
             }
             //다음 위치로 nowY, nowX 조정
+            //합이 N 보다 크다는 것은 대각선 넘어로 갔다는 뜻
+            if(nowY + nowX >= N-2) {
+                if(nowX == N-1) {
+                    nowX = nowY + 1;
+                    nowY = N;
+                }
+                else {
+                    nowX += 1;
+                    nowY -= 1;
+                }
+
+            } else {
+                if(nowY == 0) {
+                    nowY = nowX + 1;
+                    nowX = 0;
+                }
+                else {
+                    nowY -= 1;
+                    nowX += 1;
+                }
+            }
         }
         return true;
     }
@@ -80,7 +122,7 @@ class Main {
         for (int i = 0; i < 4; i++) {
             int ny = y + y_moves[i];
             int nx = x + x_moves[i];
-            if(map[ny][nx] == 1) {
+            if(inArea(ny, nx) && map[ny][nx] == 1) {
                 return true;
             }
         }
