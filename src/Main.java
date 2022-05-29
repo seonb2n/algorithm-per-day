@@ -51,17 +51,23 @@ class Main {
             }
             //다음 위치로 nowY, nowX 조정
             //합이 N 보다 크다는 것은 대각선 넘어로 갔다는 뜻
-            if(nowY + nowX <= N-2) {
+            if(nowY == N-1 && nowX == 0) {
+                nowY = 0;
+                nowX = N-2;
+
+            }
+            else if(nowX + nowY <= N-2) {
                 if(nowX == 0) {
                     nowX = nowY - 1;
                     nowY = 0;
                 }
                 else {
-                    nowX += 1;
-                    nowY -= 1;
+                    nowY += 1;
+                    nowX -= 1;
                 }
+            }
 
-            } else {
+            else {
                 if(nowY == N-1) {
                     nowY = nowX - 1;
                     nowX = N - 1;
@@ -90,17 +96,21 @@ class Main {
             }
             //다음 위치로 nowY, nowX 조정
             //합이 N 보다 크다는 것은 대각선 넘어로 갔다는 뜻
-            if(nowY + nowX >= N-2) {
+            if(nowX == N-1 && nowY == 0) {
+                nowY = N-1;
+                nowX = 1;
+            }
+            else if(nowX + nowY >= N) {
                 if(nowX == N-1) {
                     nowX = nowY + 1;
-                    nowY = N;
+                    nowY = N-1;
                 }
                 else {
-                    nowX += 1;
                     nowY -= 1;
+                    nowX += 1;
                 }
-
-            } else {
+            }
+            else {
                 if(nowY == 0) {
                     nowY = nowX + 1;
                     nowX = 0;
