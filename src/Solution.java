@@ -1,74 +1,71 @@
 import java.util.Arrays;
+import java.util.HashSet;
 
 class Solution {
-    static Ship[] ships;
-    static int maxTime;
-    static int restFuel;
-    static double ratioSum;
+    static HashSet<String> answerSet = new HashSet<>();
+    static String[] userIds;
+    static String[] bannedIds;
 
     public static void main(String[] args) {
-        int[] powers = {20, 30};
-        int[] distances = {750, 675};
-        solution(8, powers, distances);
+        String[] user_id = {"frodo", "fradi", "crodo", "abc123", "frodoc"};
+        String[] banned_id = {"*rodo", "*rodo", "******"};
+        solution(user_id, banned_id);
     }
 
-    public static int solution(int fuel, int[] powers, int[] distances) {
-        ships = new Ship[powers.length];
-        maxTime = 0;
-        ratioSum = 0;
-        restFuel = fuel;
+    public static int solution(String[] user_id, String[] banned_id) {
+        boolean[] isVisited = new boolean[user_id.length];
 
-        for (int i = 0; i < powers.length; i++) {
-            ships[i] = new Ship(powers[i], distances[i]);
-            ratioSum += ships[i].ratio;
+        userIds = new String[user_id.length];
+        System.arraycopy(user_id, 0, userIds, 0, user_id.length);
+        bannedIds = new String[banned_id.length];
+        System.arraycopy(banned_id, 0, bannedIds, 0, banned_id.length);
+
+        //dfs 로 banned_id 와 user_id 를 비교하고
+        //비교한 결과를 hashSet 으로 추가한다.
+        StringBuilder sb = new StringBuilder();
+        DFS(isVisited, sb, 0, banned_id.length);
+
+
+        return answerSet.size();
+    }
+
+    public static boolean isSame(String bannedId, String userId) {
+        if (bannedId.length() != userId.length()) {
+            return false;
         }
-
-        if(fuel == powers.length) {
-            for (int i = 0; i < ships.length; i++) {
-                double dis = ships[i].distance;
-                int pw = ships[i].power;
-                maxTime = Math.max(maxTime, (int)(dis - (pw / 2)) / pw + 1);
+        for (int i = 0; i < bannedId.length(); i++) {
+            if (bannedId.charAt(i) != '*' && (bannedId.charAt(i) != userId.charAt(i))) {
+                return false;
             }
-            return (int)Math.ceil(maxTime);
         }
-
-        Arrays.sort(ships);
-
-        for (int i = 0; i < ships.length-1; i++) {
-            int nowFuel = (int) Math.round(fuel * (ships[i].ratio / ratioSum));
-            maxTime = Math.max(maxTime, getTime(i, nowFuel));
-            restFuel -= nowFuel;
-        }
-
-        maxTime = Math.max(maxTime, getTime(ships.length-1, restFuel));
-
-        return maxTime;
+        return true;
     }
 
-    public static int getTime(int shipNumber, int fuel) {
-        double dis = ships[shipNumber].distance;
-        int pw = ships[shipNumber].power;
-
-        double temp = dis / (pw * fuel);
-        temp = temp + temp / 2;
-
-        return (int)Math.ceil(temp);
+    public static void DFS(boolean[] nowVisit, StringBuilder sb, int nowIndex, int lastIndex) {
+        if (nowIndex == lastIndex) {
+            //중복된 값이 없도록 sb 에 있던 값들을 정렬해줘야 한다.
+            int[] ans = new int[sb.length()];
+            for (int i = 0; i < sb.length(); i++) {
+                ans[i] = Character.getNumericValue(sb.charAt(i));
+            }
+            Arrays.sort(ans);
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < ans.length; i++) {
+                result.append(ans[i]);
+            }
+            answerSet.add(result.toString());
+        } else {
+            String nowBannedId = bannedIds[nowIndex];
+            for (int i = 0; i < userIds.length; i++) {
+                if (!nowVisit[i] && isSame(nowBannedId, userIds[i])) {
+                    nowVisit[i] = true;
+                    sb.append(i);
+                    DFS(nowVisit, sb, nowIndex + 1, lastIndex);
+                    nowVisit[i] = false;
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+            }
+        }
     }
 
-    public static class Ship implements Comparable<Ship>{
-        int power;
-        int distance;
-        double ratio;
-
-        public Ship(int power, int distance) {
-            this.power = power;
-            this.distance = distance;
-            this.ratio = (double)distance / power;
-        }
-
-        @Override
-        public int compareTo(Ship o) {
-            return (int) (o.ratio - this.ratio);
-        }
-    }
 }
