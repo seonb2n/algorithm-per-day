@@ -1,66 +1,105 @@
+import javax.swing.plaf.IconUIResource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.*;
 
 class Main {
 
+    static ArrayList<Node>[] graph;
     static BufferedReader br;
     static int N;
-    static int[] numbers;
+    static int M;
+    static int count;
+    static int[] dist;
+    static int[] route;
 
     public static void main(String[] args) throws IOException {
         StringBuilder sb = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
         N = Integer.parseInt(br.readLine());
-        numbers = new int[10];
+        M = Integer.parseInt(br.readLine());
 
-        int startNumber = 1;
-        int endNumber = N;
-        int digit = 1;
+        graph = new ArrayList[N+1];
+        route = new int[N+1];
 
-        while (startNumber <= endNumber) {
-            //끝자리를 9 로 만들 때까지 빼준다.
-            while (endNumber % 10 != 9 && startNumber <= endNumber) {
-                addNumber(endNumber, digit);
-                endNumber--;
-            }
-
-            if(endNumber < startNumber) {
-                break;
-            }
-
-            //끝자리를 0으로 만들떄까지 더해준다.
-            while(startNumber % 10 != 0 && startNumber <= endNumber) {
-                addNumber(startNumber, digit);
-                startNumber++;
-            }
-
-            startNumber /= 10;
-            endNumber /= 10;
-
-            int addCount = (endNumber - startNumber + 1) * digit;
-
-            for (int i = 0; i < numbers.length; i++) {
-                numbers[i] += addCount;
-            }
-
-            digit = digit * 10;
-
+        for (int i = 1; i <= N; i++) {
+            graph[i] = new ArrayList<>();
         }
 
-        for (int i = 0; i < numbers.length; i++) {
-            sb.append(numbers[i]);
-            sb.append(" ");
+        for (int i = 0; i < M; i++) {
+            st = new StringTokenizer(br.readLine());
+            int startPoint = Integer.parseInt(st.nextToken());
+            int endPoint = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
+            graph[startPoint].add(new Node(endPoint, cost));
+        }
+
+        st = new StringTokenizer(br.readLine());
+        int start = Integer.parseInt(st.nextToken());
+        int end = Integer.parseInt(st.nextToken());
+
+        dijkstra(start);
+        sb.append(dist[end] + "\n");
+        Stack<Integer> stack = new Stack<>();
+        stack.push(end);
+
+        while (route[end] != 0) {
+            count += 1;
+            stack.push(route[end]);
+            end = route[end];
+        }
+
+        sb.append(count+1);
+        sb.append("\n");
+        while (!stack.isEmpty()) {
+            sb.append(stack.pop() + " ");
         }
 
         System.out.println(sb);
+
     }
 
+    private static void dijkstra(int startPoint) {
 
-    public static void addNumber(int x, int digit) {
-        while (x > 0) {
-            numbers[x % 10] += digit;
-            x /= 10;
+        Queue<Node> queue = new LinkedList<>();
+        dist = new int[N+1];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+
+        dist[startPoint] = 0;
+        queue.offer(new Node(startPoint, 0));
+
+        while (!queue.isEmpty()) {
+            Node nowNode = queue.poll();
+            int nowPoint = nowNode.next;
+
+            for (Node next : graph[nowPoint]) {
+                if(dist[next.next] > dist[nowPoint] + next.cost) {
+                    dist[next.next] = dist[nowPoint] + next.cost;
+
+                    route[next.next] = nowPoint;
+                    queue.offer(new Node(next.next, dist[next.next]));
+                }
+            }
         }
     }
+
+    public static class Node implements Comparable<Node> {
+        public int next;
+        public int cost;
+
+        public Node(int next, int cost) {
+            this.next = next;
+            this.cost = cost;
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            return cost - o.cost;
+        }
+    }
+
+
 }
