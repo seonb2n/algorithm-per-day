@@ -2,44 +2,59 @@ import java.util.*;
 
 class Solution {
 
+    static long sumOne;
+
+    static long sumTwo;
+
+    static Queue<Integer> queueOne = new LinkedList<>();
+    static Queue<Integer> queueTwo = new LinkedList<>();
+
+
     public static void main(String[] args) {
-        String test = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        System.out.println(solution(test));
+        int[] queue1 = {1,1,1,8,10,9};
+        int[] queue2 = {1,1,1,1,1,1};
+        System.out.println(solution(queue1, queue2));
     }
 
-    public static int solution(String s) {
-        String origin = s;
-        int stringSize = s.length();
-        int answer = stringSize;
+    public static int solution(int[] queue1, int[] queue2) {
+        sumOne = 0;
+        sumTwo = 0;
+        int answer = -2;
+        for (int i = 0; i < queue1.length; i++) {
+            sumOne += queue1[i];
+            sumTwo += queue2[i];
 
-        for (int i = 1; i <= stringSize; i++) {
-            //i 크기만큼 압축을 진행한다.
-            String nowPattern = origin.substring(0, i);
-            int nowPatternNumber = 1;
-            int nowAnswer = stringSize;
-            //문자열을 처음부터 끝까지 훓는다.
-            int nowIndex = i;
-            while (nowIndex < stringSize) {
-                String nextPattern = origin.substring(nowIndex, Math.min(nowIndex + i, stringSize));
-                //다음 글자가 지금 패턴과 일치한다면
-                if(nowPattern.equals(nextPattern)) {
-                    nowPatternNumber++;
-                }
-                else {
-                    //일치하지 않는 경우에는 지금 패턴을 업데이트해준다.
-                    nowAnswer = nowAnswer - Math.max(0, (i * nowPatternNumber - (i + String.valueOf(nowPatternNumber).length())));
-                    nowPattern = nextPattern;
-                    nowPatternNumber = 1;
-                }
-                nowIndex = nowIndex + i;
-            }
-            //마지막 패턴에 대한 처리도 해줘야 함.
-            nowAnswer = nowAnswer - Math.max(0, (i * nowPatternNumber - (i + String.valueOf(nowPatternNumber).length())));
-            answer = Math.min(answer, nowAnswer);
-
+            queueOne.offer(queue1[i]);
+            queueTwo.offer(queue2[i]);
         }
+
+        //greedy 알고리즘으로 목표치에 근사하게 값을 만들어준다.
+        int count = 0;
+        while (sumOne != sumTwo) {
+            if(sumOne > sumTwo) {
+                var targetNumber = queueOne.poll();
+                sumTwo += targetNumber;
+                sumOne -= targetNumber;
+                queueTwo.offer(targetNumber);
+            }
+            else {
+                var targetNumber = queueTwo.poll();
+                sumOne += targetNumber;
+                sumTwo -= targetNumber;
+                queueOne.offer(targetNumber);
+            }
+            count++;
+
+            //모든 경우를 다 돌은 경우면 break
+            if(count > (queue1.length + queue2.length + 2)) {
+                answer = -1;
+                return answer;
+            }
+        }
+        answer = count;
 
         return answer;
     }
+
 
 }
