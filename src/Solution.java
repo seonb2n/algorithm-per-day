@@ -2,136 +2,122 @@ import java.util.*;
 
 class Solution {
 
-    static List<Node> nodeList;
-    static PriorityQueue<Point> priorityQueue;
-    static boolean[][] isVisited;
-    static int minIntensity;
-    static int[] answer;
-
-    public static void main(String[] args) {
-        int[][] paths = {{1, 4, 4}, {1, 6, 1}, {1, 7, 3}, {2, 5, 2}, {3, 7, 4}, {5, 6, 6}};
-        int[] gates = {1};
-        int[] summits = {2, 3, 4};
-        solution(6, paths, gates, summits);
-    }
+    private static List<List<Node>> graph;
 
     public static int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
-
-        nodeList = new ArrayList<>();
-        minIntensity = 0;
-
-        //n번째 노드까지 추가해준다.
-        for (int i = 0; i < n + 1; i++) {
-            nodeList.add(new Node());
+        graph = new ArrayList<>();
+        for (int i = 0; i <= n; i++) {
+            graph.add(new ArrayList<>());
         }
 
-        for (int[] path : paths) {
-            int nodeOne = path[0];
-            int nodeTwo = path[1];
-            int intensity = path[2];
+        for (int[] path: paths) {
+            int start = path[0];
+            int end = path[1];
+            int weight = path[2];
 
-            //현재 경로 탐색 중 최대의 피로도를 초기값으로 가진다.
-            minIntensity = Math.max(intensity, minIntensity);
-
-            nodeList.get(nodeOne).toNode.add(new Point(nodeTwo, intensity));
-            nodeList.get(nodeTwo).toNode.add(new Point(nodeOne, intensity));
+            //gate 인 경우에는 다른 곳으로만 갈 수 있다.
+            if (isGate(gates, start)) {
+                graph.get(start).add(new Node(end, weight));
+            }
+            else if (isGate(gates, end)) {
+                graph.get(end).add(new Node(start, weight));
+            }
+            //산봉우리인 경우에는 산봉우리로만 올 수 있다.
+            else if (isSummit(summits, start)) {
+                graph.get(end).add(new Node(start, weight));
+            }
+            else if (isSummit(summits, end)) {
+                graph.get(start).add(new Node(end, weight));
+            }
+            else {
+                graph.get(start).add(new Node(end, weight));
+                graph.get(end).add(new Node(start, weight));
+            }
         }
 
-        for (int gateNumber : gates) {
-            nodeList.get(gateNumber).isGate = true;
+        //다익스라를 사용해서 각 정상까지 도착하는데 필요한 intensity 를 구함
+        return dijkstra(n, gates, summits);
+    }
+
+    public static int[] dijkstra(int n, int[] gates, int[] summits) {
+        Queue<Node> queue = new LinkedList<>();
+        //i 번 노드까지 가는데 필요한 min intensity
+        int[] intensity = new int[n+1];
+
+        Arrays.fill(intensity, Integer.MAX_VALUE);
+
+        //모든 출발지점을 queue 에 추가
+        for (int gate: gates) {
+            queue.add(new Node(gate, 0));
+            intensity[gate] = 0;
         }
 
-        for (int summitNumber : summits) {
-            nodeList.get(summitNumber).isSummit = true;
+        while (!queue.isEmpty()) {
+            Node nowNode = queue.poll();
+
+            //이미 현재 노드의 weight 가 intensity 보다 커지면 해당 케이스 skip
+            if (nowNode.weight > intensity[nowNode.end]) {
+                continue;
+            }
+
+            //지금 노드가 방문할 수 있는 노드를 모두 탐색한다.
+            for (int i = 0; i < graph.get(nowNode.end).size(); i++) {
+                Node nextNode = graph.get(nowNode.end).get(i);
+
+                //다음 노드로 가는데 필요한 피로도는, 다음 노드에 기록되어 있는 피로도와 지금 가중치의 비교
+                int nextIntensity = Math.max(intensity[nowNode.end], nextNode.weight);
+
+                //intensity 에 존재하는 값보다 현재의 피로도가 더 작다면 업데이트를 해준다.
+                if (intensity[nextNode.end] > nextIntensity) {
+                    intensity[nextNode.end] = nextIntensity;
+                    queue.add(new Node(nextNode.end, nextIntensity));
+                }
+            }
         }
 
-        //BFS 탐색
-        answer = new int[2];
+        int[] answer = new int[2];
         answer[0] = Integer.MAX_VALUE - 1;
-        answer[1] = minIntensity;
+        answer[1] = Integer.MAX_VALUE - 1;
 
-        for (int gate : gates) {
-            priorityQueue = new PriorityQueue<>();
-            isVisited = new boolean[n + 1][n + 1];
-            priorityQueue.offer(new Point(gate, 0));
-            BFS();
+        Arrays.sort(summits);
+
+        for (int summit: summits) {
+            if (intensity[summit] < answer[1]) {
+                answer[0] = summit;
+                answer[1] = intensity[summit];
+            }
         }
 
         return answer;
     }
 
-    //각각의 gate 에서 출발해서 정상에 도착할 때마다 intensity 를 업데이트해주는 BFS
-    public static void BFS() {
-        while (!priorityQueue.isEmpty()) {
-            Point nowPoint = priorityQueue.poll();
-            Node nowNode = nodeList.get(nowPoint.nowNode);
-
-            //만약 지금 intensity 가 answer[1] 을 넘었다면 더 이상 탐색할 필요가 없다.
-            if (nowPoint.intensity > answer[1]) {
-                return;
-            }
-
-            //만약 지금 위치가 산의 정상이라면 intensity 를 업데이트해준다.
-            //가장 먼저 도착한 산의 정상은 가장 적은 피로도로 도착한 것이다.
-            if (nowNode.isSummit) {
-                if (nowPoint.intensity < answer[1]) {
-                    answer[0] = nowPoint.nowNode;
-                    answer[1] = nowPoint.intensity;
-                } else if (nowPoint.intensity == answer[1]) {
-                    if (answer[0] > nowPoint.nowNode) {
-                        answer[0] = nowPoint.nowNode;
-                    }
-                }
-            } else {
-                // 아직 피로도도 answer[1] 보다 작고 산의 정상도 아니라면 다음 노드를 탐색한다.
-                for (int i = 0; i < nowNode.toNode.size(); i++) {
-                    Point nextPoint = nowNode.toNode.get(i);
-
-                    // 다음 방문할 노드가 gate 인 경우는 skip
-                    if (nodeList.get(nextPoint.nowNode).isGate) {
-                        continue;
-                    }
-
-                    // 다음 방문할 노드가 아직 방문 안한 노드라면
-                    if (!isVisited[nowPoint.nowNode][nextPoint.nowNode] && !isVisited[nextPoint.nowNode][nowPoint.nowNode]) {
-                        int nextIntensity = Math.max(nowPoint.intensity, nextPoint.intensity);
-                        priorityQueue.offer(new Point(nextPoint.nowNode, nextIntensity));
-                        isVisited[nowPoint.nowNode][nextPoint.nowNode] = true;
-                        isVisited[nextPoint.nowNode][nowPoint.nowNode] = true;
-                    }
-                }
+    public static boolean isGate(int[] gates, int point) {
+        for (int i = 0; i < gates.length; i++) {
+            if (gates[i] == point) {
+                return true;
             }
         }
-    }
-}
-
-//현재 위치에 오기까지 얼만큼의 intensity 로 왔는지를 의미함
-class Point implements Comparable<Point> {
-    int nowNode;
-    int intensity;
-
-    public Point(int nowNode, int intensity) {
-        this.nowNode = nowNode;
-        this.intensity = intensity;
+        return false;
     }
 
-    @Override
-    public int compareTo(Point o) {
-        return this.intensity - o.intensity;
+    public static boolean isSummit(int[] summits, int point) {
+        for (int i = 0; i < summits.length; i++) {
+            if (summits[i] == point) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
 //산의 각 지점
 class Node {
 
-    //현재 노드에서 갈 수 있는 node 와 그 intensity
-    List<Point> toNode;
-    boolean isGate;
-    boolean isSummit;
+    int end;
+    int weight;
 
-    public Node() {
-        this.toNode = new ArrayList<>();
-        isGate = false;
-        isSummit = false;
+    public Node(int e, int w) {
+        this.end = e;
+        this.weight = w;
     }
 }
