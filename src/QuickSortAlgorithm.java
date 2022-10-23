@@ -35,12 +35,12 @@ public class QuickSortAlgorithm {
 
         while (low < high) {
 
-            // 오른쪽 수 중에 pivot 보다 큰 수를 찾는다.
+            // 오른쪽 수 중에 pivot 보다 작은 수를 찾는다.
             while (a[high] > pivot && low < high) {
                 high--;
             }
 
-            // 왼쪽 수 중에 pivot 보다 작거나 같은 수를 찾는다.
+            // 왼쪽 수 중에 pivot 보다 크거나 같은 수를 찾는다.
             while (a[low] <= pivot && low < high) {
                 low++;
             }
