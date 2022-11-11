@@ -1,32 +1,35 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Solution {
+
     /**
-     * N 을 이진수로 변환했을 때, 1 사이에 있는 가장 긴 0의 연속을 구해야 함.
-     * @param N
+     * A,B,C 중 하나라도 conform 하는 integer 의 총 개수
+     *
+     * @param A
+     * @param B
+     * @param C
      * @return
      */
-    public int solution(int N) {
-        int result  = 0;
-        String binaryString = Integer.toBinaryString(N);
 
-        // 전체 탐색
-        int nowLen = 0;
-        for (int i = 0; i < binaryString.length()-1; i++) {
-            if (binaryString.charAt(i) == '1') {
-                result = Math.max(result, nowLen);
-                nowLen = 0;
-            }
-            else {
-                nowLen++;
+    public static int solution(int A, int B, int C) {
+        return findNumber(A) + findNumber(B) + findNumber(C) - findNumber(A | B) - findNumber(A | C) - findNumber(B | C) + findNumber(A | B | C);
+    }
+
+    static int findNumber(int target) {
+        //target 을 30 자리로 만듦
+        StringBuilder binaryTarget = new StringBuilder(Integer.toBinaryString(target));
+        while (binaryTarget.length() < 30) {
+            binaryTarget.insert(0, "0");
+        }
+        int result = 1;
+        for (int i = 0; i < 30; i++) {
+            if (binaryTarget.charAt(i) == '0') {
+                result *= 2;
             }
         }
-
-        // 마지막 숫자가 1이면 비교를 한다.
-        if (binaryString.charAt(binaryString.length()-1) == '1') {
-            result = Math.max(result, nowLen);
-        }
-
         return result;
     }
+
 }
+
