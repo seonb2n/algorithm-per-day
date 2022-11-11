@@ -1,29 +1,32 @@
 import java.util.*;
 
 class Solution {
+    /**
+     * N 을 이진수로 변환했을 때, 1 사이에 있는 가장 긴 0의 연속을 구해야 함.
+     * @param N
+     * @return
+     */
+    public int solution(int N) {
+        int result  = 0;
+        String binaryString = Integer.toBinaryString(N);
 
-    public static void main(String[] args) {
-
-    }
-
-
-    public static int solution(int[] A) {
-        // write your code in Java SE 8
-        HashSet<Integer> set = new HashSet<Integer>();
-
-        int result = 1;
-        for (int j : A) {
-            set.add(j);
-        }
-
-        while (true) {
-            if(set.contains(result)) {
-                result++;
+        // 전체 탐색
+        int nowLen = 0;
+        for (int i = 0; i < binaryString.length()-1; i++) {
+            if (binaryString.charAt(i) == '1') {
+                result = Math.max(result, nowLen);
+                nowLen = 0;
             }
             else {
-                break;
+                nowLen++;
             }
         }
+
+        // 마지막 숫자가 1이면 비교를 한다.
+        if (binaryString.charAt(binaryString.length()-1) == '1') {
+            result = Math.max(result, nowLen);
+        }
+
         return result;
     }
 }
