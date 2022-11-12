@@ -1,35 +1,88 @@
 import java.util.*;
-import java.util.stream.Collectors;
 
 class Solution {
 
     /**
-     * A,B,C 중 하나라도 conform 하는 integer 의 총 개수
-     *
+     * A,B 개수만큼 이루어진 배열을 조합해라. 단 3개 이상 같은 문자가 연속할 수 없다.
      * @param A
      * @param B
-     * @param C
      * @return
      */
+    static StringBuilder sb = new StringBuilder();
 
-    public static int solution(int A, int B, int C) {
-        return findNumber(A) + findNumber(B) + findNumber(C) - findNumber(A | B) - findNumber(A | C) - findNumber(B | C) + findNumber(A | B | C);
-    }
-
-    static int findNumber(int target) {
-        //target 을 30 자리로 만듦
-        StringBuilder binaryTarget = new StringBuilder(Integer.toBinaryString(target));
-        while (binaryTarget.length() < 30) {
-            binaryTarget.insert(0, "0");
+    public String solution(int A, int B) {
+        if (A == 0) {
+            while (B > 0) {
+                sb.append('b');
+                B--;
+            }
+            return sb.toString();
         }
-        int result = 1;
-        for (int i = 0; i < 30; i++) {
-            if (binaryTarget.charAt(i) == '0') {
-                result *= 2;
+
+        if (B == 0) {
+            while (A > 0) {
+                sb.append('a');
+                A--;
+            }
+            return sb.toString();
+        }
+
+        // A 와 B 의 개수를 같게 만들어준다.
+        if (A > B) {
+            while (A != B && A > 0 && B > 0) {
+                sb.append('a');
+                A--;
+                sb.append('a');
+                A--;
+                sb.append('b');
+                B--;
+            }
+            // A B 하나씩 번갈아가면서 더하거나, 남은 한쪽만 더함.
+            while (A != 0 || B != 0) {
+                if (A != 0) {
+                    sb.append('a');
+                    A--;
+                }
+                if (B != 0) {
+                    sb.append('b');
+                    B--;
+                }
             }
         }
-        return result;
+        else if (A < B) {
+            while (A != B && A > 0 && B > 0) {
+                sb.append('b');
+                B--;
+                sb.append('b');
+                B--;
+                sb.append('b');
+                A--;
+            }
+            // A B 하나씩 번갈아가면서 더하거나, 남은 한쪽만 더함.
+            while (A != 0 || B != 0) {
+                if (B != 0) {
+                    sb.append('b');
+                    B--;
+                }
+                if (A != 0) {
+                    sb.append('a');
+                    A--;
+                }
+            }
+        }
+        else {
+            while (A != 0 || B != 0) {
+                if (B != 0) {
+                    sb.append('b');
+                    B--;
+                }
+                if (A != 0) {
+                    sb.append('a');
+                    A--;
+                }
+            }
+        }
+        return sb.toString();
     }
-
 }
 
