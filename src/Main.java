@@ -1,110 +1,74 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.*;
 
 class Main {
 
-    static ArrayList<Node>[] graph;
-    static BufferedReader br;
     static int N;
-    static int M;
-    static int count;
-    static int[] dist;
-    static int[] route;
-    static int end;
+    static int cases;
+    static int[][] memo;
+    static Node[] caseArr;
 
+    /**
+     * https://www.acmicpc.net/problem/2618
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-        br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
-
         N = Integer.parseInt(br.readLine());
-        M = Integer.parseInt(br.readLine());
+        cases = Integer.parseInt(br.readLine());
 
-        graph = new ArrayList[N + 1];
-        route = new int[N + 1];
+        caseArr = new Node[cases+1];
 
-        for (int i = 1; i <= N; i++) {
-            graph[i] = new ArrayList<>();
+        for (int i = 1; i <= cases; i++) {
+            String[] tmp = br.readLine().split(" ");
+            Node node = new Node(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]));
+            caseArr[i] = node;
         }
 
-        for (int i = 0; i < M; i++) {
-            st = new StringTokenizer(br.readLine());
-            int startPoint = Integer.parseInt(st.nextToken());
-            int endPoint = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
-            graph[startPoint].add(new Node(endPoint, cost));
+        //A 경찰차와 B 경찰차가 각각 i, j 케이스를 해결했을 때 총 이동한 거리
+        memo = new int[cases+1][cases+1];
+
+        for (int i = 0; i <= cases; i++) {
+            Arrays.fill(memo[i], Integer.MAX_VALUE-1);
         }
 
-        st = new StringTokenizer(br.readLine());
-        int start = Integer.parseInt(st.nextToken());
-        end = Integer.parseInt(st.nextToken());
+        memo[0][0] = 0;
+        memo[1][0] = caseArr[1].y + caseArr[1].x;
+        memo[0][1] = Math.abs(N - caseArr[1].y) + Math.abs(N - caseArr[1].x);
 
-        dijkstra(start);
-        sb.append(dist[end]).append("\n");
-
-        StringBuilder sb2 = new StringBuilder();
-
-        while (route[end] != 0) {
-            count += 1;
-            sb2.insert(0, end);
-            sb2.insert(0, " ");
-            end = route[end];
-        }
-
-        sb2.insert(0, start);
-
-        sb.append(count + 1);
-        sb.append("\n");
-        sb.append(sb2);
-        System.out.println(sb);
-
-    }
-
-    private static void dijkstra(int startPoint) {
-        // 최소 비용 순으로 정렬한다.
-        PriorityQueue<Node> queue = new PriorityQueue<>();
-        dist = new int[N + 1];
-        Arrays.fill(dist, Integer.MAX_VALUE);
-
-        dist[startPoint] = 0;
-        queue.offer(new Node(startPoint, 0));
-        while (!queue.isEmpty()) {
-            Node nowNode = queue.poll();
-            int nowPoint = nowNode.next;
-
-            // 다음 노드가 목적지인 경우엔 더 이상 탐색할 필요가 없다.
-            if (nowPoint == end) {
-                return;
-            }
-
-            for (Node next : graph[nowPoint]) {
-                if (dist[next.next] > dist[nowPoint] + next.cost) {
-                    dist[next.next] = dist[nowPoint] + next.cost;
-                    route[next.next] = nowPoint;
-
-                    queue.offer(new Node(next.next, dist[next.next]));
-
-                }
+        //todo 현재 지점부터 탐색하면서 i, j 둘 중 하나는 마지막에 도달해야 함.
+        for (int i = 1; i <= cases; i++) {
+            for (int j = 0; j < i; j++) {
+                memo[i][j]
             }
         }
+
+        System.out.println(memo[cases][cases]);
     }
 
-    public static class Node implements Comparable<Node> {
-        public int next;
-        public int cost;
+    public static int getDist(int next, int now) {
+        int nowY = caseArr[now].y;
+        int nowX = caseArr[now].x;
 
-        public Node(int next, int cost) {
-            this.next = next;
-            this.cost = cost;
-        }
+        int nextY = caseArr[next].y;
+        int nextX = caseArr[next].x;
 
-        @Override
-        public int compareTo(Node o) {
-            return cost - o.cost;
-        }
+        return Math.abs(nowY - nextY) + Math.abs(nowX - nextX);
     }
 
+    public static class Node {
+        int y;
+        int x;
+
+        public Node(int y, int x) {
+            this.y = y;
+            this.x = x;
+        }
+    }
 
 }
