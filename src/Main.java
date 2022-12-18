@@ -44,7 +44,7 @@ class Main {
         //todo 현재 지점부터 탐색하면서 i, j 둘 중 하나는 마지막에 도달해야 함.
         for (int i = 1; i <= cases; i++) {
             for (int j = 0; j < i; j++) {
-                memo[i][j]
+//                memo[i][j];
             }
         }
 

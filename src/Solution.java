@@ -1,62 +1,51 @@
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 class Solution {
-    static int[] memo;
-    static int[] dp;
+    static int [][] roads;
 
     public static void main(String[] args) {
-        int[] starts = {1, 1_000_000, 5_000_000};
-        solution(4_900_000, starts);
+        int[][] edges = {{1,2,1},{3,2,1}};
+        int[] users = {1,2,1};
+        solution(3, edges, users, 1, 2);
     }
 
-    public static int[] solution(int e, int[] starts) {
-        memo = new int[e+1];
-        dp = new int[e+1];
-        int min = 5_000_000;
-        for (int start : starts) {
-            min = Math.min(min, start);
+    public static int solution(int n, int[][] edges, int[] users, int d, int limit) {
+
+        roads = new int[n+1][n+1];
+
+        for (int i = 0; i < edges.length; i++) {
+            int from = edges[i][0];
+            int to = edges[i][1];
+            int dis = edges[i][2];
+            roads[from][to] = dis;
+            roads[to][from] = dis;
         }
 
-        // memo[n] 은 n 부터 e 까지 중의 최댓값이다.
-        // memo[n-1] 은 memo[n] 과 n-1 의 등장 횟수 중 더 큰 녀석이다.
-        e = Math.min(e, 4_324_320);
-        getCount(e);
-        dp[e] = e;
-        for (int i = e; i >= min+1; i--) {
-            getCount(i-1);
-            if (memo[i-1] >= memo[dp[i]]) {
-                dp[i-1] = i-1;
+        int[] edgePersonNumber = new int[n+1];
+        for (int i = 0; i < users.length; i++) {
+            edgePersonNumber[i+1] += users[i];
+            for (int j = 1; j < n; j++) {
+                int dist = roads[i+1][j];
+                if (dist != 0 && dist <= d) {
+                    edgePersonNumber[j] += users[i];
+                }
+            }
+        }
+
+        Arrays.sort(edgePersonNumber);
+
+        int answer = 0;
+        for (int i = 0; i < 2; i++) {
+            if (edgePersonNumber[i] >= limit) {
+                answer += limit;
+
             }
             else {
-                dp[i-1] = dp[i];
+                answer += edgePersonNumber[i];
             }
-
         }
 
-        int[] answer = new int[starts.length];
-        for (int i = 0; i < starts.length; i++) {
-            if (e >= 4324320 && starts[i] <= 4324320) {
-                answer[i] = 4324320;
-            }
-            answer[i] = dp[starts[i]];
-        }
         return answer;
     }
 
-    static void getCount(int target) {
-        int sqrt = (int) Math.sqrt(target);
-        int n = 2;
-        for (int j = 2; j <= sqrt; j++) {
-            if (target % j == 0) {
-                n+=2;
-            }
-        }
-        if (sqrt * sqrt == target) n--;
-        memo[target] = n;
-    }
 }
-
-
