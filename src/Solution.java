@@ -1,51 +1,33 @@
 import java.util.Arrays;
 
 class Solution {
-    static int [][] roads;
 
-    public static void main(String[] args) {
-        int[][] edges = {{1,2,1},{3,2,1}};
-        int[] users = {1,2,1};
-        solution(3, edges, users, 1, 2);
-    }
+    private static final int[] noAnswer = {-1};
 
-    public static int solution(int n, int[][] edges, int[] users, int d, int limit) {
+    static int sum = 0;
 
-        roads = new int[n+1][n+1];
+    public int[] solution(int n, int s) {
+        int[] answer = new int[n];
 
-        for (int i = 0; i < edges.length; i++) {
-            int from = edges[i][0];
-            int to = edges[i][1];
-            int dis = edges[i][2];
-            roads[from][to] = dis;
-            roads[to][from] = dis;
+        answer[0] = s / n;
+        sum += answer[0];
+        if (answer[0] == 0) {
+            return noAnswer;
         }
 
-        int[] edgePersonNumber = new int[n+1];
-        for (int i = 0; i < users.length; i++) {
-            edgePersonNumber[i+1] += users[i];
-            for (int j = 1; j < n; j++) {
-                int dist = roads[i+1][j];
-                if (dist != 0 && dist <= d) {
-                    edgePersonNumber[j] += users[i];
-                }
-            }
+        for (int i = 1; i < n; i++) {
+            answer[i] = s / n;
+            sum += answer[i];
         }
 
-        Arrays.sort(edgePersonNumber);
+        sum = s - sum;
 
-        int answer = 0;
-        for (int i = 0; i < 2; i++) {
-            if (edgePersonNumber[i] >= limit) {
-                answer += limit;
-
-            }
-            else {
-                answer += edgePersonNumber[i];
-            }
+        // 합이 s 가 될 때까지 뒤에다 더함
+        for (int i = 0; i < sum; i++) {
+            answer[n-1-i] ++;
         }
+
 
         return answer;
     }
-
 }
