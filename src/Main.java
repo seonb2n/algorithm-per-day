@@ -6,69 +6,74 @@ import java.util.*;
 
 class Main {
 
+    static BufferedReader br;
     static int N;
-    static int cases;
-    static int[][] memo;
-    static Node[] caseArr;
+    static int M;
+
+    static int ax1;
+    static int ay1;
+    static int ax2;
+    static int ay2;
+    static int bx1;
+    static int by1;
+    static int bx2;
+    static int by2;
+
+    static boolean[][] isWay;
+
+    static final String imp = "IMPOSSIBLE";
+
+    static int[] x_key = {-1, 0, 1, 0};
+    static int[] y_key = {0, -1, 0, 1};
 
     /**
-     * https://www.acmicpc.net/problem/2618
+     * https://www.acmicpc.net/problem/5022
+     *
      * @param args
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-        N = Integer.parseInt(br.readLine());
-        cases = Integer.parseInt(br.readLine());
+        br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-        caseArr = new Node[cases+1];
+        st = new StringTokenizer(br.readLine(), " ");
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        for (int i = 1; i <= cases; i++) {
-            String[] tmp = br.readLine().split(" ");
-            Node node = new Node(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]));
-            caseArr[i] = node;
-        }
+        st = new StringTokenizer(br.readLine(), " ");
+        ax1 = Integer.parseInt(st.nextToken());
+        ay1 = Integer.parseInt(st.nextToken());
 
-        //A 경찰차와 B 경찰차가 각각 i, j 케이스를 해결했을 때 총 이동한 거리
-        memo = new int[cases+1][cases+1];
+        st = new StringTokenizer(br.readLine(), " ");
+        ax2 = Integer.parseInt(st.nextToken());
+        ay2 = Integer.parseInt(st.nextToken());
 
-        for (int i = 0; i <= cases; i++) {
-            Arrays.fill(memo[i], Integer.MAX_VALUE-1);
-        }
+        st = new StringTokenizer(br.readLine(), " ");
+        bx1 = Integer.parseInt(st.nextToken());
+        by1 = Integer.parseInt(st.nextToken());
 
-        memo[0][0] = 0;
-        memo[1][0] = caseArr[1].y + caseArr[1].x;
-        memo[0][1] = Math.abs(N - caseArr[1].y) + Math.abs(N - caseArr[1].x);
+        st = new StringTokenizer(br.readLine(), " ");
+        bx2 = Integer.parseInt(st.nextToken());
+        by2 = Integer.parseInt(st.nextToken());
 
-        //todo 현재 지점부터 탐색하면서 i, j 둘 중 하나는 마지막에 도달해야 함.
-        for (int i = 1; i <= cases; i++) {
-            for (int j = 0; j < i; j++) {
-//                memo[i][j];
-            }
-        }
+        isWay = new boolean[N+1][M+1];
 
-        System.out.println(memo[cases][cases]);
+        // 1. A 의 최단 경로를 BFS 로 탐색, 탐색 후에 경로 마킹, 이때 경로상에 B 인 점이 있으면 안된다.
+        // 2. B 의 최단 경로를 BFS 로 탐색하되, A 의 경로는 못 지나감
+        // 3. 1, 2 의 과정을 B 를 먼저 탐색하는 것으로
+        // 4. 1,2 의 결과와 3의 결과를 비교해서 작은 쪽으로 답 제출
+
     }
 
-    public static int getDist(int next, int now) {
-        int nowY = caseArr[now].y;
-        int nowX = caseArr[now].x;
 
-        int nextY = caseArr[next].y;
-        int nextX = caseArr[next].x;
 
-        return Math.abs(nowY - nextY) + Math.abs(nowX - nextX);
+    static void BFS() {
+
     }
 
-    public static class Node {
-        int y;
-        int x;
-
-        public Node(int y, int x) {
-            this.y = y;
-            this.x = x;
-        }
+    static boolean inArea(int nowX, int nowY) {
+        return 0 <= nowX && nowX < N && 0 <= nowY && nowY < M;
     }
 
 }
