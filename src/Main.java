@@ -54,47 +54,44 @@ class Main {
         by2 = Integer.parseInt(st.nextToken());
 
         // 1. A 의 최단 경로를 BFS 로 탐색, 탐색 후에 경로 마킹, 이때 경로상에 B 인 점이 있으면 안된다.
-        int[][] map = new int[N+1][M+1];
+        int[][] map = new int[N + 1][M + 1];
         map[bx1][by1] = -1;
         map[bx2][by2] = -1;
-        int firstMinA = BFS(ax1, ay1, ax2, ay2, map);
+        int firstMinA = BFS(ax1, ay1, ax2, ay2, map, true);
 
         // 2. B 의 최단 경로를 BFS 로 탐색하되, A 의 경로는 못 지나감
-        map = new int[N+1][M+1];
+        map = new int[N + 1][M + 1];
         map[ax1][ay1] = -1;
         map[ax2][ay2] = -1;
         for (Node path : paths) {
             map[path.x][path.y] = -1;
         }
-        int firstMinB = BFS(bx1, by1, bx2, by2, map);
+        int firstMinB = BFS(bx1, by1, bx2, by2, map, false);
 
         // 3. 1, 2 의 과정을 B 를 먼저 탐색하는 것으로
-        map = new int[N+1][M+1];
+        map = new int[N + 1][M + 1];
         map[ax1][ay1] = -1;
         map[ax2][ay2] = -1;
-        int secondMinB = BFS(bx1, by1, bx2, by2, map);
+        int secondMinB = BFS(bx1, by1, bx2, by2, map, true);
 
-        map = new int[N+1][M+1];
+        map = new int[N + 1][M + 1];
         map[bx1][by1] = -1;
         map[bx2][by2] = -1;
         for (Node path : paths) {
             map[path.x][path.y] = -1;
         }
-        int secondMinA = BFS(ax1, ay1, ax2, ay2, map);
+        int secondMinA = BFS(ax1, ay1, ax2, ay2, map, false);
 
         // 4. 1,2 의 결과와 3의 결과를 비교해서 작은 쪽으로 답 제출
         if (firstMinA * firstMinB == 0 && secondMinA * secondMinB == 0) {
             bw.write(imp);
-        }
-        else {
+        } else {
             // 둘 중 하나라도 0 이면 정답이 될 수 없다.
             if (firstMinA * firstMinB == 0) {
                 bw.write(String.valueOf(secondMinA + secondMinB));
-            }
-            else if (secondMinA * secondMinB == 0) {
+            } else if (secondMinA * secondMinB == 0) {
                 bw.write(String.valueOf(firstMinA + firstMinB));
-            }
-            else {
+            } else {
                 bw.write(String.valueOf(Math.min(firstMinA + firstMinB, secondMinA + secondMinB)));
             }
         }
@@ -103,11 +100,17 @@ class Main {
     }
 
 
-    static int BFS(int startX, int startY, int targetX, int targetY, int[][] map) {
+    static int BFS(int startX, int startY, int targetX, int targetY, int[][] map, boolean isFirst) {
         PriorityQueue<Node> queue = new PriorityQueue<>();
         queue.offer(new Node(startX, startY, 0));
 
-        while (!queue.isEmpty()) {
+        boolean isEnd = false;
+
+        // 경로 탐색용
+        // Node[x][y] = b  x, y 좌표의 직전 점은 b 이다.
+        Node[][] nodeInfos = new Node[101][101];
+
+        while (!queue.isEmpty() && !isEnd) {
             Node nowNode = queue.poll();
 
             if (nowNode.x == targetX && nowNode.y == targetY) {
@@ -124,15 +127,22 @@ class Main {
                     // 해당 지역이 처음 방문하는 지역인 경우
                     if (map[nextX][nextY] == 0) {
                         map[nextX][nextY] = nowVal + 1;
+                        nodeInfos[nextX][nextY] = nowNode;
                         queue.offer(new Node(nextX, nextY, nowVal + 1));
                     }
                     // 이미 이전에 방문한 지역인 경우, 이번 방문이 더 빠른 경우에만 업데이트된다.
                     else {
                         if (map[nextX][nextY] > nowVal + 1) {
                             map[nextX][nextY] = nowVal + 1;
+                            nodeInfos[nextX][nextY] = nowNode;
                             queue.offer(new Node(nextX, nextY, nowVal + 1));
                         }
                     }
+                }
+
+                // 목표에 도착했으면 더 이상 탐색할 필요가 없다.
+                if (nextX == targetX && nextY == targetY) {
+                    isEnd = true;
                 }
             }
         }
@@ -141,24 +151,17 @@ class Main {
         if (map[targetX][targetY] <= 0) {
             return 0;
         }
-        // 경로를 역 추적해서 A 의 경로를 확인한다
-        int nowX = targetX;
-        int nowY = targetY;
-        int nowVal = map[nowX][nowY];
-        while (!(nowX == startX && nowY == startY)) {
-            for (int i = 0; i < 4; i++) {
-                int nextX = nowX + x_key[i];
-                int nextY = nowY + y_key[i];
-                if (inArea(nextX, nextY) && map[nextX][nextY] == nowVal - 1) {
-                    nowX = nextX;
-                    nowY = nextY;
-                    nowVal = map[nextX][nextY];
-                    paths.add(new Node(nextX, nextY, 0));
-                    break;
-                }
+
+        // 첫번째 탐색인 경우
+        if (isFirst) {
+            // 경로를 역 추적해서 A 의 경로를 확인한다
+            Node nowNode = nodeInfos[targetX][targetY];
+            while (true) {
+               paths.add(nowNode);
+               if (nowNode.x == startX && nowNode.y == startY) break;
+               nowNode = nodeInfos[nowNode.x][nowNode.y];
             }
         }
-
         return map[targetX][targetY];
     }
 
