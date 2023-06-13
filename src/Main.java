@@ -4,28 +4,10 @@ import java.util.*;
 class Main {
 
     static BufferedReader br;
-    static StringTokenizer st;
     static BufferedWriter bw;
-    static int N;
-    static int M;
-
-    static int ax1;
-    static int ay1;
-    static int ax2;
-    static int ay2;
-    static int bx1;
-    static int by1;
-    static int bx2;
-    static int by2;
-    static List<Node> paths;
-
-    static final String imp = "IMPOSSIBLE";
-
-    static int[] x_key = {-1, 0, 1, 0};
-    static int[] y_key = {0, -1, 0, 1};
 
     /**
-     * https://www.acmicpc.net/problem/5022
+     https://www.acmicpc.net/problem/28086
      *
      * @param args
      * @throws IOException
@@ -33,156 +15,32 @@ class Main {
     public static void main(String[] args) throws IOException {
         br = new BufferedReader(new InputStreamReader(System.in));
         bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
 
-        st = new StringTokenizer(br.readLine(), " ");
-        ax1 = Integer.parseInt(st.nextToken());
-        ay1 = Integer.parseInt(st.nextToken());
-
-        st = new StringTokenizer(br.readLine(), " ");
-        ax2 = Integer.parseInt(st.nextToken());
-        ay2 = Integer.parseInt(st.nextToken());
-
-        st = new StringTokenizer(br.readLine(), " ");
-        bx1 = Integer.parseInt(st.nextToken());
-        by1 = Integer.parseInt(st.nextToken());
-
-        st = new StringTokenizer(br.readLine(), " ");
-        bx2 = Integer.parseInt(st.nextToken());
-        by2 = Integer.parseInt(st.nextToken());
-
-        // 1. A 의 최단 경로를 BFS 로 탐색, 탐색 후에 경로 마킹, 이때 경로상에 B 인 점이 있으면 안된다.
-        int[][] map = new int[N + 1][M + 1];
-        map[bx1][by1] = -1;
-        map[bx2][by2] = -1;
-        int firstMinA = BFS(ax1, ay1, ax2, ay2, map, true);
-
-        // 2. B 의 최단 경로를 BFS 로 탐색하되, A 의 경로는 못 지나감
-        map = new int[N + 1][M + 1];
-        map[ax1][ay1] = -1;
-        map[ax2][ay2] = -1;
-        for (Node path : paths) {
-            map[path.x][path.y] = -1;
+        String problem = br.readLine();
+        String[] split = new String[2];
+        String op = null;
+        if (problem.contains("+")) {
+            split = problem.split("\\+");
+            op = "+";
         }
-        int firstMinB = BFS(bx1, by1, bx2, by2, map, false);
-
-        // 3. 1, 2 의 과정을 B 를 먼저 탐색하는 것으로
-        map = new int[N + 1][M + 1];
-        map[ax1][ay1] = -1;
-        map[ax2][ay2] = -1;
-        int secondMinB = BFS(bx1, by1, bx2, by2, map, true);
-
-        map = new int[N + 1][M + 1];
-        map[bx1][by1] = -1;
-        map[bx2][by2] = -1;
-        for (Node path : paths) {
-            map[path.x][path.y] = -1;
+        if (problem.contains("-")) {
+            split = problem.split("-");
+            op = "-";
         }
-        int secondMinA = BFS(ax1, ay1, ax2, ay2, map, false);
-
-        // 4. 1,2 의 결과와 3의 결과를 비교해서 작은 쪽으로 답 제출
-        if (firstMinA * firstMinB == 0 && secondMinA * secondMinB == 0) {
-            bw.write(imp);
-        } else {
-            // 둘 중 하나라도 0 이면 정답이 될 수 없다.
-            if (firstMinA * firstMinB == 0) {
-                bw.write(String.valueOf(secondMinA + secondMinB));
-            } else if (secondMinA * secondMinB == 0) {
-                bw.write(String.valueOf(firstMinA + firstMinB));
-            } else {
-                bw.write(String.valueOf(Math.min(firstMinA + firstMinB, secondMinA + secondMinB)));
-            }
+        if (problem.contains("*")) {
+            split = problem.split("\\*");
+            op = "\\*";
         }
-        bw.flush();
+        if (problem.contains("/")) {
+            split = problem.split("/");
+            op = "/";
+        }
+
+        for (int i = 0; i < split.length; i++) {
+            System.out.println(split[i]);
+        }
+
         bw.close();
     }
 
-
-    static int BFS(int startX, int startY, int targetX, int targetY, int[][] map, boolean isFirst) {
-        PriorityQueue<Node> queue = new PriorityQueue<>();
-        queue.offer(new Node(startX, startY, 0));
-
-        boolean isEnd = false;
-
-        // 경로 탐색용
-        // Node[x][y] = b  x, y 좌표의 직전 점은 b 이다.
-        Node[][] nodeInfos = new Node[101][101];
-
-        while (!queue.isEmpty() && !isEnd) {
-            Node nowNode = queue.poll();
-
-            if (nowNode.x == targetX && nowNode.y == targetY) {
-                break;
-            }
-
-            int nowVal = map[nowNode.x][nowNode.y];
-            for (int i = 0; i < 4; i++) {
-                int nextX = nowNode.x + x_key[i];
-                int nextY = nowNode.y + y_key[i];
-
-                // 해당 지역이 통행 가능 지역인 경우
-                if (!(nextX == startX && nextY == startY) && inArea(nextX, nextY) && map[nextX][nextY] != -1) {
-                    // 해당 지역이 처음 방문하는 지역인 경우
-                    if (map[nextX][nextY] == 0) {
-                        map[nextX][nextY] = nowVal + 1;
-                        nodeInfos[nextX][nextY] = nowNode;
-                        queue.offer(new Node(nextX, nextY, nowVal + 1));
-                    }
-                    // 이미 이전에 방문한 지역인 경우, 이번 방문이 더 빠른 경우에만 업데이트된다.
-                    else {
-                        if (map[nextX][nextY] > nowVal + 1) {
-                            map[nextX][nextY] = nowVal + 1;
-                            nodeInfos[nextX][nextY] = nowNode;
-                            queue.offer(new Node(nextX, nextY, nowVal + 1));
-                        }
-                    }
-                }
-
-                // 목표에 도착했으면 더 이상 탐색할 필요가 없다.
-                if (nextX == targetX && nextY == targetY) {
-                    isEnd = true;
-                }
-            }
-        }
-        paths = new ArrayList<>();
-        // 목표에 도달할 수 없다면 0 을 반환한다.
-        if (map[targetX][targetY] <= 0) {
-            return 0;
-        }
-
-        // 첫번째 탐색인 경우
-        if (isFirst) {
-            // 경로를 역 추적해서 A 의 경로를 확인한다
-            Node nowNode = nodeInfos[targetX][targetY];
-            while (true) {
-               paths.add(nowNode);
-               if (nowNode.x == startX && nowNode.y == startY) break;
-               nowNode = nodeInfos[nowNode.x][nowNode.y];
-            }
-        }
-        return map[targetX][targetY];
-    }
-
-    static boolean inArea(int nowX, int nowY) {
-        return 0 <= nowX && nowX <= N && 0 <= nowY && nowY <= M;
-    }
-
-    public static class Node implements Comparable<Node> {
-        int x;
-        int y;
-        int val;
-
-        public Node(int x, int y, int val) {
-            this.x = x;
-            this.y = y;
-            this.val = val;
-        }
-
-        @Override
-        public int compareTo(Node o) {
-            return this.val - o.val;
-        }
-    }
 }
