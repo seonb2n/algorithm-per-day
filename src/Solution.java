@@ -2,48 +2,37 @@ import java.util.*;
 
 class Solution {
 
-    static PriorityQueue<Integer> minQueue = new PriorityQueue<>();
-    static PriorityQueue<Integer> maxQueue = new PriorityQueue<>(Collections.reverseOrder());
+    // 이전 room 번호가 몇번 방을 줬는지는 넣어놓자
+    static Map<Long, Long> lastRoomMap = new HashMap<>();
 
     public static void main(String[] args) {
-        String[] sol = {"I 16", "I -5643", "D -1", "D 1", "D 1", "I 123", "D -1"};
-        solution(sol);
+        long[] rooms = {1,3,4,1,3,1};
+        solution(10, rooms);
     }
 
-    public static int[] solution(String[] operations) {
+    public static long[] solution(long k, long[] room_number) {
+        // 메모제이션?
+        // 모든 숫자에 대해서
+        long[] answer = new long[room_number.length];
 
-        for (String operation : operations) {
-            if (operation.contains("I")) {
-
-                int number = Integer.parseInt(operation.substring(2));
-                minQueue.add(number);
-                maxQueue.add(number);
-            }
-            else if (operation.contains("-")) {
-                if (!minQueue.isEmpty()) {
-                    int num = minQueue.poll();
-                    maxQueue.remove(num);
-                }
-            }
-            else {
-                if (!maxQueue.isEmpty()) {
-                    int num = maxQueue.poll();
-                    minQueue.remove(num);
-                }
-            }
+        for (int i = 0; i < room_number.length; i++) {
+            long nowRoom = room_number[i];
+            answer[i] = findRoom(nowRoom);
         }
 
-        int minNum = 0;
-        int maxNum = 0;
-        if (!minQueue.isEmpty()) {
-            minNum = minQueue.poll();
-        }
-        if (!maxQueue.isEmpty()) {
-            maxNum = maxQueue.poll();
-        }
-
-        return new int[]{maxNum, minNum};
+        return answer;
     }
 
-
+    public static long findRoom(long nowNumber) {
+        if (!lastRoomMap.containsKey(nowNumber)) {
+            lastRoomMap.put(nowNumber, nowNumber+1);
+            return nowNumber;
+        }
+        else {
+            long nextRoom = lastRoomMap.get(nowNumber);
+            long emptyRoom = findRoom(nextRoom);
+            lastRoomMap.put(nextRoom, emptyRoom+1);
+            return emptyRoom;
+        }
+    }
 }
