@@ -2,37 +2,86 @@ import java.util.*;
 
 class Solution {
 
-    // 이전 room 번호가 몇번 방을 줬는지는 넣어놓자
-    static Map<Long, Long> lastRoomMap = new HashMap<>();
-
     public static void main(String[] args) {
-        long[] rooms = {1,3,4,1,3,1};
-        solution(10, rooms);
+        String[] words = {"abc", "def", "ghi", "jklm"};
+        solution(words);
     }
 
-    public static long[] solution(long k, long[] room_number) {
-        // 메모제이션?
-        // 모든 숫자에 대해서
-        long[] answer = new long[room_number.length];
+    public static int solution(String[] words) {
+        int answer = 0;
 
-        for (int i = 0; i < room_number.length; i++) {
-            long nowRoom = room_number[i];
-            answer[i] = findRoom(nowRoom);
+        HashMap<Character, Node> dictionary = new HashMap<Character, Node>();
+
+        for (String word : words) {
+            char firstChar = word.charAt(0);
+            if (dictionary.containsKey(firstChar)) {
+                dictionary.get(firstChar).num++;
+                dictionary.get(firstChar).addWord(word.substring(1));
+            }
+            else {
+                dictionary.put(firstChar, new Node());
+                dictionary.get(firstChar).addWord(word.substring(1));
+            }
+        }
+
+        for (String word : words) {
+            char firstChar = word.charAt(0);
+            if (dictionary.containsKey(firstChar) && dictionary.get(firstChar).num == 1) {
+                answer += 1;
+            }
+            else if (dictionary.containsKey(firstChar)) {
+                answer += dictionary.get(firstChar).findWord(word.substring(1), 1);
+            }
         }
 
         return answer;
     }
 
-    public static long findRoom(long nowNumber) {
-        if (!lastRoomMap.containsKey(nowNumber)) {
-            lastRoomMap.put(nowNumber, nowNumber+1);
-            return nowNumber;
+
+    static class Node {
+        // 해당 key 값으로 몇개가 있는지
+        int num;
+        HashMap<Character, Node> nextAlps;
+
+        public Node() {
+            num = 1;
+            nextAlps = new HashMap<>();
         }
-        else {
-            long nextRoom = lastRoomMap.get(nowNumber);
-            long emptyRoom = findRoom(nextRoom);
-            lastRoomMap.put(nextRoom, emptyRoom+1);
-            return emptyRoom;
+
+        public void addWord(String word) {
+            if (word.length() == 0) {
+                return;
+            }
+
+            char nowChar = word.charAt(0);
+            if (nextAlps.containsKey(nowChar)) {
+                nextAlps.get(nowChar).num++;
+                nextAlps.get(nowChar).addWord(word.substring(1));
+            }
+            else {
+                nextAlps.put(nowChar, new Node());;
+                nextAlps.get(nowChar).addWord(word.substring(1));
+            }
         }
+
+        public int findWord(String word, int nowNum) {
+            if (word.length() == 0) {
+                return nowNum;
+            }
+
+            char nowChar = word.charAt(0);
+            if (nextAlps.containsKey(nowChar) && nextAlps.get(nowChar).num == 1) {
+                return nowNum+1;
+            }
+
+            if (nextAlps.containsKey(nowChar)) {
+                return nextAlps.get(nowChar).findWord(word.substring(1), nowNum + 1);
+            }
+            else {
+                return nowNum;
+            }
+        }
+
     }
+
 }
