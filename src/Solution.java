@@ -2,46 +2,40 @@ import java.util.*;
 
 class Solution {
 
-    public static void main(String[] args) {
-        int[][] routes = {{-20, -15}, {-14, -5}, {-18, -13}, {-5, -3}};
-        solution(routes);
-    }
-
     public static int solution(int[][] routes) {
         int answer = 0;
+        Car[] carArr = new Car[routes.length];
+        for (int i = 0; i < routes.length; i++) {
+            carArr[i] = new Car(routes[i][0], routes[i][1]);
+        }
 
-        Set<Integer> passedCar = new HashSet<>();
-        while (true) {
-            HashMap<Integer, List<Integer>> roadMap = new HashMap<>();
-            for (int i = 0; i < routes.length; i++) {
-                if (!passedCar.contains(i)) {
-                    int startPoint = routes[i][0];
-                    int endPoint = routes[i][1];
+        Arrays.sort(carArr);
 
-                    for (int j = startPoint; j <= endPoint; j++) {
-                        var carNumberList = roadMap.getOrDefault(j, new ArrayList<>());
-                        carNumberList.add(i);
-                        roadMap.put(j, carNumberList);
-                    }
-                }
+        int cam = carArr[0].endPoint;
+        answer++;
+        for (Car car : carArr) {
+            if (car.startPoint > cam) {
+                answer++;
+                cam = car.endPoint;
             }
-
-            int maxPassed = 0;
-            int maxPassedIndex = 0;
-
-            for (int i : roadMap.keySet()) {
-                if (maxPassed < roadMap.get(i).size()) {
-                    maxPassed = roadMap.get(i).size();
-                    maxPassedIndex = i;
-                }
-            }
-            if (maxPassed == 0) break;
-
-            answer++;
-            passedCar.addAll(roadMap.get(maxPassedIndex));
         }
 
         return answer;
+    }
+
+    static class Car implements Comparable<Car> {
+        int startPoint;
+        int endPoint;
+
+        public Car(int startPoint, int endPoint) {
+            this.startPoint = startPoint;
+            this.endPoint = endPoint;
+        }
+
+        @Override
+        public int compareTo(Car o) {
+            return this.endPoint - o.endPoint;
+        }
     }
 
 }
