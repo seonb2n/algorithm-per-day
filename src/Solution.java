@@ -1,52 +1,76 @@
 import java.util.*;
 
 class Solution {
+    public int[] solution(String[] genres, int[] plays) {
 
+        HashMap<String, PriorityQueue<Song>> genreMap = new HashMap<>();
+        HashMap<String, Integer> sumMap = new HashMap<>();
 
-    public static void main(String[] args) {
-        int[][] puddles = {{2,2}};
-        solution(4, 3, puddles);
-    }
+        for (int i = 0; i < genres.length; i++) {
+            var pq = genreMap.getOrDefault(genres[i], new PriorityQueue<Song>());
+            pq.offer(new Song(i, plays[i]));
+            genreMap.put(genres[i], pq);
 
-    static int[][] memo;
-    static boolean[][] notWay;
-
-    public static int solution(int m, int n, int[][] puddles) {
-        memo = new int[m+1][n+1];
-        notWay = new boolean[m+1][n+1];
-
-        for (int i = 0; i < puddles.length; i++) {
-            notWay[puddles[i][0]][puddles[i][1]] = true;
+            var number = sumMap.getOrDefault(genres[i], 0);
+            number += plays[i];
+            sumMap.put(genres[i], number);
         }
 
-        memo[1][1] = 1;
+        Genre[] genresArr = new Genre[genreMap.keySet().size()];
 
-        for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                if (!notWay[i][j]) {
-                    memo[i][j] = findMemo(i, j);
-                }
+
+        int i = 0;
+        for (String key : genreMap.keySet()) {
+            genresArr[i] = new Genre(key, sumMap.get(key));
+            i++;
+        }
+        Arrays.sort(genresArr);
+
+        List<Integer> answerList = new ArrayList<Integer>();
+
+        for (int j = 0; j < genresArr.length; j++) {
+            String key = genresArr[j].genre;
+            answerList.add(genreMap.get(key).poll().id);
+            if (!genreMap.get(key).isEmpty()) {
+                answerList.add(genreMap.get(key).poll().id);
             }
         }
 
-        return memo[m][n];
+        int[] answer = new int[answerList.size()];
+        for (int j = 0; j < answerList.size(); j++) {
+            answer[j] = answerList.get(j);
+        }
+
+        return answer;
     }
 
-    public static int findMemo(int x, int y) {
-        if (x < 1 || y < 1) {
-            return 0;
+    class Genre implements Comparable<Genre> {
+        String genre;
+        int count;
+
+        public Genre(String genre, int count) {
+            this.genre = genre;
+            this.count = count;
         }
 
-        if (notWay[x][y]) {
-            return 0;
-        }
-
-        if (memo[x][y] != 0) {
-            return memo[x][y];
-        }
-        else {
-            return (findMemo(x-1, y) + findMemo(x, y-1)) % 1_000_000_007;
+        @Override
+        public int compareTo(Genre o) {
+            return o.count - this.count;
         }
     }
 
+    class Song implements Comparable<Song> {
+        int id;
+        int playCount;
+
+        public Song(int id, int playCount) {
+            this.id = id;
+            this.playCount = playCount;
+        }
+
+        @Override
+        public int compareTo(Song o) {
+            return o.playCount - this.playCount;
+        }
+    }
 }
