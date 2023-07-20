@@ -1,76 +1,72 @@
 import java.util.*;
 
 class Solution {
-    public int[] solution(String[] genres, int[] plays) {
 
-        HashMap<String, PriorityQueue<Song>> genreMap = new HashMap<>();
-        HashMap<String, Integer> sumMap = new HashMap<>();
+    public static void main(String[] args) {
+        int[][] costs = {{0, 1, 1}, {0, 2, 2}, {1, 2, 5}, {1, 3, 1}, {2, 3, 8}};
+        solution(4, costs);
+    }
 
-        for (int i = 0; i < genres.length; i++) {
-            var pq = genreMap.getOrDefault(genres[i], new PriorityQueue<Song>());
-            pq.offer(new Song(i, plays[i]));
-            genreMap.put(genres[i], pq);
+    public static int solution(int n, int[][] costs) {
 
-            var number = sumMap.getOrDefault(genres[i], 0);
-            number += plays[i];
-            sumMap.put(genres[i], number);
+        Cost[] costArr = new Cost[costs.length];
+
+        // 섬 번호로 해당 섬이 속한 그룹을 가져올 수 있어야 한다.
+        HashMap<Integer, Integer> islandGroupMap = new HashMap<Integer, Integer>();
+
+        for (int i = 0; i < n; i++) {
+            islandGroupMap.put(i, i);
         }
 
-        Genre[] genresArr = new Genre[genreMap.keySet().size()];
-
-
-        int i = 0;
-        for (String key : genreMap.keySet()) {
-            genresArr[i] = new Genre(key, sumMap.get(key));
-            i++;
+        for (int i = 0; i < costs.length; i++) {
+            int start = costs[i][0];
+            int end = costs[i][1];
+            int cost = costs[i][2];
+            costArr[i] = new Cost(cost, start, end);
         }
-        Arrays.sort(genresArr);
 
-        List<Integer> answerList = new ArrayList<Integer>();
+        Arrays.sort(costArr);
 
-        for (int j = 0; j < genresArr.length; j++) {
-            String key = genresArr[j].genre;
-            answerList.add(genreMap.get(key).poll().id);
-            if (!genreMap.get(key).isEmpty()) {
-                answerList.add(genreMap.get(key).poll().id);
+        int answer = 0;
+
+        for (int i = 0; i < costArr.length; i++) {
+            // costArr 에서 값을 꺼낸 뒤에 각각의 group 이 다르면 해당 다리를 건설한다.
+            Cost nowCost = costArr[i];
+
+            // 두 그룹이 다르다면
+            if (islandGroupMap.get(nowCost.start) != islandGroupMap.get(nowCost.end)) {
+                answer += nowCost.cost;
+                // 그룹 하나로 뭉친다.
+                int newGroup = islandGroupMap.get(nowCost.start);
+                int oldGroup = islandGroupMap.get(nowCost.end);
+
+                for (Integer index : islandGroupMap.keySet()) {
+                    if (islandGroupMap.get(index) == oldGroup) {
+                        islandGroupMap.put(index, newGroup);
+                    }
+                }
             }
-        }
 
-        int[] answer = new int[answerList.size()];
-        for (int j = 0; j < answerList.size(); j++) {
-            answer[j] = answerList.get(j);
         }
 
         return answer;
     }
 
-    class Genre implements Comparable<Genre> {
-        String genre;
-        int count;
+    static class Cost implements Comparable<Cost> {
+        int cost;
+        int start;
+        int end;
 
-        public Genre(String genre, int count) {
-            this.genre = genre;
-            this.count = count;
+        public Cost(int cost, int start, int end) {
+            this.cost = cost;
+            this.start = start;
+            this.end = end;
         }
 
+        //desc
         @Override
-        public int compareTo(Genre o) {
-            return o.count - this.count;
-        }
-    }
-
-    class Song implements Comparable<Song> {
-        int id;
-        int playCount;
-
-        public Song(int id, int playCount) {
-            this.id = id;
-            this.playCount = playCount;
-        }
-
-        @Override
-        public int compareTo(Song o) {
-            return o.playCount - this.playCount;
+        public int compareTo(Cost o) {
+            return this.cost - o.cost;
         }
     }
 }
