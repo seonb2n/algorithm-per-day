@@ -2,71 +2,61 @@ import java.util.*;
 
 class Solution {
 
-    public static void main(String[] args) {
-        int[][] costs = {{0, 1, 1}, {0, 2, 2}, {1, 2, 5}, {1, 3, 1}, {2, 3, 8}};
-        solution(4, costs);
-    }
-
-    public static int solution(int n, int[][] costs) {
-
-        Cost[] costArr = new Cost[costs.length];
-
-        // 섬 번호로 해당 섬이 속한 그룹을 가져올 수 있어야 한다.
-        HashMap<Integer, Integer> islandGroupMap = new HashMap<Integer, Integer>();
-
-        for (int i = 0; i < n; i++) {
-            islandGroupMap.put(i, i);
-        }
-
-        for (int i = 0; i < costs.length; i++) {
-            int start = costs[i][0];
-            int end = costs[i][1];
-            int cost = costs[i][2];
-            costArr[i] = new Cost(cost, start, end);
-        }
-
-        Arrays.sort(costArr);
-
+    static int N = 0;
+    static int max = 0;
+    static int[] STICKERS;
+    public int solution(int sticker[]) {
         int answer = 0;
+        N = sticker.length;
+        STICKERS = new int[N];
 
-        for (int i = 0; i < costArr.length; i++) {
-            // costArr 에서 값을 꺼낸 뒤에 각각의 group 이 다르면 해당 다리를 건설한다.
-            Cost nowCost = costArr[i];
+        if (sticker.length == 1) {
+            return sticker[0];
+        }
 
-            // 두 그룹이 다르다면
-            if (islandGroupMap.get(nowCost.start) != islandGroupMap.get(nowCost.end)) {
-                answer += nowCost.cost;
-                // 그룹 하나로 뭉친다.
-                int newGroup = islandGroupMap.get(nowCost.start);
-                int oldGroup = islandGroupMap.get(nowCost.end);
+        for (int i = 0; i < N; i++) {
+            STICKERS[i] = sticker[i];
+        }
+        //dfs
+        Set<Integer> detached = new HashSet<Integer>();
+        detached.add(0);
+        dfs(detached, STICKERS[0], 0);
+        detached.add(1);
+        if (N > 2) {
+            detached.add(2);
+        }
+        dfs(detached, STICKERS[1], 1);
 
-                for (Integer index : islandGroupMap.keySet()) {
-                    if (islandGroupMap.get(index) == oldGroup) {
-                        islandGroupMap.put(index, newGroup);
-                    }
+        return max;
+    }
+
+    void dfs(Set<Integer> detached, int nowSum, int lastNode) {
+        if (detached.size() == N) {
+            max = Math.max(max, nowSum);
+        }
+        else {
+            //last node 에서 두칸을 가는 경우
+            int nextNode = lastNode + 2;
+            if (!detached.contains(nextNode) && nextNode < N) {
+                Set<Integer> newSet = new HashSet<>(Set.copyOf(detached));
+                newSet.add(nextNode);
+                if (nextNode + 1 < N) {
+                    newSet.add(nextNode+1);
                 }
+                dfs(newSet, nowSum+STICKERS[nextNode], nextNode);
             }
-
-        }
-
-        return answer;
-    }
-
-    static class Cost implements Comparable<Cost> {
-        int cost;
-        int start;
-        int end;
-
-        public Cost(int cost, int start, int end) {
-            this.cost = cost;
-            this.start = start;
-            this.end = end;
-        }
-
-        //desc
-        @Override
-        public int compareTo(Cost o) {
-            return this.cost - o.cost;
+            //last node 에서 세칸을 가는 경우
+            nextNode = lastNode + 3;
+            if (!detached.contains(nextNode) && nextNode < N) {
+                Set<Integer> newSet = new HashSet<>(Set.copyOf(detached));
+                newSet.add(nextNode);
+                newSet.add(nextNode-1);
+                if (nextNode + 1 < N) {
+                    newSet.add(nextNode+1);
+                }
+                dfs(newSet, nowSum+STICKERS[nextNode], nextNode);
+            }
         }
     }
+
 }
