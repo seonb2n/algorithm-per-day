@@ -2,62 +2,61 @@ import java.util.*;
 
 class Solution {
 
-    public static void main(String[] args) {
-        int[] stat = {9};
-        solution(16, stat, 2);
+    static final int MAX_NUMBER = 50;
+    static int result = MAX_NUMBER;
+    static String[] targetWords;
+
+    public int solution(String begin, String target, String[] words) {
+        targetWords = new String[words.length];
+        System.arraycopy(words, 0, targetWords, 0, words.length);
+
+        boolean isContain = false;
+        for (int i = 0; i < words.length; i++) {
+            if (words[i].equals(target)) {
+                isContain = true;
+            }
+        }
+        if (!isContain) {
+            return 0;
+        }
+
+        dfs(begin, target, 0);
+
+        return result;
     }
 
-    public static int solution(int n, int[] stations, int w) {
-        int answer = 0;
-
-        // n 개의 아파트에 w 만큼의 기지국을 설치해서 범위를 모두 커버해야 한다.
-        // 범위 내 기지국의 개수를 구하는 공식은 거리 / (1+w*2) 이다.
-        // 1 부터 station[1] 까지 필요한 개수
-//        int end = stations[0] - w-1;
-//        if (end == start) answer++;
-//        if (start < end) {
-//            int width = end-start;
-//            answer += (width / (1+w*2));
-//            //나누어 떨어지지 않으면 추가적인 설치가 필요하다.
-//            if (width % (1+w*2) != 0) {
-//                answer++;
-//            }
-//        }
-        int index = 0;
-        int start = 1;
-        int end = 1;
-        while (index < stations.length) {
-            end = stations[index] - w - 1;
-            if (start == end) {
-                answer++;
-                start = stations[index] + w + 1;
-                index++;
-            } else if (start > end) {
-                start = stations[index] + w + 1;
-                index++;
-            } else {
-                int width = end - start + 1;
-                // 해당 지역 내 설치 최소 설치 개수를 더한다.
-                answer += (width / (1 + w * 2));
-                //나누어 떨어지지 않으면 추가적인 설치가 필요하다.
-                if (width % (1 + w * 2) != 0) {
-                    answer++;
+    void dfs(String nowWord, String target, int nowCount) {
+        if (nowCount > result) {
+            return;
+        }
+        if (nowWord.equals(target)) {
+            result = nowCount;
+        }
+        else {
+            //targetWords 를 순환하면서 변환이 가능하다면 변환한다.
+            for (int i = 0; i < targetWords.length; i++) {
+                if (isConvertable(nowWord, targetWords[i])) {
+                    dfs(targetWords[i], target, nowCount+1);
                 }
-                start = stations[index] + w + 1;
-                index++;
             }
         }
+    }
 
-        // 마지막 개수를 확인한다.
-        if (start < n) {
-            int width = n - start + 1;
-            answer += (width / (1 + w * 2));
-            //나누어 떨어지지 않으면 추가적인 설치가 필요하다.
-            if (width % (1 + w * 2) != 0) {
-                answer++;
+    /**
+     * a 와 b 사이에 한 글자만 달라야 한다.
+     * @param a
+     * @param b
+     * @return
+     */
+    boolean isConvertable(String a, String b) {
+        String[] aSplit = a.split("");
+        String[] bSplit = b.split("");
+        int diff = 0;
+        for (int i = 0; i < aSplit.length; i++) {
+            if (!aSplit[i].equals(bSplit[i])) {
+                diff++;
             }
         }
-
-        return answer;
+        return diff == 1;
     }
 }
