@@ -2,61 +2,40 @@ import java.util.*;
 
 class Solution {
 
-    static final int MAX_NUMBER = 50;
-    static int result = MAX_NUMBER;
-    static String[] targetWords;
+    public int solution(int[] food_times, long k) {
+        Queue<Node> foodNode = new LinkedList<>();
 
-    public int solution(String begin, String target, String[] words) {
-        targetWords = new String[words.length];
-        System.arraycopy(words, 0, targetWords, 0, words.length);
-
-        boolean isContain = false;
-        for (int i = 0; i < words.length; i++) {
-            if (words[i].equals(target)) {
-                isContain = true;
-            }
-        }
-        if (!isContain) {
-            return 0;
+        for (int i = 0; i < food_times.length; i++) {
+            foodNode.add(new Node(i+1, food_times[i]));
         }
 
-        dfs(begin, target, 0);
+        long nowTime = 0;
 
-        return result;
-    }
-
-    void dfs(String nowWord, String target, int nowCount) {
-        if (nowCount > result) {
-            return;
-        }
-        if (nowWord.equals(target)) {
-            result = nowCount;
-        }
-        else {
-            //targetWords 를 순환하면서 변환이 가능하다면 변환한다.
-            for (int i = 0; i < targetWords.length; i++) {
-                if (isConvertable(nowWord, targetWords[i])) {
-                    dfs(targetWords[i], target, nowCount+1);
+        while (nowTime < k && !foodNode.isEmpty()) {
+            Node nowNode = foodNode.poll();
+            if (nowNode.food > 0) {
+                nowNode.food--;
+                nowTime++;
+                if (nowNode.food > 0) {
+                    foodNode.offer(nowNode);
                 }
             }
         }
+
+        if (foodNode.isEmpty()) {
+            return -1;
+        }
+
+        return foodNode.peek().index;
     }
 
-    /**
-     * a 와 b 사이에 한 글자만 달라야 한다.
-     * @param a
-     * @param b
-     * @return
-     */
-    boolean isConvertable(String a, String b) {
-        String[] aSplit = a.split("");
-        String[] bSplit = b.split("");
-        int diff = 0;
-        for (int i = 0; i < aSplit.length; i++) {
-            if (!aSplit[i].equals(bSplit[i])) {
-                diff++;
-            }
+    class Node {
+        int index;
+        int food;
+
+        public Node(int index, int food) {
+            this.index = index;
+            this.food = food;
         }
-        return diff == 1;
     }
 }
