@@ -2,61 +2,47 @@ import java.util.*;
 
 class Solution {
 
-    public static void main(String[] args) {
-        int[] times = {1,2,3};
-        solution(times, 4);
+    public int solution(int n, int s, int a, int b, int[][] fares) {
+        //int[i][j] 는 i 에서 j 로 가는 최소 비용
+        int[][] mapCosts = dijkstra(n, fares);
+
+        //s 에서 특정 위치로 이동한다음, 해당 위치에서 a,b 로 이동하는 경우의 최소 값을 구한다.
+        //출발지에서 각각 가는 경우
+        int answer = Integer.MAX_VALUE;
+
+        for (int i = 1; i <= n; i++) {
+            answer = Math.min(answer, mapCosts[s][i] + mapCosts[i][a] + mapCosts[i][b]);
+        }
+
+        return answer;
     }
 
-    public static int solution(int[] food_times, long k) {
-        List<Node> foodNode = new LinkedList<>();
+    public static int[][] dijkstra(int n, int[][] graph) {
+        int[][] result = new int[n + 1][n + 1];
 
-        for (int i = 0; i < food_times.length; i++) {
-            foodNode.add(new Node(i + 1, food_times[i]));
+        for (int i = 1; i <= n; i++) {
+            Arrays.fill(result[i], Integer.MAX_VALUE);
+            result[i][i] = 0;
         }
-        // 음식 오름차순 정렬
-        foodNode.sort((o1, o2) -> o1.food - o2.food);
 
-        // 저번 순환 횟수
-        long nowRotate = 0;
-        // 총 음식 개수
-        int length = foodNode.size();
-        // 현재까지 소요된 시간
-        long totalSpentTime = 0;
-        // 현재 먹은 음식
-        int index = 0;
-        for (Node n : foodNode) {
-            //n 번째 음식을 다 먹는데 걸리는 시간
-            //이번 음식을 다 먹는데 걸리는 시간은 저번 차례의 음식을 다 먹는데 걸리는 시간을 빼줘야 한다.
-            long timeToEat = (n.food - nowRotate) * length;
-            nowRotate = n.food;
-            totalSpentTime += timeToEat;
-            // 지금까지 소요된 시간이 k 보다 크다면
-            if (k - totalSpentTime >= 0) {
-                index++;
-                length--;
-            }
-            // 현재 시간 중에 k 가 끝남
-            else {
-                long restTime = k - (totalSpentTime - timeToEat);
-                restTime = restTime % length;
-                //남은 놈들을 다시 index 번호로 원복해줘야 함
-                //index 이전 음식은 모두 넘었으니 빼줘야 함
-                foodNode = foodNode.subList(index, foodNode.size());
-                foodNode.sort((o1, o2) -> o1.index - o2.index);
-                return foodNode.get((int) restTime).index;
+        for (int[] edge : graph) {
+            int from = edge[0];
+            int to = edge[1];
+            int cost = edge[2];
+            result[from][to] = cost;
+            result[to][from] = cost; // 양방향 이동을 반영
+        }
+
+        for (int k = 1; k <= n; k++) {
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1; j <= n; j++) {
+                    if (result[i][k] != Integer.MAX_VALUE && result[k][j] != Integer.MAX_VALUE) {
+                        result[i][j] = Math.min(result[i][j], result[i][k] + result[k][j]);
+                    }
+                }
             }
         }
 
-        return -1;
-    }
-
-    static class Node {
-        int index;
-        int food;
-
-        public Node(int index, int food) {
-            this.index = index;
-            this.food = food;
-        }
+        return result;
     }
 }
