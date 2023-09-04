@@ -1,49 +1,30 @@
 import java.util.*;
 
 class Solution {
-
-    public static int solution(int[] stones, int k) {
-        int answer = 0;
-
-        // 이진 탐색으로 풀어야 함
-        int min = 1;
-        int max = 200_000_000;
-        while (min <= max) {
-            int mid = (min + max) / 2;
-            // mid 로 강을 건널 수 있으면 min 을 올린다.
-            if (canCrossRiver(stones, k, mid)) {
-                min = mid + 1;
-                // 정답은 강을 건널 수 있는 최대 값
-                answer = Math.max(answer, mid);
-            }
-            // 강을 건널 수 없으면 max 를 줄인다.
-            else {
-                max = mid-1;
-            }
-        }
-        
-        return answer;
-    }
-    
-    // set 안에 연속된 숫자가 k 개 만큼 존재하는지 확인한다.
-    public static boolean canCrossRiver(int[] stones, int k, int friendsNum) {
-        int skip = 0;
-
-        for (int stone : stones) {
-            // 못 건너는 돌이다.
-            if (stone < friendsNum) {
-                skip++;
-            }
-            else {
-                skip= 0;
-            }
-
-            if (skip == k) {
-                return false;
-            }
-        }
-
-        return true;
+    // 주어진 TreeNode root 가 이진 트리인지 체크해야 한다.
+    public boolean isValidBST(TreeNode root) {
+        return checker(root, Long.MAX_VALUE, Long.MAX_VALUE);
     }
 
+    private boolean checker(TreeNode node, long start, long end) {
+        if (node == null) return true;
+        // node 가 start - end 의 바운더리를 벗어나는지 체크한다.
+        if (node.val <= start || node.val >= end) return false;
+
+        // 왼쪽 자식은 부모보다 작아야하고, 오른쪽 자식은 부모보다 커야한다.
+        return checker(node.left, start, node.val) && checker(node.right, node.val, end);
+    }
+
+    public class TreeNode {
+      int val;
+      TreeNode left;
+      TreeNode right;
+      TreeNode() {}
+      TreeNode(int val) { this.val = val; }
+      TreeNode(int val, TreeNode left, TreeNode right) {
+          this.val = val;
+          this.left = left;
+          this.right = right;
+      }
+  }
 }
