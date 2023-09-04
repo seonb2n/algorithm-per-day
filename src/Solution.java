@@ -1,30 +1,29 @@
 import java.util.*;
 
 class Solution {
-    // 주어진 TreeNode root 가 이진 트리인지 체크해야 한다.
-    public boolean isValidBST(TreeNode root) {
-        return checker(root, Long.MAX_VALUE, Long.MAX_VALUE);
+
+    static int maxNum;
+    static List<String> answerList = new ArrayList<String>();
+
+    public List<String> longestUniqueSubstringSet(String s) {
+        // implementation
+        // s 에서 문자별 위치를 기록한다.
+        String[] al = s.split("");
+        Map<String, List<Integer>> alphabetIndex = new HashMap<>();
+        for (int i = 0; i < al.length; i++) {
+            if (!alphabetIndex.containsKey(al[i])) {
+                alphabetIndex.put(al[i], new ArrayList<Integer>());
+            }
+            alphabetIndex.get(al[i]).add(i);
+        }
+
+        // 기록한 위치를 바탕으로 dfs 를 해서 최장 케이스를 반환한다.
+        dfs(0, 0, new ArrayList<>());
+
+        return answerList;
     }
 
-    private boolean checker(TreeNode node, long start, long end) {
-        if (node == null) return true;
-        // node 가 start - end 의 바운더리를 벗어나는지 체크한다.
-        if (node.val <= start || node.val >= end) return false;
+    void dfs(int nowNum, int nowIndex, List<String> nowAnswerList) {
 
-        // 왼쪽 자식은 부모보다 작아야하고, 오른쪽 자식은 부모보다 커야한다.
-        return checker(node.left, start, node.val) && checker(node.right, node.val, end);
     }
-
-    public class TreeNode {
-      int val;
-      TreeNode left;
-      TreeNode right;
-      TreeNode() {}
-      TreeNode(int val) { this.val = val; }
-      TreeNode(int val, TreeNode left, TreeNode right) {
-          this.val = val;
-          this.left = left;
-          this.right = right;
-      }
-  }
 }
