@@ -2,45 +2,48 @@ import java.util.*;
 
 class Solution {
 
-    static boolean[] isUsedTicket;
-    static List<String> answerList;
+    static int minCost = Integer.MAX_VALUE;
 
-    public static void main(String[] args) {
-        String[][] src = {{"ICN", "JFK"}, {"HND", "IAD"}, {"JFK", "HND"}};
-        solution(src);
+    static int[] x_moves = {-1, 0, 1, 0};
+    static int[] y_moves = {0, 1, 0, -1};
+    static int[] dir = {1, 2, 3, 4};
+    static int N;
+    static boolean[][] isPassed;
+    public int solution(int[][] board) {
+        N = board.length;
+        isPassed = new boolean[N][N];
+
+        isPassed[0][0] = true;
+        DFS(0, 0, -500,0, board);
+
+        return minCost;
     }
 
-    public static String[] solution(String[][] tickets) {
-
-        isUsedTicket = new boolean[tickets.length];
-
-        answerList = new ArrayList<String>();
-
-        for (int i = 0; i < tickets.length; i++) {
-            if (tickets[i][0].equals("ICN")) {
-                isUsedTicket[i] = true;
-                String route = "ICN";
-                dfs(tickets[i][1], route + " " + tickets[i][1], 1, tickets);
-                isUsedTicket[i] = false;
+    void DFS(int nowX, int nowY, int nowCost, int nowDir, int[][] board) {
+        if (nowX == N-1 && nowY == N-1) {
+            minCost = Math.min(minCost, nowCost);
+            return;
+        }
+        if (nowCost > minCost) {
+            return;
+        }
+        for (int i = 0; i < 4; i++) {
+            int nextX = nowX + x_moves[i];
+            int nextY = nowY + y_moves[i];
+            if (inArea(nextX, nextY) && board[nextX][nextY] == 0 && !isPassed[nextX][nextY]) {
+                isPassed[nextX][nextY] = true;
+                if (nowDir != dir[i]) {
+                    DFS(nextX, nextY, nowCost + 600, dir[i], board);
+                }
+                else {
+                    DFS(nextX, nextY, nowCost + 100, dir[i], board);
+                }
+                isPassed[nextX][nextY] = false;
             }
         }
-
-        Collections.sort(answerList);
-
-        return answerList.get(0).split(" ");
     }
 
-    static void dfs(String nowAirport, String nowRoute, int nowCnt, String[][] tickets) {
-        if (nowCnt == tickets.length) {
-            answerList.add(nowRoute);
-        }
-        for (int i = 0; i < tickets.length; i++) {
-            if (tickets[i][0].equals(nowAirport) && !isUsedTicket[i]) {
-                isUsedTicket[i] = true;
-                dfs(tickets[i][1], nowRoute + " " + tickets[i][1], nowCnt+1, tickets);
-                isUsedTicket[i] = false;
-            }
-        }
-
+    boolean inArea(int x, int y) {
+        return 0 <= x && x < N && 0 <= y && y < N;
     }
 }
