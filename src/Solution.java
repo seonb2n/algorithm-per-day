@@ -19,6 +19,7 @@ class Solution {
     public static int solution(int[][] board) {
         N = board.length;
         isPassed = new boolean[N][N];
+
         memo = new int[N][N];
 
         for (int i = 0; i < N; i++) {
