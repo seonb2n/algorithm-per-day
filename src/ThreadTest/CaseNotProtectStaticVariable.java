@@ -1,25 +1,27 @@
 package ThreadTest;
 
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * 전역 변수를 스레드에서 각각 변경하는 경우
  */
 public class CaseNotProtectStaticVariable {
 
     static class Counter {
-        private static int count = 0;
+        private AtomicInteger count = new AtomicInteger(0);
 
         public int increment() {
-            return ++count;
+            return count.incrementAndGet();
         }
 
         public int getCount() {
-            return count;
+            return count.get();
         }
     }
 
     static class SynchronizedCounter {
-        private static int count = 0;
+        private int count = 0;
 
         public synchronized int increment() {
             return ++count;
