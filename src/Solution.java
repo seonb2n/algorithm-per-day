@@ -2,65 +2,80 @@ import java.util.*;
 
 class Solution {
 
-    static int minCost = Integer.MAX_VALUE;
 
     static int[] x_moves = {-1, 0, 1, 0};
     static int[] y_moves = {0, 1, 0, -1};
-    static int[] dir = {1, 2, 3, 4};
-    static int N;
-    static boolean[][] isPassed;
-    static int[][] memo;
 
-    public static void main(String[] args) {
-        int[][] board = {{0,0,1,0},{0,0,0,0},{0,1,0,1},{1,0,0,0}};
-        solution(board);
-    }
+    public int orangesRotting(int[][] grid) {
+        int N = grid.length;
+        int M = grid[0].length;
 
-    public static int solution(int[][] board) {
-        N = board.length;
-        isPassed = new boolean[N][N];
+        Queue<Node> rottenTomatoQueue = new LinkedList<>();
+        Set<Node> freshTomato = new HashSet<>();
 
-        memo = new int[N][N];
-
-        for (int i = 0; i < N; i++) {
-            Arrays.fill(memo[i], Integer.MAX_VALUE);
-        }
-
-        isPassed[0][0] = true;
-        memo[0][0] = 0;
-        DFS(0, 0, -500,0, board);
-
-        return minCost;
-    }
-
-    static void DFS(int nowX, int nowY, int nowCost, int nowDir, int[][] board) {
-        if (nowX == N-1 && nowY == N-1) {
-            minCost = Math.min(minCost, nowCost);
-            return;
-        }
-        if (nowCost > minCost) {
-            return;
-        }
-        for (int i = 0; i < 4; i++) {
-            int nextX = nowX + x_moves[i];
-            int nextY = nowY + y_moves[i];
-            if (inArea(nextX, nextY) && board[nextX][nextY] == 0 && !isPassed[nextX][nextY]) {
-                if (memo[nextX][nextY] > nowCost) {
-                    memo[nextX][nextY] = nowCost;
-                    isPassed[nextX][nextY] = true;
-                    if (nowDir == dir[i]) {
-                        DFS(nextX, nextY, nowCost + 100, dir[i], board);
-                    }
-                    else {
-                        DFS(nextX, nextY, nowCost + 600, dir[i], board);
-                    }
-                    isPassed[nextX][nextY] = false;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 2) {
+                    rottenTomatoQueue.add(new Node(i, j));
+                }
+                else if (grid[i][j] == 1) {
+                    freshTomato.add(new Node(i, j));
                 }
             }
         }
+
+        Queue<Node> nextQueue = new LinkedList<>();
+        int turn = 0;
+        do {
+            while (!rottenTomatoQueue.isEmpty()) {
+                Node now = rottenTomatoQueue.poll();
+                for (int i = 0; i < 4; i++) {
+                    int nextX = now.x + x_moves[i];
+                    int nextY = now.y + y_moves[i];
+                    if (inArea(nextX, nextY, N , M) && grid[nextX][nextY] == 1) {
+                        freshTomato.remove(new Node(nextX, nextY));
+                        nextQueue.add(new Node(nextX, nextY));
+                        grid[nextX][nextY] = 2;
+                    }
+                }
+            }
+            turn++;
+            rottenTomatoQueue.addAll(nextQueue);
+            nextQueue = new LinkedList<>();
+        } while (!rottenTomatoQueue.isEmpty());
+
+        if (!freshTomato.isEmpty()) {
+            return -1;
+        } else {
+            return turn;
+        }
     }
 
-    static boolean inArea(int x, int y) {
+    class Node {
+        int x;
+        int y;
+
+        public Node(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return x == node.x && y == node.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+    }
+
+
+    static boolean inArea(int x, int y, int N, int M) {
         return 0 <= x && x < N && 0 <= y && y < N;
     }
 }
