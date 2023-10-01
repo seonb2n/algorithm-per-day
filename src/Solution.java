@@ -2,80 +2,56 @@ import java.util.*;
 
 class Solution {
 
+    /**
+     * 정렬된 정수 list 에서 중간값을 찾아서 반환해준다
+     * 중간값이 존재하지 않으면 두 중간값의 평균을 반환한다.
+     */
+    class MedianFinder {
 
-    static int[] x_moves = {-1, 0, 1, 0};
-    static int[] y_moves = {0, 1, 0, -1};
+       PriorityQueue<Integer> lessMedian;
+       PriorityQueue<Integer> moreMedian;
+       int size = 0;
 
-    public int orangesRotting(int[][] grid) {
-        int N = grid.length;
-        int M = grid[0].length;
+        public MedianFinder() {
+            this.lessMedian = new PriorityQueue<Integer>(Comparator.reverseOrder());
+            this.moreMedian = new PriorityQueue<Integer>();
+        }
 
-        Queue<Node> rottenTomatoQueue = new LinkedList<>();
-        Set<Node> freshTomato = new HashSet<>();
-
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                if (grid[i][j] == 2) {
-                    rottenTomatoQueue.add(new Node(i, j));
+        public void addNum(int num) {
+            // 첫번째인 경우에는 작은쪽에 넣는다.
+            if (size == 0) {
+                lessMedian.add(num);
+                size++;
+                return;
+            }
+            // 현재 개수가 홀수개인 경우에 큰 쪽에 수를 추가해줘야 한다.
+            else if (size % 2 != 0) {
+                if (lessMedian.peek() <= num) {
+                    moreMedian.add(num);
                 }
-                else if (grid[i][j] == 1) {
-                    freshTomato.add(new Node(i, j));
+                else {
+                    moreMedian.add(lessMedian.poll());
+                    lessMedian.add(num);
+                }
+            }
+            // 현재 개수가 짝수개면 작은 쪽에 수를 추가해줘야 한다.
+            else {
+                if (num <= moreMedian.peek()) {
+                    lessMedian.add(num);
+                }
+                else {
+                    lessMedian.add(moreMedian.poll());
+                    moreMedian.add(num);
                 }
             }
         }
 
-        Queue<Node> nextQueue = new LinkedList<>();
-        int turn = 0;
-        do {
-            while (!rottenTomatoQueue.isEmpty()) {
-                Node now = rottenTomatoQueue.poll();
-                for (int i = 0; i < 4; i++) {
-                    int nextX = now.x + x_moves[i];
-                    int nextY = now.y + y_moves[i];
-                    if (inArea(nextX, nextY, N , M) && grid[nextX][nextY] == 1) {
-                        freshTomato.remove(new Node(nextX, nextY));
-                        nextQueue.add(new Node(nextX, nextY));
-                        grid[nextX][nextY] = 2;
-                    }
-                }
+        public double findMedian() {
+            if (size % 2 != 0) {
+                return lessMedian.peek();
             }
-            turn++;
-            rottenTomatoQueue.addAll(nextQueue);
-            nextQueue = new LinkedList<>();
-        } while (!rottenTomatoQueue.isEmpty());
-
-        if (!freshTomato.isEmpty()) {
-            return -1;
-        } else {
-            return turn;
+            return (lessMedian.peek() + moreMedian.peek()) / 2f;
         }
     }
 
-    class Node {
-        int x;
-        int y;
-
-        public Node(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Node node = (Node) o;
-            return x == node.x && y == node.y;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
-        }
-    }
-
-
-    static boolean inArea(int x, int y, int N, int M) {
-        return 0 <= x && x < N && 0 <= y && y < N;
-    }
 }
