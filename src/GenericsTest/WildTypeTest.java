@@ -12,18 +12,23 @@ public class WildTypeTest {
         appleBox.add(new Apple("GreenApple", 100));
         appleBox.add(new Apple("GreenApple", 300));
 
-        Collections.sort(appleBox.getList(), new FruitComp());
+        Collections.sort(appleBox.getList());
         System.out.println(appleBox.getList());
     }
 }
 
-class Fruit {
+class Fruit implements Comparable<Fruit>{
     String name;
     int weight;
 
     Fruit(String name, int weight) {
         this.name = name;
         this.weight = weight;
+    }
+
+    @Override
+    public int compareTo(Fruit o) {
+        return this.weight - o.weight;
     }
 
     @Override
@@ -41,11 +46,6 @@ class Apple extends Fruit {
     }
 }
 
-class Grape extends Fruit {
-    Grape(String name, int weight) {
-        super(name, weight);
-    }
-}
 
 class FruitBox<T> {
     List<T> list = new ArrayList<>();
@@ -58,11 +58,3 @@ class FruitBox<T> {
         return list;
     }
 }
-
-class FruitComp implements Comparator<Fruit> {
-    @Override
-    public int compare(Fruit o1, Fruit o2) {
-        return o1.weight - o2.weight;
-    }
-}
-
