@@ -19,6 +19,8 @@ public class WildTypeTest {
 
 class Fruit implements Comparable<Fruit>{
     String name;
+
+
     int weight;
 
     Fruit(String name, int weight) {
