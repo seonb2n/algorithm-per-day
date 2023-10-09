@@ -22,7 +22,9 @@ class ThreadEx1 extends Thread {
 
         while (i != 0 && !isInterrupted()) {
             System.out.println(i--);
-            for (long x = 0; x < 2500000000L; x++);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {}
         }
         System.out.println("카운트가 종료됐습니다.");
     }
