@@ -5,28 +5,53 @@ import javax.swing.*;
 public class ThreadInterruptTest {
 
     public static void main(String[] args) {
-        ThreadEx1 th1= new ThreadEx1();
-        th1.start();
-        String input = JOptionPane.showInputDialog("아무 값이나 입력하세요");
-        System.out.println("입력하신 값은 " + input + "입니다.");
-        th1.interrupt();
-        System.out.println("isInterrupted() : " + th1.isInterrupted());
+        ThreadEx1 gc = new ThreadEx1();
+        gc.setDaemon(true);
+        gc.start();
+
+        int requiredMemory = 0;
+
+        for (int i = 0; i < 20; i++) {
+            requiredMemory = (int) (Math.random() * 10) * 20;
+
+            if (gc.freeMemory() < requiredMemory || gc.freeMemory() < gc.totalMemory() * 0.4) {
+                gc.interrupt();
+                try {
+                    gc.join(1000);
+                } catch (InterruptedException e) {}
+            }
+
+            gc.usedMemory += requiredMemory;
+            System.out.println("usedMemory : " + gc.usedMemory);
+        }
     }
 
 }
 
 class ThreadEx1 extends Thread {
+
+    final static int MAX_MEMORY = 1000;
+    int usedMemory = 0;
+
     @Override
     public void run() {
-        int i = 10;
-
-        while (i != 0 && !isInterrupted()) {
-            System.out.println(i--);
+        while (true) {
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {}
+                Thread.sleep(10 * 1000);
+            } catch (InterruptedException e) {
+                System.out.println("Awaken By Interrupt");
+            }
+            gc();
+            System.out.println("Garbage Coolected. Free Memory : " + freeMemory());
         }
-        System.out.println("카운트가 종료됐습니다.");
     }
+
+    public void gc() {
+        usedMemory -= 300;
+        if (usedMemory < 0) usedMemory = 0;
+    }
+
+    public int totalMemory() { return MAX_MEMORY; }
+    public int freeMemory() { return MAX_MEMORY - usedMemory; }
 }
 
