@@ -1,20 +1,16 @@
 package ThreadTest;
 
+import javax.swing.*;
+
 public class ThreadInterruptTest {
 
     public static void main(String[] args) {
         ThreadEx1 th1= new ThreadEx1();
-        ThreadEx2 th2 = new ThreadEx2();
         th1.start();
-        th2.start();
-
-        try {
-            th1.sleep(2000); // 현재 실행중인 쓰레드에 대해 작동하기 때문에, main 쓰레드가 영향을 받음
-        } catch (InterruptedException e) {
-
-        }
-
-        System.out.println("<main 종료>");
+        String input = JOptionPane.showInputDialog("아무 값이나 입력하세요");
+        System.out.println("입력하신 값은 " + input + "입니다.");
+        th1.interrupt();
+        System.out.println("isInterrupted() : " + th1.isInterrupted());
     }
 
 }
@@ -22,19 +18,13 @@ public class ThreadInterruptTest {
 class ThreadEx1 extends Thread {
     @Override
     public void run() {
-        for (int i = 0; i < 300; i++) {
-            System.out.print("-");
+        int i = 10;
+
+        while (i != 0 && !isInterrupted()) {
+            System.out.println(i--);
+            for (long x = 0; x < 2500000000L; x++);
         }
-        System.out.println("<th1 종료>");
+        System.out.println("카운트가 종료됐습니다.");
     }
 }
 
-class ThreadEx2 extends Thread {
-    @Override
-    public void run() {
-        for (int i = 0; i < 300; i++) {
-            System.out.print("|");
-        }
-        System.out.println("<th2 종료>");
-    }
-}
