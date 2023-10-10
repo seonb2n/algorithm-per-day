@@ -39,7 +39,6 @@ class Customer implements Runnable {
             String name = Thread.currentThread().getName();
 
             table.remove(food);
-            System.out.println(name + " ate a "  + food);
         }
     }
 }
@@ -74,13 +73,15 @@ class Table {
     private Condition forCust = tableLock.newCondition();
 
     public void add(String dish) {
+        System.out.println("Cook Wait For Lock");
         tableLock.lock();
-
+        System.out.println("Cook Get Lock");
         try {
             while (dishes.size() >= MAX_FOOD) {
                 String name = Thread.currentThread().getName();
                 System.out.println(name + " is waiting.");
                 try {
+                    System.out.println("Cook Wait");
                     forCook.await();
                     // wait(); cust 쓰레드를 기다리게 한다.
                     Thread.sleep(500);
@@ -89,6 +90,7 @@ class Table {
             }
 
             dishes.add(dish);
+            System.out.println("Cook Add " + dish);
             forCust.signal();
 //            notify();
             System.out.println("Dishes : " + dishes.toString());
@@ -98,8 +100,11 @@ class Table {
     }
 
     public void remove(String dishName) {
-        tableLock.lock();
         String name = Thread.currentThread().getName();
+        System.out.println(name + " is wait for lock");
+        tableLock.lock();
+        System.out.println(name + " get Lock!");
+
 
         try {
             while (dishes.size() == 0) {
@@ -114,6 +119,7 @@ class Table {
                 for (int i = 0; i < dishes.size(); i++) {
                     if (dishName.equals(dishes.get(i))) {
                         dishes.remove(i);
+                        System.out.println(name + " ate a "  + dishName);
                         forCook.signal();
                         return;
                     }
