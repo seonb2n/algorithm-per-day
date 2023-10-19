@@ -22,7 +22,6 @@ public class FileNameFilterTest {
                 delete(files[i], ext);
             } else {
 
-
             }
         }
     }
