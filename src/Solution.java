@@ -1,40 +1,31 @@
 import java.util.*;
 
-//https://leetcode.com/problems/valid-sudoku/
+// https://leetcode.com/problems/text-justification/
 class Solution {
-    public boolean isValidSudoku(char[][] board) {
-        boolean[][] rowValid = new boolean[9][10];
-        boolean[][] columnValid = new boolean[9][10];
-        boolean[][] cellValid = new boolean[9][10];
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> result = new ArrayList<>();
 
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                // i,j 를 바탕으로 해당 숫자가 몇번째 셀인지 알아야 함
-                if (board[i][j] != '.') {
-                    int num = board[i][j] - '0';
-                    if (rowValid[i][num] || columnValid[j][num] || cellValid[getCellNumber(i, j)][num]) {
-                        return false;
-                    }
-                    rowValid[i][num] = true;
-                    columnValid[j][num] = true;
-                    cellValid[getCellNumber(i, j)][num] = true;
-                }
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < words.length; i++) {
+            String nowWord = words[i];
+            if (sb.length() + nowWord.length() > maxWidth) {
+                // todo  sb 에 문자 사이 space 추가
+                // 한 글자인 경우엔 맨 뒤에 space 추가
+                result.add(sb.toString());
+                sb = new StringBuilder();
+            } else {
+                sb.append(" ").append(nowWord);
             }
         }
-
-        return true;
+        if (sb.length() > 0) {
+            result.add(sb.toString());
+        }
+        return result;
     }
 
-    int getCellNumber(int i, int j) {
-        if (i < 3 && j < 3) return 0;
-        if (i < 3 && j < 6) return 1;
-        if (i < 3 && j < 9) return 2;
-        if (i < 6 && j < 3) return 3;
-        if (i < 6 && j < 6) return 4;
-        if (i < 6 && j < 9) return 5;
-        if (i < 9 && j < 3) return 6;
-        if (i < 9 && j < 6) return 7;
-        if (i < 9 && j < 9) return 8;
-        return 0;
+    String convertToMaxString(String input, int maxWidth) {
+        String[] split = input.split(" ");
+        int left = maxWidth - input.length() - (split.length - 1);
     }
 }
