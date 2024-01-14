@@ -1,55 +1,36 @@
 import java.util.*;
 
-// https://leetcode.com/problems/sliding-window-maximum/
+// https://leetcode.com/problems/bulls-and-cows/
 class Solution {
+    public String getHint(String secret, String guess) {
 
-    public int[] maxSlidingWindow(int[] nums, int k) {
-        PriorityQueue<Node> pq = new PriorityQueue<>(Comparator.reverseOrder());
-        int[] res = new int[nums.length - k + 1];
+        int bulls = 0;
+        int cows = 0;
 
-        int cursor = 0;
+        boolean[] isAlreadySecretChecked = new boolean[secret.length()];
+        boolean[] isAlreadyGuessChecked = new boolean[secret.length()];
 
-        while (cursor < k) {
-            pq.add(new Node(nums[cursor], cursor));
-            cursor++;
+        for (int i = 0; i < secret.length(); i++) {
+            if (guess.charAt(i) == secret.charAt(i)) {
+                bulls++;
+                // guess 중에 사용된 애 찾기
+                isAlreadySecretChecked[i] = true;
+                isAlreadyGuessChecked[i] = true;
+            }
         }
 
-        res[0] = pq.peek().value;
-
-        // 하나씩 추가한다.
-        while (cursor < nums.length) {
-            pq.add(new Node(nums[cursor], cursor));
-
-            //pq 에서 최대값을 찾는다.
-            int max = -10001;
-            while (max == -10001 && !pq.isEmpty()) {
-                if (pq.peek().index + k <= cursor) {
-                    pq.poll();
-                }
-                else {
-                    max = pq.peek().value;
+        for (int i = 0; i < secret.length(); i++) {
+            for (int j = 0; j < guess.length(); j++) {
+                if (!isAlreadySecretChecked[j] && !isAlreadyGuessChecked[i] && secret.charAt(i) == guess.charAt(j)) {
+                    cows++;
+                    isAlreadyGuessChecked[j] = true;
+                    break;
                 }
             }
-            res[cursor - k + 1] = max;
-            cursor++;
         }
 
-        return res;
-    }
-
-    class Node implements Comparable<Node> {
-
-        int value;
-        int index;
-
-        public Node(int value, int index) {
-            this.value = value;
-            this.index = index;
-        }
-
-        @Override
-        public int compareTo(Node o) {
-            return this.value - o.value;
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(bulls).append('A').append(cows).append('B');
+        return sb.toString();
     }
 }
