@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Scanner;
 
 import static java.util.Collections.swap;
@@ -6,41 +7,50 @@ import static java.util.Collections.swap;
 public class Main {
 
     public static void main(String[] args) {
-
-        Arrays.stream(solution(new int[]{2, 3, 1, 2}, new int[]{3, 1, 2, 1, 4, 1})).forEach(System.out::print);
-
-        System.out.println();
-        Arrays.stream(solution(new int[]{5, 5, 5}, new int[]{1, 2, 1, 2, 3})).forEach(System.out::print);
-
-        System.out.println();
-        Arrays.stream(solution(new int[]{2, 1, 3, 4, 3}, new int[]{2, 2, 2, 2, 5, 5, 5})).forEach(System.out::print);
+        int[][] delays = {
+                {2423, 10},
+                {3423, 30},
+                {1, 40},
+                {450, 50},
+                {1200, 60},
+                {2781, 100}
+        };
+        int[] limits = {2, 1};
+        Arrays.stream(solution(delays, limits)).forEach(System.out::print);
     }
 
-    static int[] solution(int[] emotions, int[] orders) {
-        int[] result = new int[orders.length];
-
-        int[] nowEmotions = Arrays.copyOf(emotions, emotions.length);
-
-        for (int i = 0; i < orders.length; i++) {
-            // 물을 주지만, 0 인 경우엔 변동이 없다.
-            int nowOrder = orders[i]-1;
-            if (nowEmotions[nowOrder] != 0) {
-                nowEmotions[nowOrder] = emotions[nowOrder] + 1;
+    static int[] solution(int[][] delays, int[] limits) {
+        int maxUser = 0;
+        int maxServer = 1;
+        for (int i = 0; i < delays[0].length; i++) {
+            Integer[] serverDelays = new Integer[delays.length];
+            for (int j = 0; j < delays.length; j++) {
+                serverDelays[j] = delays[j][i];
             }
-            int nowResult = 0;
-            for (int j = 0; j < nowEmotions.length; j++) {
-                if (nowEmotions[j] > 1) {
-                    nowResult++;
-                    nowEmotions[j]--;
-                } else if (nowEmotions[j] == 1) {
-                    nowEmotions[j]--;
+
+            Arrays.sort(serverDelays, Collections.reverseOrder());
+            // serverDelays 중에 최고 길이를 찾는다.
+            for (int j = 0; j < serverDelays.length; j++) {
+                int maxNum = dfs(j, j+1, serverDelays, limits[0], limits[1] * 1000);
+                if (maxUser < maxNum) {
+                    maxUser = maxNum;
+                    maxServer = i+1;
                 }
             }
-            result[i] = nowResult;
         }
+        return new int[]{maxUser, maxServer};
+    }
 
-//        Arrays.stream(result).forEach(System.out::println);
-        return result;
+    static int dfs(int maxUser, int nowNumber, Integer[] serverDelays, int limitOne, int limitTwo) {
+        if (nowNumber > serverDelays.length - 1) {
+            return nowNumber - maxUser + 1;
+        }
+        int nowUser = serverDelays[nowNumber];
+        // nowUser 가 조건에 맞는지 검사해야 함
+        if (serverDelays[maxUser] < nowUser * limitOne && serverDelays[maxUser] < nowUser + limitTwo) {
+            return dfs(maxUser, nowNumber + 1, serverDelays, limitOne, limitTwo);
+        }
+        return nowNumber - maxUser;
     }
 
 }
