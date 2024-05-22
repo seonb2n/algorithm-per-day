@@ -4,34 +4,24 @@ import java.util.*;
 class Solution {
 
     public int solution(String s) {
-        int answer = 0;
-
+        int start = 0, end = 0;
         for (int i = 0; i < s.length(); i++) {
-            for (int j = s.length(); i < j; j--) {
-                String target = s.substring(i, j);
-                if (target.length() <= answer) {
-                    break;
-                }
-
-                if (isPellindrome(target)) {
-                    answer = Math.max(answer, target.length());
-                    break;
-                }
+            int len1 = expandAroundCenter(s, i, i);
+            int len2 = expandAroundCenter(s, i, i + 1);
+            int len = Math.max(len1, len2);
+            if (len > end - start) {
+                start = i - (len - 1) / 2;
+                end = i + len / 2;
             }
         }
-
-        return answer;
+        return s.substring(start, end + 1).length();
     }
 
-    boolean isPellindrome(String s) {
-
-        int length = s.length() / 2;
-
-        for (int i = 0; i < length; i++) {
-            if (s.charAt(i) != s.charAt(s.length() - i - 1)) {
-                return false;
-            }
+    private static int expandAroundCenter(String s, int left, int right) {
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            left--;
+            right++;
         }
-        return true;
+        return right - left - 1;
     }
 }
