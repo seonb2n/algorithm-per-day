@@ -7,10 +7,15 @@ class Solution {
         int answer = 0;
 
         for (int i = 0; i < s.length(); i++) {
-            for (int j = i+answer; j < s.length(); j++) {
-                String target = s.substring(i, j + 1);
+            for (int j = s.length(); i < j; j--) {
+                String target = s.substring(i, j);
+                if (target.length() <= answer) {
+                    break;
+                }
+
                 if (isPellindrome(target)) {
                     answer = Math.max(answer, target.length());
+                    break;
                 }
             }
         }
