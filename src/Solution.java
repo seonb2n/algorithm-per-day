@@ -12,32 +12,30 @@ class Solution {
             String[] times = log.split("-");
             int startTime = convertToSeconds(times[0]);
             int endTime = convertToSeconds(times[1]);
-            for (int j = startTime; j <= endTime; j++) {
+            for (int j = startTime; j < endTime; j++) {
                 perSeconds[j]++;
             }
         }
 
         // 0 초부터 광고 계산
         int maxTime = 0;
-        int maxValue = 0;
-        int nowTime = 1;
+        long maxValue = 0;
 
-        int totalAdvTime = convertToSeconds(adv_time);
+        int lastAdvTime = convertToSeconds(adv_time);
 
         // 0 초부터 광고 마지막 초까지 누적 시척시간 계산
-        for (int i = 0; i <= totalAdvTime; i++) {
+        for (int i = 0; i < lastAdvTime; i++) {
             maxValue += perSeconds[i];
         }
 
-        int nowValue = maxValue;
+        long nowValue = maxValue;
 
-        while (nowTime + totalAdvTime <= lastTime) {
-            nowValue = nowValue - perSeconds[nowTime-1] + perSeconds[nowTime + totalAdvTime];
+        for (int i = lastAdvTime; i < lastTime; i++) {
+            nowValue = (nowValue + perSeconds[i] - perSeconds[i-lastAdvTime]);
             if (nowValue > maxValue) {
                 maxValue = nowValue;
-                maxTime = nowTime;
+                maxTime = i - lastAdvTime + 1;
             }
-            nowTime++;
         }
 
         return convertToTimeString(maxTime);
