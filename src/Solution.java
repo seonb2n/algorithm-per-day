@@ -1,29 +1,65 @@
 import java.util.*;
 
-//https://leetcode.com/problems/add-two-numbers/
+//https://leetcode.com/problems/longest-palindromic-substring/
 class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        PriorityQueue<Integer> pq = new PriorityQueue<>();
-        for (int i = 0; i < nums1.length; i++) {
-            pq.offer(nums1[i]);
+    public String longestPalindrome(String s) {
+        //length n palindrom consists of  S(start-1) + n-2 palindrom + S(end+ 1)
+        List<Palindrom>[] dp= new List[s.length() + 3];
+        dp[1] = new ArrayList<Palindrom>();
+        for (int i = 0; i < s.length(); i++) {
+            dp[1].add(new Palindrom(i,i+1, s.substring(i, i+1)));
         }
-        for (int i = 0; i < nums2.length; i++) {
-            pq.offer(nums2[i]);
+        if (s.length() == 1) {
+            return dp[1].get(0).value;
         }
-        int length = pq.size();
-        if (length % 2 == 0) {
-            for (int i = 0; i < length / 2-1; i++) {
-                pq.poll();
+        dp[2] = new ArrayList<Palindrom>();
+        for (int i = 0; i < s.length() - 1; i++) {
+            String now = s.substring(i, i + 2);
+            if (now.charAt(0) == now.charAt(1)) {
+                dp[2].add(new Palindrom(i,i+2, now));
             }
-            int first = pq.poll();
-            int second = pq.poll();
-            return ((double)first + (double)second) / 2;
         }
-        else {
-            for (int i = 0; i < length / 2 - 1; i++) {
-                pq.poll();
+
+        int nowLength = 3;
+        while (true) {
+            dp[nowLength] = new ArrayList<Palindrom>();
+            for (int i = 0; i < dp[nowLength - 2].size(); i++) {
+                Palindrom now = dp[nowLength-2].get(i);
+                if (now.start - 1 >= 0 && now.end < s.length()) {
+                    if (s.charAt(now.start-1) == s.charAt(now.end)) {
+                        dp[nowLength].add(new Palindrom(now.start-1, now.end + 1, s.substring(now.start-1, now.end + 1)));
+                    }
+                }
             }
-            return (double) pq.poll();
+            if (dp[nowLength].isEmpty() && dp[nowLength - 1].isEmpty()) {
+                break;
+            }
+            nowLength++;
         }
+
+        if (!dp[nowLength-2].isEmpty()) {
+            return dp[nowLength-2].get(0).value;
+        }
+        if (!dp[nowLength-3].isEmpty()) {
+            return dp[nowLength-3].get(0).value;
+        }
+
+        return dp[nowLength].get(0).value;
+    }
+}
+
+class Palindrom {
+    int start;
+    int end;
+    String value;
+
+    public Palindrom(int start, int end, String value) {
+        this.start = start;
+        this.end = end;
+        this.value = value;
+    }
+
+    public String toString() {
+        return value;
     }
 }
