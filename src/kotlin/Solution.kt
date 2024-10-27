@@ -2,45 +2,24 @@ package kotlin
 
 import java.lang.StringBuilder
 
-// https://leetcode.com/problems/zigzag-conversion/
+// https://leetcode.com/problems/reverse-integer/
 class Solution {
-    fun convert(s: String, numRows: Int): String {
-        var width = 0
-        var result = Array(numRows) { CharArray(1001) { '-' } }
+    fun reverse(x: Int): Int {
+        val sb: StringBuilder = StringBuilder()
+        var stringX = x.toString()
 
-        var x = 0
-        var y = 0
-        var isInZig = false
-        for (i in s.indices) {
-            result[x][y] = s[i]
+        if (x < 0) {
+            stringX = stringX.substring(1)
+        }
 
-            if (isInZig) {
-                x -= 1;
-                y += 1;
-                if (x == 0) {
-                    isInZig = false
-                }
-            } else {
-                if (x == numRows-1) {
-                    isInZig = true
-                    x -= 1
-                    y += 1
-                    if (x == 0) {
-                        isInZig = false
-                    }
-                } else {
-                    x += 1
-                }
-            }
+        for (i in stringX.length - 1 downTo 0) {
+            sb.append(stringX[i])
         }
-        var sb: StringBuilder = StringBuilder()
-        for (i in 0..numRows - 1) {
-            for (j in 0..y) {
-                if (result[i][j] != '-') {
-                    sb.append(result[i][j])
-                }
-            }
+
+        return try {
+            if (x < 0) sb.toString().toInt() * -1 else sb.toString().toInt()
+        } catch (e: NumberFormatException) {
+            0
         }
-        return sb.toString()
     }
 }
