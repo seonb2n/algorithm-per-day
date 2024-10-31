@@ -1,43 +1,37 @@
 package kotlin
 
-// https://leetcode.com/problems/roman-to-integer/
+// https://leetcode.com/problems/3sum/
 class Solution {
-    fun romanToInt(s: String): Int {
-        val romanStr = arrayOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
-        val romanMap: MutableMap<String, Int> = mutableMapOf()
-        romanMap.put("M", 1000)
-        romanMap.put("CM", 900)
-        romanMap.put("D", 500)
-        romanMap.put("CD", 400)
-        romanMap.put("C", 100)
-        romanMap.put("XC", 90)
-        romanMap.put("L", 50)
-        romanMap.put("XL", 40)
-        romanMap.put("X", 10)
-        romanMap.put("IX", 9)
-        romanMap.put("V", 5)
-        romanMap.put("IV", 4)
-        romanMap.put("I", 1)
+    fun threeSum(nums: IntArray): List<List<Int>> {
+        nums.sort() // 배열을 정렬하여 중복 체크를 쉽게 함
+        val result = mutableSetOf<List<Int>>() // Set을 사용하여 중복 제거
 
-        var result = 0
+        for (i in nums.indices) {
+            // 같은 첫 번째 숫자는 건너뛰기
+            if (i > 0 && nums[i] == nums[i-1]) continue
 
-        var cursor = 0
-        var romanCursor = 0
+            var left = i + 1
+            var right = nums.size - 1
 
-        while (cursor < s.length) {
-            if (cursor + 2 <= s.length && s.substring(cursor, cursor+2) == romanStr[romanCursor]) {
-                result += romanMap[romanStr[romanCursor]]!!
-                cursor+=2
-            }
-            else if(cursor + 1 <= s.length && s.substring(cursor, cursor+1) == romanStr[romanCursor]) {
-                result += romanMap[romanStr[romanCursor]]!!
-                cursor +=1
-            }
-            else {
-                romanCursor++
+            while (left < right) {
+                val sum = nums[i] + nums[left] + nums[right]
+
+                when {
+                    sum == 0 -> {
+                        result.add(listOf(nums[i], nums[left], nums[right]))
+                        left++
+                        right--
+
+                        // 중복되는 값 건너뛰기
+                        while (left < right && nums[left] == nums[left-1]) left++
+                        while (left < right && nums[right] == nums[right+1]) right--
+                    }
+                    sum < 0 -> left++
+                    else -> right--
+                }
             }
         }
 
-        return result
+        return result.toList()
     }
 }
