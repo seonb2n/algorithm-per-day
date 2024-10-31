@@ -1,73 +1,43 @@
 package kotlin
 
-// https://leetcode.com/problems/integer-to-roman/
+// https://leetcode.com/problems/roman-to-integer/
 class Solution {
-    fun intToRoman(num: Int): String {
-        val romanMap: MutableMap<Int, String> = mutableMapOf<Int, String>()
-        romanMap.put(1, "I")
-        romanMap.put(2, "II")
-        romanMap.put(3, "III")
-        romanMap.put(4, "IV")
-        romanMap.put(5, "V")
-        romanMap.put(6, "VI")
-        romanMap.put(7, "VII")
-        romanMap.put(8, "VIII")
-        romanMap.put(9, "IX")
-        romanMap.put(10, "X")
+    fun romanToInt(s: String): Int {
+        val romanStr = arrayOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
+        val romanMap: MutableMap<String, Int> = mutableMapOf()
+        romanMap.put("M", 1000)
+        romanMap.put("CM", 900)
+        romanMap.put("D", 500)
+        romanMap.put("CD", 400)
+        romanMap.put("C", 100)
+        romanMap.put("XC", 90)
+        romanMap.put("L", 50)
+        romanMap.put("XL", 40)
+        romanMap.put("X", 10)
+        romanMap.put("IX", 9)
+        romanMap.put("V", 5)
+        romanMap.put("IV", 4)
+        romanMap.put("I", 1)
 
-        val sb: StringBuilder = StringBuilder()
+        var result = 0
 
-        var rest = num
+        var cursor = 0
+        var romanCursor = 0
 
-        if (rest >= 1000) {
-            val mock = rest / 1000
-            for (i in 1..mock) {
-                sb.append("M")
+        while (cursor < s.length) {
+            if (cursor + 2 <= s.length && s.substring(cursor, cursor+2) == romanStr[romanCursor]) {
+                result += romanMap[romanStr[romanCursor]]!!
+                cursor+=2
             }
-            rest -= (mock * 1000)
-        }
-        if (rest >= 900) {
-            sb.append("CM")
-            rest -= 900
-        }
-        if (rest >= 500) {
-            sb.append("D")
-            rest -= 500
-        }
-        if (rest >= 400) {
-            sb.append("CD")
-            rest -= 400
+            else if(cursor + 1 <= s.length && s.substring(cursor, cursor+1) == romanStr[romanCursor]) {
+                result += romanMap[romanStr[romanCursor]]!!
+                cursor +=1
+            }
+            else {
+                romanCursor++
+            }
         }
 
-        if (rest >= 100) {
-            val mock = rest / 100
-            for (i in 1..mock) {
-                sb.append("C")
-            }
-            rest -= (mock * 100)
-        }
-        if (rest >= 90) {
-            sb.append("XC")
-            rest -= 90
-        }
-        if (rest >= 50) {
-            sb.append("L")
-            rest -= 50
-        }
-        if (rest >= 40) {
-            sb.append("XL")
-            rest -= 40
-        }
-        if (rest >= 10) {
-            val mock = rest / 10
-            for (i in 1..mock) {
-                sb.append("X")
-            }
-            rest -= (10 * mock)
-        }
-        if (rest > 0) {
-            sb.append(romanMap[rest])
-        }
-        return sb.toString()
+        return result
     }
 }
