@@ -1,32 +1,36 @@
 package kotlin
 
-// https://leetcode.com/problems/3sum-closet/
+// https://leetcode.com/problems/letter-combinations-of-a-phone-number
 class Solution {
-    fun threeSumClosest(nums: IntArray, target: Int): Int {
-        nums.sort()
-        var result = nums[0] + nums[1] + nums[2]
+    fun letterCombinations(digits: String): List<String> {
+        if (digits.isEmpty()) return emptyList()
+        val result = mutableListOf<String>()
+        val map = mapOf(
+            '2' to "abc",
+            '3' to "def",
+            '4' to "ghi",
+            '5' to "jkl",
+            '6' to "mno",
+            '7' to "pqrs",
+            '8' to "tuv",
+            '9' to "wxyz"
+        )
 
-        for (i in 0..nums.size-3) {
-            var left = i+1
-            var right = nums.size-1
-
-            while (left < right) {
-                val current = nums[i] + nums[left] + nums[right]
-                if (current == target) {
-                    return current
-                }
-
-                if (Math.abs(current - target) < Math.abs(result - target)) {
-                    result = current
-                }
-                if (current > target) {
-                    right--
-                }
-                else if (current < target) {
-                    left++
-                }
+        //DFS
+        fun dfs(digits: String, index: Int, sb: StringBuilder) {
+            if (index == digits.length) {
+                result.add(sb.toString())
+                return
+            }
+            val nowStr = map[digits[index]]!!
+            for (i in nowStr.indices) {
+                sb.append(nowStr[i])
+                dfs(digits, index + 1, sb)
+                sb.deleteCharAt(sb.length - 1)
             }
         }
+        val sb: StringBuilder = StringBuilder()
+        dfs(digits, 0, sb)
 
         return result
     }
