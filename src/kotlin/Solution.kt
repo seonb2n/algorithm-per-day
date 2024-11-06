@@ -1,31 +1,47 @@
 package kotlin
 
-// https://leetcode.com/problems/4sums
+/**
+ * Example:
+ * var li = ListNode(5)
+ * var v = li.`val`
+ * Definition for singly-linked list.
+ * class ListNode(var `val`: Int) {
+ *     var next: ListNode? = null
+ * }
+ */
 class Solution {
-    fun fourSum(nums: IntArray, target: Int): List<List<Int>> {
-        nums.sort()
-        val result = mutableSetOf<List<Int>>()
+    fun removeNthFromEnd(head: ListNode?, n: Int): ListNode? {
+        val stack = ArrayDeque<Int>()
 
-        for (i in 0 until nums.size - 1) {
-            for (j in i + 1 until nums.size) {
-                var left = j+1
-                var right = nums.size-1
+        var now = head
 
-                while (left < right) {
-                    val nowNumber = nums[i].toLong() + nums[j] + nums[left] + nums[right]
-                    if (nowNumber == target.toLong()) {
-                        result.add(listOf(nums[i], nums[j], nums[left], nums[right]))
-                        left++
-                    }
-                    else if (nowNumber < target) {
-                       left++
-                    }
-                    else {
-                        right--
-                    }
-                }
-            }
+        while (now != null) {
+            stack.add(now.`val`)
+            now = now.next
         }
-        return result.map { it.toMutableList() }.toList()
+
+        var pastNode: ListNode? = ListNode(stack.removeLast())
+        var cursor = 1
+        if (n == 1) {
+            pastNode = null
+        }
+
+        while (stack.isNotEmpty()) {
+            cursor++
+            if (cursor == n) {
+                cursor++
+                continue
+            }
+            val now = ListNode(stack.removeLast())
+            now.next = pastNode
+            pastNode = now
+        }
+
+        return pastNode
     }
+}
+
+
+data class ListNode(var `val`: Int) {
+    var next: ListNode? = null
 }
