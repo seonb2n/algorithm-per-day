@@ -1,23 +1,30 @@
 package kotlin
 
-class Solution {
+import java.util.*
 
-    val result = mutableListOf<String>()
-    fun generateParenthesis(n: Int): List<String> {
-        dfs(n, 0, 0, "")
+
+class Solution {
+    fun mergeKLists(lists: Array<ListNode?>): ListNode? {
+       val pq = PriorityQueue<Int>(Collections.reverseOrder())
+        for (i in lists.indices) {
+            var nowNode = lists[i]
+            while (nowNode != null) {
+                pq.add(nowNode.`val`)
+                nowNode = nowNode.next
+            }
+        }
+
+        var result: ListNode? = null
+        while (pq.isNotEmpty()) {
+            var next = ListNode(pq.poll())
+            next.next = result
+            result = next
+        }
+
         return result
     }
+}
 
-    fun dfs(n: Int, left: Int, right: Int, now: String) {
-        if (now.length == n * 2) {
-            result.add(now)
-            return
-        }
-        if (left < n) {
-            dfs(n, left + 1, right, now + '(')
-        }
-        if (right < n && right < left) {
-            dfs(n, left, right + 1, now + ')')
-        }
-    }
+class ListNode(var `val`: Int) {
+    var next: ListNode? = null
 }
