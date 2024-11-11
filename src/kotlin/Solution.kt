@@ -3,25 +3,45 @@ package kotlin
 import java.util.*
 
 
+/**
+ * Example:
+ * var li = ListNode(5)
+ * var v = li.`val`
+ * Definition for singly-linked list.
+ * class ListNode(var `val`: Int) {
+ *     var next: ListNode? = null
+ * }
+ */
+
 class Solution {
-    fun mergeKLists(lists: Array<ListNode?>): ListNode? {
-       val pq = PriorityQueue<Int>(Collections.reverseOrder())
-        for (i in lists.indices) {
-            var nowNode = lists[i]
-            while (nowNode != null) {
-                pq.add(nowNode.`val`)
-                nowNode = nowNode.next
+    fun swapPairs(head: ListNode?): ListNode? {
+        if (head == null) return head
+        if (head.next == null) return head
+
+        val firstNode = ListNode(0)
+        var now = firstNode
+        var cursor = head.next
+        val stack: Stack<Int> = Stack()
+
+        stack.push(head.`val`)
+
+        while (cursor != null) {
+            stack.push(cursor.`val`)
+            cursor = cursor.next
+            if (stack.size == 2) {
+                val first = ListNode(stack.pop())
+                val second = ListNode(stack.pop())
+                first.next = second
+                now.next = first
+                now = second
             }
         }
 
-        var result: ListNode? = null
-        while (pq.isNotEmpty()) {
-            var next = ListNode(pq.poll())
-            next.next = result
-            result = next
+        if(!stack.isEmpty()) {
+            now.next = ListNode(stack.pop())
         }
 
-        return result
+        return firstNode.next
     }
 }
 
