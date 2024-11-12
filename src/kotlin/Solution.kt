@@ -1,7 +1,7 @@
 package kotlin
 
 import java.util.*
-
+import kotlin.collections.ArrayDeque
 
 /**
  * Example:
@@ -12,39 +12,36 @@ import java.util.*
  *     var next: ListNode? = null
  * }
  */
-
 class Solution {
-    fun swapPairs(head: ListNode?): ListNode? {
+    fun reverseKGroup(head: ListNode?, k: Int): ListNode? {
         if (head == null) return head
         if (head.next == null) return head
 
         val firstNode = ListNode(0)
         var now = firstNode
         var cursor = head.next
-        val stack: Stack<Int> = Stack()
+        val deque: ArrayDeque<Int> = ArrayDeque()
 
-        stack.push(head.`val`)
+        deque.add(head.`val`)
 
         while (cursor != null) {
-            stack.push(cursor.`val`)
+            deque.add(cursor.`val`)
             cursor = cursor.next
-            if (stack.size == 2) {
-                val first = ListNode(stack.pop())
-                val second = ListNode(stack.pop())
-                first.next = second
-                now.next = first
-                now = second
+            if (deque.size == k) {
+                while (!deque.isEmpty()) {
+                    val node = ListNode(deque.removeLast())
+                    now.next = node
+                    now = node
+                }
             }
         }
+        println(deque)
 
-        if(!stack.isEmpty()) {
-            now.next = ListNode(stack.pop())
+        while (!deque.isEmpty()) {
+            now.next = ListNode(deque.removeFirst())
+            now = now.next
         }
 
         return firstNode.next
     }
-}
-
-class ListNode(var `val`: Int) {
-    var next: ListNode? = null
 }
