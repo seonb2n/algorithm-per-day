@@ -2,46 +2,31 @@ package kotlin
 
 import java.util.*
 import kotlin.collections.ArrayDeque
-
-/**
- * Example:
- * var li = ListNode(5)
- * var v = li.`val`
- * Definition for singly-linked list.
- * class ListNode(var `val`: Int) {
- *     var next: ListNode? = null
- * }
- */
 class Solution {
-    fun reverseKGroup(head: ListNode?, k: Int): ListNode? {
-        if (head == null) return head
-        if (head.next == null) return head
+    fun divide(dividend: Int, divisor: Int): Int {
+        if (dividend == Int.MIN_VALUE && divisor == -1) return Int.MAX_VALUE
+        if (dividend == Int.MIN_VALUE && divisor == 1) return Int.MIN_VALUE
+        // Long으로 변환하여 오버플로우 방지
+        var a = Math.abs(dividend.toLong())
+        val b = Math.abs(divisor.toLong())
 
-        val firstNode = ListNode(0)
-        var now = firstNode
-        var cursor = head.next
-        val deque: ArrayDeque<Int> = ArrayDeque()
+        // 부호 미리 계산
+        val isNegative = (dividend > 0) xor (divisor > 0)
 
-        deque.add(head.`val`)
+        var ans = 0L
 
-        while (cursor != null) {
-            deque.add(cursor.`val`)
-            cursor = cursor.next
-            if (deque.size == k) {
-                while (!deque.isEmpty()) {
-                    val node = ListNode(deque.removeLast())
-                    now.next = node
-                    now = node
-                }
+        // 비트 연산으로 나눗셈 수행
+        for (i in 31 downTo 0) {
+            if (a >= (b shl i)) {
+                a -= b shl i
+                ans += 1L shl i
             }
         }
-        println(deque)
 
-        while (!deque.isEmpty()) {
-            now.next = ListNode(deque.removeFirst())
-            now = now.next
+        // 부호 적용 및 범위 체크
+        return when {
+            isNegative -> -ans.coerceAtLeast(Int.MIN_VALUE.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+            else -> ans.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         }
-
-        return firstNode.next
     }
 }
