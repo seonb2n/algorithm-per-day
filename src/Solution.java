@@ -1,65 +1,55 @@
 import java.util.*;
 
-//https://leetcode.com/problems/longest-palindromic-substring/
 class Solution {
-    public String longestPalindrome(String s) {
-        //length n palindrom consists of  S(start-1) + n-2 palindrom + S(end+ 1)
-        List<Palindrom>[] dp= new List[s.length() + 3];
-        dp[1] = new ArrayList<Palindrom>();
+
+    public List<Integer> findSubstring(String s, String[] words) {
+        Map<String, Integer> wordMap = new HashMap<>();
+        for (String word : words) {
+            if (wordMap.containsKey(word)) {
+                wordMap.put(word, wordMap.get(word) + 1);
+            } else {
+                wordMap.put(word, 1);
+            }
+        }
+
+        int length = words[0].length();
+        List<Integer> res = new ArrayList<>();
         for (int i = 0; i < s.length(); i++) {
-            dp[1].add(new Palindrom(i,i+1, s.substring(i, i+1)));
-        }
-        if (s.length() == 1) {
-            return dp[1].get(0).value;
-        }
-        dp[2] = new ArrayList<Palindrom>();
-        for (int i = 0; i < s.length() - 1; i++) {
-            String now = s.substring(i, i + 2);
-            if (now.charAt(0) == now.charAt(1)) {
-                dp[2].add(new Palindrom(i,i+2, now));
+            if (dfs(s.substring(i), length, wordMap)) {
+                res.add(i);
             }
         }
+        return res;
+    }
 
-        int nowLength = 3;
-        while (true) {
-            dp[nowLength] = new ArrayList<Palindrom>();
-            for (int i = 0; i < dp[nowLength - 2].size(); i++) {
-                Palindrom now = dp[nowLength-2].get(i);
-                if (now.start - 1 >= 0 && now.end < s.length()) {
-                    if (s.charAt(now.start-1) == s.charAt(now.end)) {
-                        dp[nowLength].add(new Palindrom(now.start-1, now.end + 1, s.substring(now.start-1, now.end + 1)));
-                    }
+    public boolean dfs(String s, int length, Map<String, Integer> wordMap) {
+        if (wordMap.isEmpty()) {
+            return true;
+        }
+        if (s.length() < length) {
+            return false;
+        }
+        String now = s.substring(0, length);
+        if (wordMap.containsKey(now)) {
+            if (wordMap.get(now) == 1) {
+                wordMap.remove(now);
+            } else {
+                wordMap.put(now, wordMap.get(now) - 1);
+            }
+            if (dfs(s.substring(length), length, wordMap)) {
+                if (wordMap.containsKey(now)) {
+                    wordMap.put(now, wordMap.get(now) + 1);
+                } else {
+                    wordMap.put(now, 1);
                 }
+                return true;
+            };
+            if (wordMap.containsKey(now)) {
+                wordMap.put(now, wordMap.get(now) + 1);
+            } else {
+                wordMap.put(now, 1);
             }
-            if (dp[nowLength].isEmpty() && dp[nowLength - 1].isEmpty()) {
-                break;
-            }
-            nowLength++;
         }
-
-        if (!dp[nowLength-2].isEmpty()) {
-            return dp[nowLength-2].get(0).value;
-        }
-        if (!dp[nowLength-3].isEmpty()) {
-            return dp[nowLength-3].get(0).value;
-        }
-
-        return dp[nowLength].get(0).value;
-    }
-}
-
-class Palindrom {
-    int start;
-    int end;
-    String value;
-
-    public Palindrom(int start, int end, String value) {
-        this.start = start;
-        this.end = end;
-        this.value = value;
-    }
-
-    public String toString() {
-        return value;
+        return false;
     }
 }
