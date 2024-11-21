@@ -1,44 +1,37 @@
 import java.util.*;
 
-// leetcode find-first-and-last-position-of-element-in-sorted-array
+// leetcode search-insert-position
 class Solution {
-    static int min;
-    static int max;
-
-    public int[] searchRange(int[] nums, int target) {
-        min = 100_001;
-        max = -1;
-        if (nums.length == 0) {
-            return new int[]{-1, -1};
+    public int searchInsert(int[] nums, int target) {
+        int result = divide(nums, 0, nums.length-1, target);
+        if (result == -1 && nums[nums.length-1] < target) {
+            result = nums.length;
         }
-        divide(nums, target, 0, nums.length - 1);
-
-        if (min == 100_001) {
-            min = -1;
+        if (result == -1 && nums[0] >= target) {
+            result = 0;
         }
-
-        return new int[]{min, max};
+        return result;
     }
 
-    public void divide(int[] nums, int target, int left, int right) {
+    public int divide(int[] nums, int left, int right, int target) {
         if (left == right) {
-            if (nums[left] == target) {
-                min = Math.min(min, left);
-                max = Math.max(max, right);
-            } else {
-                return;
-            }
-        } else {
-            if (nums[left] == target) {
-                min = Math.min(min, nums[left]);
-            }
-            if (nums[right] == target) {
-                max = Math.max(max, nums[right]);
-            }
-
-            int mid = (left + right) / 2;
-            divide(nums, target, left, mid);
-            divide(nums, target, mid + 1, right);
+            return -1;
         }
+        if (right - left == 1) {
+            if (nums[left] < target && target <= nums[right]) {
+                return left+1;
+            }
+            return -1;
+        }
+        int mid = (left + right) / 2;
+        int foundLeft = divide(nums, left, mid, target);
+        if (foundLeft != -1) {
+            return foundLeft;
+        }
+        int foundRight = divide(nums, mid, right, target);
+        if (foundRight != -1) {
+            return foundRight;
+        }
+        return -1;
     }
 }
