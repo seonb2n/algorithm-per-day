@@ -2,49 +2,70 @@ import java.util.*;
 
 // leetcode sudoku-solver
 class Solution {
+    private int[] rows;    // rows[i]의 각 비트는 i번 행에서 해당 숫자의 사용 여부
+    private int[] cols;    // cols[j]의 각 비트는 j번 열에서 해당 숫자의 사용 여부
+    private int[] boxes;   // boxes[box]의 각 비트는 box번 박스에서 해당 숫자의 사용 여부
+
     public void solveSudoku(char[][] board) {
+        rows = new int[9];
+        cols = new int[9];
+        boxes = new int[9];
+
+        // 현재 보드 상태 초기화
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] != '.') {
+                    int num = board[i][j] - '0';
+                    int box = (i / 3) * 3 + j / 3;
+                    updateState(i, j, box, num, true);
+                }
+            }
+        }
+
         solve(board);
     }
 
     private boolean solve(char[][] board) {
         Cell nextCell = findBestCell(board);
-
         if (nextCell == null) {
             return true;
         }
 
-        // board를 순회하면서 빈 칸 찾기
-        // 빈 칸을 찾으면
+        int row = nextCell.row, col = nextCell.col;
+        int box = (row / 3) * 3 + col / 3;
+
         // 1부터 9까지 숫자를 시도
         for (char num = '1'; num <= '9'; num++) {
-            // 현재 위치에 num을 놓을 수 있는지 검사
-            if (isValid(board, nextCell.row, nextCell.col, num)) {
+            int n = num - '0';
+            if (canPlace(row, col, box, n)) {
                 // 가능하다면 숫자를 놓고
-                board[nextCell.row][nextCell.col] = num;
+                board[row][col] = num;
+                updateState(row, col, box, n, true);
 
                 // 다음 빈 칸으로 재귀 호출
                 if (solve(board)) {
                     return true;
-                } else {
-                    // 실패하면 백트래킹
-                    board[nextCell.row][nextCell.col] = '.';
                 }
+
+                // 실패하면 백트래킹
+                board[row][col] = '.';
+                updateState(row, col, box, n, false);
             }
         }
-        // 1-9 중 어떤 숫자도 놓을 수 없다면 실패
+
         return false;
     }
 
     private Cell findBestCell(char[][] board) {
         Cell bestCell = null;
-        int minPossibilities = 10; // 9보다 큰 값으로 초기화
+        int minPossibilities = 10;
 
         for (int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 if (board[row][col] == '.') {
-                    int count = countPossibleNumbers(board, row, col);
+                    int box = (row / 3) * 3 + col / 3;
+                    int count = countPossibleNumbers(row, col, box);
 
-                    // 가능한 숫자가 더 적은 셀을 찾았다면 업데이트
                     if (count < minPossibilities) {
                         minPossibilities = count;
                         bestCell = new Cell(row, col, count);
@@ -61,43 +82,39 @@ class Solution {
         return bestCell;
     }
 
-    private int countPossibleNumbers(char[][] board, int row, int col) {
+    private int countPossibleNumbers(int row, int col, int box) {
         int count = 0;
-        for (char num = '1'; num <= '9'; num++) {
-            if (isValid(board, row, col, num)) {
-                count++;
-            }
+        int mask = ~(rows[row] | cols[col] | boxes[box]);
+
+        // 1부터 9까지의 비트만 확인
+        mask &= 0x3FE;  // 0011 1111 1110
+
+        // 비트 1의 개수를 세기
+        while (mask != 0) {
+            count++;
+            mask &= (mask - 1);  // 최하위 비트 제거
         }
+
         return count;
     }
 
-    private boolean isValid(char[][] board, int row, int col, char num) {
-        // 가로줄 검사
-        for (int x = 0; x < 9; x++) {
-            if (board[row][x] == num) {
-                return false;
-            }
-        }
+    private boolean canPlace(int row, int col, int box, int num) {
+        // num 비트가 모두 0이어야 배치 가능
+        return ((rows[row] | cols[col] | boxes[box]) & (1 << num)) == 0;
+    }
 
-        // 세로줄 검사
-        for (int x = 0; x < 9; x++) {
-            if (board[x][col] == num) {
-                return false;
-            }
+    private void updateState(int row, int col, int box, int num, boolean place) {
+        int mask = 1 << num;
+        if (place) {
+            rows[row] |= mask;
+            cols[col] |= mask;
+            boxes[box] |= mask;
+        } else {
+            mask = ~mask;
+            rows[row] &= mask;
+            cols[col] &= mask;
+            boxes[box] &= mask;
         }
-
-        // 3x3 박스 검사
-        int startRow = row - row % 3;
-        int startCol = col - col % 3;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (board[i + startRow][j + startCol] == num) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 }
 
