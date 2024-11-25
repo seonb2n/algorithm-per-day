@@ -1,12 +1,13 @@
 import java.util.*;
 
-// https://leetcode.com/problems/combintion-sum/
+// https://leetcode.com/problems/combintion-sum-ii/
 class Solution {
-    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);
         List<List<Integer>> result = new ArrayList<>();
         // dfs
         dfs(candidates, target, 0, new ArrayList<>(), result);
-        return result;
+        return new ArrayList<>(result);
     }
 
 
@@ -17,15 +18,15 @@ class Solution {
             return;
         }
 
-        if (target < 0) {
-            return;
-        }
-
         for (int i = nowIndex; i < candidates.length; i++) {
+            if (i > nowIndex && candidates[i] == candidates[i-1]) {
+                continue;
+            }
+            if (candidates[i] > target) break;
+
             current.add(candidates[i]);
-            dfs(candidates, target - candidates[i], i, current, result);
+            dfs(candidates, target - candidates[i], i+1, current, result);
             current.remove(current.size() - 1);
         }
     }
 }
-
