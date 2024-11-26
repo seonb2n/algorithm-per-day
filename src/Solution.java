@@ -1,32 +1,31 @@
 import java.util.*;
 
-// https://leetcode.com/problems/combintion-sum-ii/
+// https://leetcode.com/problems/trapping-rain-water/
 class Solution {
-    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
-        Arrays.sort(candidates);
-        List<List<Integer>> result = new ArrayList<>();
-        // dfs
-        dfs(candidates, target, 0, new ArrayList<>(), result);
-        return new ArrayList<>(result);
-    }
+    public int trap(int[] height) {
+        if (height.length <= 2) return 0;
 
+        int left = 0;
+        int right = height.length - 1;
+        int leftMax = 0;
+        int rightMax = 0;
+        int water = 0;
 
-    void dfs(int[] candidates, int target, int nowIndex, List<Integer> current, List<List<Integer>> result) {
-        // 현재 조합의 합이 target 과 같다.
-        if (target == 0) {
-            result.add(new ArrayList<>(current));
-            return;
-        }
+        while (left < right) {
+            // 현재까지의 최대 높이 갱신
+            leftMax = Math.max(leftMax, height[left]);
+            rightMax = Math.max(rightMax, height[right]);
 
-        for (int i = nowIndex; i < candidates.length; i++) {
-            if (i > nowIndex && candidates[i] == candidates[i-1]) {
-                continue;
+            // 더 낮은 벽 쪽에서 물 높이 계산
+            if (leftMax < rightMax) {
+                water += leftMax - height[left];
+                left++;
+            } else {
+                water += rightMax - height[right];
+                right--;
             }
-            if (candidates[i] > target) break;
-
-            current.add(candidates[i]);
-            dfs(candidates, target - candidates[i], i+1, current, result);
-            current.remove(current.size() - 1);
         }
+
+        return water;
     }
 }
