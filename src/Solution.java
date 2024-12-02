@@ -1,49 +1,30 @@
-// https://leetcode.com/problems/flatten-nested-list-iterator
-
+// https://leetcode.com/problems/permutations
 
 import java.util.*;
 
-public class NestedIterator implements Iterator<Integer> {
-    Queue<Integer> queue = new LinkedList<>();
 
-    // 생성자
-    public NestedIterator(List<NestedInteger> nestedList) {
-        for (NestedInteger i : nestedList) {
-            addQueue(i);
-        }
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        boolean[] visited = new boolean[nums.length];
+        dfs(nums, visited, new ArrayList<>(), res);
+        return res;
     }
 
-    void addQueue(NestedInteger nestedInteger) {
-        if (nestedInteger.isInteger()) {
-            queue.add(nestedInteger.getInteger());
-        } else {
-            for (NestedInteger nestedIntegerInList : nestedInteger.getList()) {
-                addQueue(nestedIntegerInList);
+    private void dfs(int[] nums, boolean[] visited, List<Integer> current, List<List<Integer>> res) {
+        if (current.size() == nums.length) {
+            res.add(new ArrayList<>(current));
+            return;
+        }
+
+        for (int i = 0; i < nums.length; i++) {
+            if (!visited[i]) {
+                visited[i] = true;
+                current.add(nums[i]);
+                dfs(nums, visited, current, res);
+                current.remove(current.size() - 1);
+                visited[i] = false;
             }
         }
     }
-
-    @Override
-    public Integer next() {
-        // hasNext()가 true를 반환한 경우에만 호출된다고 가정
-        return queue.poll();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return !queue.isEmpty();
-    }
-}
-
-interface NestedInteger {
-    // @return true if this NestedInteger holds a single integer, rather than a nested list.
-    public boolean isInteger();
-
-    // @return the single integer that this NestedInteger holds, if it holds a single integer
-    // Return null if this NestedInteger holds a nested list
-    public Integer getInteger();
-
-    // @return the nested list that this NestedInteger holds, if it holds a nested list
-    // Return empty list if this NestedInteger holds a single integer
-    public List<NestedInteger> getList();
 }
