@@ -1,32 +1,58 @@
 package kotlin
 
-import java.util.*
-import kotlin.collections.ArrayDeque
+
+
+// https://leetcode.com/problems/decode-string/
 class Solution {
-    fun divide(dividend: Int, divisor: Int): Int {
-        if (dividend == Int.MIN_VALUE && divisor == -1) return Int.MAX_VALUE
-        if (dividend == Int.MIN_VALUE && divisor == 1) return Int.MIN_VALUE
-        // Long으로 변환하여 오버플로우 방지
-        var a = Math.abs(dividend.toLong())
-        val b = Math.abs(divisor.toLong())
+    fun decodeString(s: String): String {
+        val sb = StringBuilder()
+        var index = 0
+        while (index < s.length) {
+            if (s[index].isDigit()) {
+                index = dfs(sb, index, s)
+            }
+            else if (s[index] in 'a'..'z') {
+                sb.append(s[index])
+            }
+            index++
+        }
 
-        // 부호 미리 계산
-        val isNegative = (dividend > 0) xor (divisor > 0)
+        return sb.toString()
+    }
 
-        var ans = 0L
+    fun dfs(sb: StringBuilder, startIndex: Int, s: String): Int {
+        var index = startIndex
 
-        // 비트 연산으로 나눗셈 수행
-        for (i in 31 downTo 0) {
-            if (a >= (b shl i)) {
-                a -= b shl i
-                ans += 1L shl i
+        while (index < s.length) {
+            if (s[index].isDigit()) {
+                // 숫자 파싱
+                val number = StringBuilder()
+                while (index < s.length && s[index].isDigit()) {
+                    number.append(s[index])
+                    index++
+                }
+
+                // '[' 건너뛰기
+                index++ // skip '['
+
+                // 재귀적으로 내부 문자열 처리
+                val innerContent = StringBuilder()
+                index = dfs(innerContent, index, s)
+
+                // 반복 처리
+                val repeatCount = number.toString().toInt()
+                repeat(repeatCount) {
+                    sb.append(innerContent)
+                }
+            } else if (s[index] == ']') {
+                return index
+            } else {
+                // 일반 문자는 직접 추가
+                sb.append(s[index])
+                index++
             }
         }
 
-        // 부호 적용 및 범위 체크
-        return when {
-            isNegative -> -ans.coerceAtLeast(Int.MIN_VALUE.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-            else -> ans.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-        }
+        return index
     }
 }
