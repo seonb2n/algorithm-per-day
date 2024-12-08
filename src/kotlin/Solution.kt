@@ -1,8 +1,7 @@
 package kotlin
 
-
-
 // https://leetcode.com/problems/decode-string/
+// failed tc "3[z]2[2[y]pq4[2[jk]e1[f]]]ef"
 class Solution {
     fun decodeString(s: String): String {
         val sb = StringBuilder()
@@ -13,8 +12,8 @@ class Solution {
             }
             else if (s[index] in 'a'..'z') {
                 sb.append(s[index])
+                index++
             }
-            index++
         }
 
         return sb.toString()
@@ -38,6 +37,8 @@ class Solution {
                 // 재귀적으로 내부 문자열 처리
                 val innerContent = StringBuilder()
                 index = dfs(innerContent, index, s)
+
+                index++ // skip ']'
 
                 // 반복 처리
                 val repeatCount = number.toString().toInt()
