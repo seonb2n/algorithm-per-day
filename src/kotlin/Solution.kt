@@ -1,47 +1,43 @@
 package kotlin
 
 import java.util.*
+import kotlin.collections.ArrayDeque
+import kotlin.math.abs
 
-// https://leetcode.com/problems/range-sum-of-bst/
-/**
- * Example:
- * var ti = TreeNode(5)
- * var v = ti.`val`
- * Definition for a binary tree node.
- * class TreeNode(var `val`: Int) {
- *     var left: TreeNode? = null
- *     var right: TreeNode? = null
- * }
- */
+// https://leetcode.com/problems/asteroid-collision/
 class Solution {
-    fun rangeSumBST(root: TreeNode?, low: Int, high: Int): Int {
-        var result = 0
-        val queue = LinkedList<TreeNode>()
-        queue.offer(root)
-        // root 부터 BFS 로 탐색
-        while (queue.isNotEmpty()) {
-            val now = queue.poll()
-
-            // 숫자가 low 부터 high 사이면 결과에 삽입
-            if (now.`val` in low..high) {
-                result += now.`val`
+    fun asteroidCollision(asteroids: IntArray): IntArray {
+        val stack = ArrayDeque<Int>()
+        for (asteroid in asteroids) {
+            if (asteroid > 0) {
+                stack.add(asteroid)
+                continue
             }
 
-            // 현재 값이 low 보다 작으면, 왼쪽 서브트리도 모두 low 보다 작아서 탐색할 필요 x
-            if (now.`val` > low && now.left != null) {
-                queue.offer(now.left)
+            var broken = false
+            while (stack.isNotEmpty() && stack.last() > 0) {
+                // 그게 아니면 하나씩 꺼내서 처리
+                // 현재 꺼가 크면 stack 에 있는거 제거
+                if (stack.last() < abs(asteroid)) {
+                    stack.removeLast()
+                }
+                // 둘이 같으면 부서짐 처리
+                else if (stack.last() == abs(asteroid)) {
+                    stack.removeLast()
+                    broken = true
+                    break
+                }
+                // 스택의 내용이 크면 끝
+                else {
+                    broken = true
+                    break
+                }
             }
-            // 현재 값이 high 보다 크면, 오른쪽 서브트리도 모두 high 보다 커서 탐색할 필요 x
-            if (now.`val` < high && now.right != null) {
-                queue.offer(now.right)
+            // 왼쪽으로 가는 소행성이 stack 에 있는 소행성을 다 부쉈다면
+            if (!broken) {
+                stack.add(asteroid)
             }
         }
-
-        return result
+        return stack.toIntArray()
     }
-}
-
-class TreeNode(var `val`: Int) {
-    var left: TreeNode? = null
-    var right: TreeNode? = null
 }
