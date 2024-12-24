@@ -8,56 +8,68 @@ import kotlin.math.abs
 class Solution {
     fun leftmostBuildingQueries(heights: IntArray, queries: Array<IntArray>): IntArray {
         val n = heights.size
-        // dp[i]: i 위치에서 도달할 수 있는 모든 건물들의 정보를 저장
-        val dp = Array(n) { BooleanArray(n) }
 
-        // dp 배열 초기화
-        for (i in 0 until n) {
-            dp[i][i] = true
-            // i 위치에서 오른쪽으로 갈 수 있는 모든 건물 체크
-            for (j in i + 1 until n) {
-                // 현재 위치(i)에서 j로 직접 이동할 수 있는 경우
-                if (heights[j] > heights[i]) {
-                    dp[i][j] = true
-                } else {
-                    // i에서 k를 거쳐 j로 갈 수 있는지 확인
-                    for (k in i + 1 until j) {
-                        if (dp[i][k] && heights[j] > heights[k]) {
-                            dp[i][j] = true
-                            break
-                        }
-                    }
-                }
-            }
+        // 각 위치의 오른쪽에서 가장 높은 건물의 높이를 저장
+        val maxHeightToRight = IntArray(n)
+        var maxHeight = 0
+        for (i in n - 1 downTo 1) {
+            maxHeight = maxOf(maxHeight, heights[i])
+            maxHeightToRight[i - 1] = maxHeight
         }
 
-        return queries.map { (a, b) ->
-            // 이미 같은 건물에 있는 경우
-            if (a == b) {
-                a
-            }
-            // a가 b보다 오른쪽에 있는 경우, 위치를 스왑하여 처리
-            else if (a > b && heights[a] > heights[b]) {
-                a
-            }
-            else if (b > a && heights[b] > heights[a]) {
-                b
-            }
-            // 두 사람이 도달할 수 있는 공통 건물 중 가장 왼쪽 찾기
-            else {
-                var minIdx = Int.MAX_VALUE
-                var found = false
+        // 각 위치에서 점프 가능한 다음 건물의 인덱스를 저장
+        val nextJumpable = IntArray(n) { -1 }
+        val pq = PriorityQueue<Pair<Int, Int>>(compareBy { it.first }) // (높이, 인덱스)
 
-                for (i in maxOf(a, b) + 1 until n) {
-                    if (dp[a][i] && dp[b][i]) {
-                        minIdx = i
-                        found = true
-                        break
-                    }
-                }
-
-                if (found) minIdx else -1
+        for (i in 0 until n) {
+            // 현재 건물보다 낮은 이전 건물들은 현재 건물로 점프 가능
+            while (pq.isNotEmpty() && pq.peek().first < heights[i]) {
+                val (_, prevIndex) = pq.poll()
+                nextJumpable[prevIndex] = i
             }
+            pq.offer(Pair(heights[i], i))
+        }
+
+        return queries.map { (alice, bob) ->
+            findMeetingPoint(alice, bob, heights, maxHeightToRight, nextJumpable)
         }.toIntArray()
+    }
+
+    private fun findMeetingPoint(
+        alice: Int,
+        bob: Int,
+        heights: IntArray,
+        maxHeightToRight: IntArray,
+        nextJumpable: IntArray
+    ): Int {
+        // 1. 같은 위치에 있는 경우
+        if (alice == bob) return alice
+
+        // alice가 왼쪽, bob이 오른쪽에 있도록 정렬
+        val (left, right) = if (alice < bob) alice to bob else bob to alice
+        val leftHeight = heights[left]
+        val rightHeight = heights[right]
+
+        // 2. 오른쪽 건물이 더 높은 경우, 왼쪽 사람이 바로 이동 가능
+        if (rightHeight > leftHeight) return right
+
+        // 3. 오른쪽의 최대 높이가 왼쪽보다 낮은 경우, 만날 수 없음
+        if (maxHeightToRight[right] <= leftHeight) return -1
+
+        // 4. 왼쪽 높이가 더 높고, 다음 점프 위치가 오른쪽보다 더 오른쪽인 경우
+        if (leftHeight > rightHeight && nextJumpable[left] > right) {
+            return nextJumpable[left]
+        }
+
+        // 5. 오른쪽 위치부터 시작해서 점프하면서 왼쪽보다 높은 건물 찾기
+        var currentPos = nextJumpable[right]
+        while (currentPos != -1) {
+            if (heights[currentPos] > leftHeight) {
+                return currentPos
+            }
+            currentPos = nextJumpable[currentPos]
+        }
+
+        return -1
     }
 }
