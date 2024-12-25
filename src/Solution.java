@@ -2,38 +2,59 @@
 
 import java.util.*;
 
-
 class Solution {
-    public List<List<Integer>> permuteUnique(int[] nums) {
-        Arrays.sort(nums);
-        List<List<Integer>> res = new ArrayList<>();
-        boolean[] visited = new boolean[nums.length];
-        dfs(nums, visited, new ArrayList<>(), res);
-        return res;
+    public int solution(int[] diffs, int[] times, long limit) {
+        int answer = 0;
+        int nowLevel = 1;
+        // diffs 의 max 부터 탐색하면서
+        int maxDiff = 0;
+        for (int i = 0; i < diffs.length; i++) {
+            maxDiff = Math.max(diffs[i], maxDiff);
+        }
+
+        int left = 1;
+        int right = maxDiff;
+        while(left <= right) {
+            int mid = (left + right) / 2;
+            if (isPossible(mid, diffs, times, limit)) {
+                answer = mid;
+                right = mid - 1;
+            }
+            else {
+                left = mid + 1;
+            }
+        }
+
+        return answer;
     }
 
-    private void dfs(int[] nums, boolean[] visited, List<Integer> current, List<List<Integer>> res) {
-        if (current.size() == nums.length) {
-            res.add(new ArrayList<>(current));
-            return;
-        }
 
+    private boolean isPossible(int level, int[] diffs, int[] times, long limit) {
+        long totalTime = 0;
 
-        int prev = -11;
+        for (int i = 0; i < diffs.length; i++) {
+            if (diffs[i] <= level) {
+                totalTime += times[i];
+            } else {
+                long extraTime;
+                if (i > 0) {
+                    extraTime = (long)(times[i-1] + times[i]) * (diffs[i] - level) + times[i];
+                } else {
+                    extraTime = (long)times[i] * (diffs[i] - level) + times[i];
+                }
 
-        for (int i = 0; i < nums.length; i++) {
-            if (visited[i] || prev == nums[i]) {
-                continue;
+                // 오버플로우 체크
+                if (extraTime < 0 || totalTime + extraTime > limit) {
+                    return false;
+                }
+                totalTime += extraTime;
             }
 
-            if (!visited[i] && prev != nums[i]) {
-                visited[i] = true;
-                current.add(nums[i]);
-                dfs(nums, visited, current, res);
-                current.remove(current.size() - 1);
-                visited[i] = false;
-                prev = nums[i];
+            if (totalTime > limit) {
+                return false;
             }
         }
+
+        return true;
     }
 }
