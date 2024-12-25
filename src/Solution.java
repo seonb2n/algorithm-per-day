@@ -1,60 +1,80 @@
 // https://leetcode.com/problems/permutations=ii
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Solution {
-    public int solution(int[] diffs, int[] times, long limit) {
+    public int solution(int[][] points, int[][] routes) {
         int answer = 0;
-        int nowLevel = 1;
-        // diffs 의 max 부터 탐색하면서
-        int maxDiff = 0;
-        for (int i = 0; i < diffs.length; i++) {
-            maxDiff = Math.max(diffs[i], maxDiff);
+        List<Node> nowRobot = new ArrayList<>();
+
+        for (int i = 0; i < routes.length; i++) {
+            int now = routes[i][0];
+            nowRobot.add(new Node(points[now-1][0], points[now-1][1],
+                    Arrays.stream(routes[i], 1, routes[i].length).map(n -> n - 1).boxed().collect(Collectors.toList())));
         }
 
-        int left = 1;
-        int right = maxDiff;
-        while(left <= right) {
-            int mid = (left + right) / 2;
-            if (isPossible(mid, diffs, times, limit)) {
-                answer = mid;
-                right = mid - 1;
+        // 초마다 로봇 위치 체크
+        while(true) {
+            if (nowRobot.size() == 0) {
+                break;
             }
-            else {
-                left = mid + 1;
-            }
-        }
 
+            int[][] board = new int[101][101];
+            // nowRobot 에 있는 robot 위치 확인
+            for (int i = 0; i < nowRobot.size(); i++) {
+                board[nowRobot.get(i).r][nowRobot.get(i).c]++;
+                if (board[nowRobot.get(i).r][nowRobot.get(i).c] == 2) {
+                    answer++;
+                }
+            }
+
+            // robot 다음 위치로 이동
+            List<Node> nextRobot = new ArrayList<>();
+            for (int i = 0; i < nowRobot.size(); i++) {
+                Node now = nowRobot.get(i);
+                // 다음 목적지가 있으면 해당 목적지로 이동
+                int nextTarget = now.target.get(0);
+                // 지금 목적지라면 다음 목적지로 변환
+                if (points[nextTarget][0] == now.r && points[nextTarget][1] == now.c) {
+                    now.target.remove(0);
+                }
+                // 지금 목적지가 마지막이었으면 pass
+                if (now.target.isEmpty()) {
+                    continue;
+                }
+
+                nextTarget = now.target.get(0);
+                // r 이 같으면 c 가 이동
+                if (points[nextTarget][0] == now.r) {
+                    if (now.c < points[nextTarget][1]) {
+                        nextRobot.add(new Node(now.r, now.c + 1, now.target));
+                    } else {
+                        nextRobot.add(new Node(now.r, now.c - 1, now.target));
+                    }
+                }
+                else {
+                    if (now.r < points[nextTarget][0]) {
+                        nextRobot.add(new Node(now.r + 1, now.c, now.target));
+                    }
+                    else {
+                        nextRobot.add(new Node(now.r - 1, now.c, now.target));
+                    }
+                }
+            }
+            nowRobot = nextRobot;
+        }
         return answer;
     }
+}
 
-
-    private boolean isPossible(int level, int[] diffs, int[] times, long limit) {
-        long totalTime = 0;
-
-        for (int i = 0; i < diffs.length; i++) {
-            if (diffs[i] <= level) {
-                totalTime += times[i];
-            } else {
-                long extraTime;
-                if (i > 0) {
-                    extraTime = (long)(times[i-1] + times[i]) * (diffs[i] - level) + times[i];
-                } else {
-                    extraTime = (long)times[i] * (diffs[i] - level) + times[i];
-                }
-
-                // 오버플로우 체크
-                if (extraTime < 0 || totalTime + extraTime > limit) {
-                    return false;
-                }
-                totalTime += extraTime;
-            }
-
-            if (totalTime > limit) {
-                return false;
-            }
-        }
-
-        return true;
+class Node {
+    int r;
+    int c;
+    List<Integer> target;
+    public Node(int r, int c, List<Integer> target) {
+        this.r = r;
+        this.c = c;
+        this.target = target;
     }
 }
