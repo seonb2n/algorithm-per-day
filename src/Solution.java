@@ -1,38 +1,45 @@
-// https://leetcode.com/problems/permutations=ii
 
 import java.util.*;
 
-// https://leetcode.com/problems/target-sum/?envType=daily-question&envId=2024-12-26
+// https://leetcode.com/problems/maximum-units-on-a-truck/
 class Solution {
-    public int findTargetSumWays(int[] nums, int target) {
-        int sum = 0;
-        for (int num : nums) {
-            sum += num;
+    public int maximumUnits(int[][] boxTypes, int truckSize) {
+        // 최대한 큰거를 채우는게 이득
+        PriorityQueue<Box> pq = new PriorityQueue<Box>();
+
+        for (int i = 0; i < boxTypes.length; i++) {
+            pq.offer(new Box(boxTypes[i][1], boxTypes[i][0]));
         }
 
-        // 불가능한 경우 early return
-        if (Math.abs(target) > sum) {
-            return 0;
-        }
-
-        // dp[i][j]: i번째 인덱스까지 고려했을 때 합이 j가 되는 경우의 수
-        int[][] dp = new int[nums.length][2 * sum + 1];
-
-        // 초기값 설정
-        // sum 을 중간값으로 사용
-        dp[0][sum + nums[0]] += 1;
-        dp[0][sum - nums[0]] += 1;
-
-        // dp 테이블 채우기
-        for (int i = 1; i < nums.length; i++) {
-            for (int j = -sum; j <= sum; j++) {
-                if (dp[i-1][j + sum] > 0) {
-                    dp[i][j + sum + nums[i]] += dp[i-1][j + sum];
-                    dp[i][j + sum - nums[i]] += dp[i-1][j + sum];
-                }
+        int max = 0;
+        int number = 0;
+        while(number <= truckSize && !pq.isEmpty()) {
+            Box now = pq.poll();
+            if (number + now.number <= truckSize) {
+                max += (now.number * now.size);
+                number += now.number;
+            } else {
+                int next = truckSize - number;
+                max += (next * now.size);
+                number += next;
             }
         }
 
-        return target > sum ? 0 : dp[nums.length-1][sum + target];
+        return max;
+    }
+}
+
+class Box implements Comparable<Box> {
+    int size;
+    int number;
+
+    public Box(int size, int number) {
+        this.size = size;
+        this.number = number;
+    }
+
+    @Override
+    public int compareTo(Box other) {
+        return other.size - this.size;
     }
 }
