@@ -1,45 +1,30 @@
 
 import java.util.*;
 
-// https://leetcode.com/problems/maximum-units-on-a-truck/
+// https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram/
 class Solution {
-    public int maximumUnits(int[][] boxTypes, int truckSize) {
-        // 최대한 큰거를 채우는게 이득
-        PriorityQueue<Box> pq = new PriorityQueue<Box>();
+    public int minSteps(String s, String t) {
+        int count = 0;
 
-        for (int i = 0; i < boxTypes.length; i++) {
-            pq.offer(new Box(boxTypes[i][1], boxTypes[i][0]));
+        int[] alp = new int[26];
+
+        for(int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            alp[(int)(c - 'a')]++;
         }
 
-        int max = 0;
-        int number = 0;
-        while(number <= truckSize && !pq.isEmpty()) {
-            Box now = pq.poll();
-            if (number + now.number <= truckSize) {
-                max += (now.number * now.size);
-                number += now.number;
-            } else {
-                int next = truckSize - number;
-                max += (next * now.size);
-                number += next;
+        for (int i = 0; i < t.length(); i++) {
+            char c= t.charAt(i);
+            int index = (int)(c - 'a');
+            if (alp[index] > 0) {
+                alp[index]--;
             }
         }
 
-        return max;
-    }
-}
+        for (int i = 0; i < 26; i++) {
+            count += alp[i];
+        }
 
-class Box implements Comparable<Box> {
-    int size;
-    int number;
-
-    public Box(int size, int number) {
-        this.size = size;
-        this.number = number;
-    }
-
-    @Override
-    public int compareTo(Box other) {
-        return other.size - this.size;
+        return count;
     }
 }
