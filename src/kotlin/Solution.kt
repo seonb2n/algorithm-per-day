@@ -8,21 +8,19 @@ import kotlin.math.abs
 class Solution {
     fun shiftingLetters(s: String, shifts: Array<IntArray>): String {
         // shifts 배열을 돌면서 s 의 각 자리별로 얼마나 shift 되야하는지 연산한다.
+        // 누적합을 사용하면 시간을 단축할 수 있다.
+        val diff = IntArray(s.length + 1)
+
+        for (shift in shifts) {
+            val value = if (shift[2] == 1) 1 else -1
+            diff[shift[0]] += value
+            diff[shift[1] + 1] -= value
+        }
+
         val sum = IntArray(s.length) { 0 }
-        for (i in 0..shifts.size-1) {
-            val now = shifts[i]
-            val start = now[0]
-            val end = now[1]
-            if (now[2] == 0) {
-                // start - end 까지 sum 의 각 숫자 빼기 -1
-                for (k in start..end) {
-                    sum[k]--;
-                }
-            } else {
-                for (k in start..end) {
-                    sum[k]++;
-                }
-            }
+        sum[0] = diff[0]
+        for (i in 1 until s.length) {
+           sum[i] = sum[i - 1] + diff[i]
         }
 
         // shift
