@@ -4,26 +4,18 @@ import java.util.*
 import kotlin.collections.ArrayDeque
 import kotlin.math.abs
 
-// https://leetcode.com/problems/jump-game-ii/
+//https://leetcode.com/problems/minimum-number-of-operations-to-move-all-balls-to-each-box/description/?envType=daily-question&envId=2025-01-06
 class Solution {
-    fun jump(nums: IntArray): Int {
-        if (nums.size <= 1) return 0
-
-        var curMax = 0  // 현재 점프로 갈 수 있는 최대 거리
-        var nextMax = 0 // 다음 점프로 갈 수 있는 최대 거리
-        var jumps = 0
-
-        for (i in 0 until nums.size - 1) {
-            nextMax = maxOf(nextMax, i + nums[i])
-
-            if (i == curMax) {
-                jumps++
-                curMax = nextMax
-
-                if (curMax >= nums.size - 1) break
-            }
+    fun minOperations(boxes: String): IntArray {
+        val res = IntArray(boxes.length)
+        for (i in boxes.indices) {
+           if (boxes[i] == '1') {
+               for (j in 0..res.size-1) {
+                   res[j] += Math.abs(j-i)
+               }
+           }
         }
 
-        return jumps
+        return res
     }
 }
