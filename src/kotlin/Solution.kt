@@ -4,35 +4,23 @@ import java.util.*
 import kotlin.collections.ArrayDeque
 import kotlin.math.abs
 
-//https://leetcode.com/problems/minimum-number-of-operations-to-move-all-balls-to-each-box/description/?envType=daily-question&envId=2025-01-06
+// https://leetcode.com/problems/count-prefix-and-suffix-pairs-i/?envType=daily-question&envId=2025-01-08
 class Solution {
-    fun minOperations(boxes: String): IntArray {
-        val res = IntArray(boxes.length)
-
-        // 왼쪽에서 오른쪽으로 스캔
-        // 1 의 갯수
-        var one = 0
-        // 1 을 현재 위치로 가져오기 위한 움직임
-        var opr = 0
-        for (i in boxes.indices) {
-            res[i] += opr
-            if (boxes[i] == '1') {
-                one++
+    fun countPrefixSuffixPairs(words: Array<String>): Int {
+        var count = 0
+        for (i in 0 until words.size) {
+            val now = words[i]
+            for (j in i + 1 until words.size) {
+                if (isPrefixAndSuffix(now, words[j])) {
+                    count++
+                }
             }
-            // 다음 위치는, 이전까지의 모든 이동 + 현재까지의 one 을 한칸 더 이동
-            opr += one
         }
+        return count
+    }
 
-        one = 0
-        opr = 0
-        for (i in boxes.length-1 downTo 0) {
-            res[i] += opr
-            if (boxes[i] == '1') {
-                one++
-            }
-            opr += one
-        }
-
-        return res
+    // st1 이 str2 의 prefix 이자 suffix
+    fun isPrefixAndSuffix(str1: String, str2: String): Boolean {
+        return str2.startsWith(str1) && str2.endsWith(str1)
     }
 }
