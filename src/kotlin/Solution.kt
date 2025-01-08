@@ -21,6 +21,9 @@ class Solution {
 
     // st1 이 str2 의 prefix 이자 suffix
     fun isPrefixAndSuffix(str1: String, str2: String): Boolean {
-        return str2.startsWith(str1) && str2.endsWith(str1)
+        if (str1.length > str2.length) return false
+        val prefix = str2.substring(0, str1.length)
+        val suffix = str2.substring(str2.length - str1.length)
+        return str1 == prefix && str1 == suffix
     }
 }
