@@ -10,14 +10,16 @@ class Solution {
         // words2 의 모든 str 이 words1 의 subset 인지 판별
         val result: MutableList<String> = mutableListOf()
 
-        val subSetMap: MutableMap<Int, IntArray> = mutableMapOf()
-        for (i in words2.indices) {
-            val chars = words2[i].toCharArray()
+        // words2 의 모든 문자열을 모은 통합 카운터를 만들 수 있다.
+        val maxCounter = IntArray(26)
+        for (word in words2) {
             val counter = IntArray(26)
-            for (char in chars) {
+            for (char in word) {
                 counter[char - 'a']++
             }
-            subSetMap[i] = counter
+            for (i in 0..25) {
+                maxCounter[i] = maxOf(maxCounter[i], counter[i])
+            }
         }
 
         for (word in words1) {
@@ -26,17 +28,13 @@ class Solution {
             for (char in chars) {
                 counter[char - 'a']++
             }
-            // words2 의 글자들이 counter 에 모두 존재해야 한다.
+            // words2 의 글자들이 maxCounter 에 모두 존재해야 한다.
             var flag = true
-            for (key in subSetMap.keys) {
-                val subset = subSetMap[key]!!
-                for (i in 0..25) {
-                    if (subset[i] > counter[i]) {
-                        flag = false
-                        break
-                    }
+            for (i in 0..25) {
+                if (maxCounter[i] > counter[i]) {
+                    flag = false
+                    break
                 }
-                if (!flag) break
             }
             if (flag) {
                 result.add(word)
