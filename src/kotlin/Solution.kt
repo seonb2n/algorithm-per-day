@@ -15,10 +15,11 @@ class Solution {
         for (word in words2) {
             val counter = IntArray(26)
             for (char in word) {
-                counter[char - 'a']++
-            }
-            for (i in 0..25) {
-                maxCounter[i] = maxOf(maxCounter[i], counter[i])
+                val now = char - 'a'
+                counter[now]++
+                if (counter[now] > maxCounter[now]) {
+                    maxCounter[now] = counter[now]
+                }
             }
         }
 
