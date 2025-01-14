@@ -5,30 +5,35 @@ import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-// https://leetcode.com/problems/minimum-length-of-string-after-operations/?envType=daily-question&envId=2025-01-13
+// https://leetcode.com/problems/find-the-prefix-common-array-of-two-arrays/description/?envType=daily-question&envId=2025-01-14
 class Solution {
-    fun minimumLength(s: String): Int {
-        // s 를 기준으로 left 에 1글자, right 에 1글자가 존재해야 함
-        val map: MutableMap<Char, MutableList<Int>> = mutableMapOf()
-        val arr = s.toCharArray()
-        for (c in 0..s.length-1) {
-            val now = s[c]
-            if (!map.containsKey(now)) {
-                map[now] = mutableListOf(c)
-            } else {
-                map[now]!!.add(c)
-            }
+    fun findThePrefixCommonArray(A: IntArray, B: IntArray): IntArray {
+        val res = IntArray(A.size + 1)
+        for (i in A.indices) {
+            val a = A[i]
+            res[a] = Math.max(res[a], i)
 
-            // 3개가 쌓이면 제거
-            if (map[now]!!.size == 3) {
-                val target = map[s[c]]!!
-                arr[target[0]] = '.'
-                arr[target[2]] = '.'
-                target.removeAt(0)
-                target.removeAt(1)
+            val b = B[i]
+            res[b] = Math.max(res[b], i)
+        }
+        res.sort()
+        // 각 숫자를 압축
+        val ans = IntArray(A.size)
+        var origin = 0
+        for (i in 1 until A.size + 1) {
+            val now = res[i]
+            if (origin == now) {
+                ans[now]++
+            } else {
+                // origin 부터 now 는 모두 ans[origin] 으로 채운다
+                for (j in origin+1 .. now) {
+                    ans[j] = ans[origin]
+                }
+                origin = now
+                ans[now]++
             }
         }
 
-        return arr.filter { it != '.' }.size
+        return ans
     }
 }
