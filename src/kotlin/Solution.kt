@@ -5,27 +5,30 @@ import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
-// https://leetcode.com/problems/find-the-prefix-common-array-of-two-arrays/description/?envType=daily-question&envId=2025-01-14
+// https://leetcode.com/problems/minimize-xor/?envType=daily-question&envId=2025-01-15
 class Solution {
-    fun findThePrefixCommonArray(A: IntArray, B: IntArray): IntArray {
-        val n = A.size
-        val result = IntArray(n)
-        // 각 숫자가 등장한 횟수를 저장
-        val count = IntArray(n + 1)
-        var commonCount = 0
+    fun minimizeXor(num1: Int, num2: Int): Int {
+        val target = Integer.bitCount(num2)
 
-        for (i in 0 until n) {
-            // A[i]의 등장 횟수를 증가
-            count[A[i]]++
-            // A[i]가 B에서도 이미 나왔다면 공통 요소 추가
-            if (count[A[i]] == 2) commonCount++
+        var current = 0
+        var result = 0
 
-            // B[i]의 등장 횟수를 증가
-            count[B[i]]++
-            // B[i]가 A에서도 이미 나왔다면 공통 요소 추가
-            if (count[B[i]] == 2) commonCount++
+        // current xor num1 의 최솟값을 찾아야 함
+        for (i in 31 downTo 0) {
+            val bit = (num1 and (1 shl i))
 
-            result[i] = commonCount
+            when {
+                // num1의 해당 위치가 1이고, 아직 1을 더 넣을 수 있으면
+                bit != 0 && current < target -> {
+                    result = result or (1 shl i)
+                    current++
+                }
+                // 남은 1을 채워야 하는 경우
+                current < target && i < (target - current) -> {
+                    result = result or (1 shl i)
+                    current++
+                }
+            }
         }
 
         return result
