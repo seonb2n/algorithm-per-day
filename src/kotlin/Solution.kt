@@ -3,63 +3,43 @@ package kotlin
 import java.util.PriorityQueue
 import kotlin.math.max
 
-// https://leetcode.com/problems/maximum-employees-to-be-invited-to-a-meeting/?envType=daily-question&envId=2025-01-26
+// https://leetcode.com/problems/course-schedule-iv/?envType=daily-question&envId=2025-01-27
 class Solution {
-    private fun bfs(start: Int, visited: MutableSet<Int>, graph: List<List<Int>>): Int {
-        val queue = ArrayDeque<Pair<Int, Int>>()
-        queue.add(start to 0)
-        var maxDepth = 0
-
-        while(queue.isNotEmpty()) {
-            val (node, depth) = queue.removeFirst()
-            for(next in graph[node]) {
-                if(next in visited) continue
-                visited.add(next)
-                queue.add(next to depth + 1)
-                maxDepth = maxOf(maxDepth, depth + 1)
-            }
+    fun checkIfPrerequisite(numCourses: Int, prerequisites: Array<IntArray>, queries: Array<IntArray>): List<Boolean> {
+        // [i][j] 가 prerequsite 인지 판별
+        // i 가 j 의 prerequisite 라는 의미
+        val isRequired = Array(numCourses) { BooleanArray(numCourses) }
+        for (i in prerequisites.indices) {
+            val now = prerequisites[i]
+            isRequired[now[0]][now[1]] = true
         }
-        return maxDepth
+
+        // dp 로 isRequired 의 항목을 채움
+        for (start in 0 until numCourses) {
+            dfs(start, start, isRequired, BooleanArray(numCourses))
+        }
+
+        val result = mutableListOf<Boolean>()
+        for (i in queries.indices) {
+
+            result.add(isRequired[queries[i][0]][queries[i][1]])
+        }
+        return result
     }
 
-    fun maximumInvitations(favorite: IntArray): Int {
-        val n = favorite.size
-        val reverseGraph = List(n) { mutableListOf<Int>() }
-        favorite.forEachIndexed { person, fav ->
-            reverseGraph[fav].add(person)
+    private fun dfs(start: Int, current: Int, isRequired: Array<BooleanArray>, visited: BooleanArray) {
+        if (visited[current]) return
+
+        visited[current] = true
+
+        if (start != current) {
+            isRequired[start][current] = true
         }
 
-        var maxCycle = 0
-        var twoWayCycleSum = 0
-        val visited = BooleanArray(n)
-
-        for(start in 0 until n) {
-            if(visited[start]) continue
-
-            val cycleNodes = mutableMapOf<Int, Int>()
-            var curr = start
-            var depth = 0
-
-            while(!visited[curr]) {
-                visited[curr] = true
-                cycleNodes[curr] = depth++
-                val next = favorite[curr]
-
-                if(next in cycleNodes) {
-                    val cycleLen = depth - cycleNodes[next]!!
-                    if(cycleLen == 2) {
-                        val visitedSet = hashSetOf(curr, next)
-                        twoWayCycleSum += 2 + bfs(next, visitedSet, reverseGraph) +
-                                bfs(curr, visitedSet, reverseGraph)
-                    } else {
-                        maxCycle = maxOf(maxCycle, cycleLen)
-                    }
-                    break
-                }
-                curr = next
+        for (next in 0 until isRequired.size) {
+            if (isRequired[current][next]) {
+                dfs(start, next, isRequired, visited)
             }
         }
-
-        return maxOf(maxCycle, twoWayCycleSum)
     }
 }
