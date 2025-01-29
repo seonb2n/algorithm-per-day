@@ -3,43 +3,35 @@ package kotlin
 import java.util.PriorityQueue
 import kotlin.math.max
 
-// https://leetcode.com/problems/course-schedule-iv/?envType=daily-question&envId=2025-01-27
+// https://leetcode.com/problems/redundant-connection/?envType=daily-question&envId=2025-01-29
 class Solution {
-    fun checkIfPrerequisite(numCourses: Int, prerequisites: Array<IntArray>, queries: Array<IntArray>): List<Boolean> {
-        // [i][j] 가 prerequsite 인지 판별
-        // i 가 j 의 prerequisite 라는 의미
-        val isRequired = Array(numCourses) { BooleanArray(numCourses) }
-        for (i in prerequisites.indices) {
-            val now = prerequisites[i]
-            isRequired[now[0]][now[1]] = true
+    fun findRedundantConnection(edges: Array<IntArray>): IntArray {
+        val result = mutableListOf<IntArray>()
+        // union find 로 cycle 이 되는 순간의 간선을 반환한다.
+        val n = edges.size
+
+        // 초기 세팅. 자기 자신이 부모
+        val parents = IntArray(n + 1) { it }
+
+        // x 의 최상위 부모를 찾음
+        fun find(x: Int): Int {
+            if (parents[x] != x) parents[x] = find(parents[x])
+            return parents[x]
         }
 
-        // dp 로 isRequired 의 항목을 채움
-        for (start in 0 until numCourses) {
-            dfs(start, start, isRequired, BooleanArray(numCourses))
+        // x 의 부모와 y 의 부모를 찾아서 같은지 비교함. 둘의 부모가 같다면, 순환하는 구조가 된다.
+        fun union(x: Int, y: Int): Boolean {
+            val xParent = find(x)
+            val yParent = find(y)
+            if (xParent == yParent) return false
+            // 둘의 부모가 다르면 edge 에 의해서 트리가 될 수 있음
+            // x 의 최상위 부모를 y 쪽에 붙임
+            parents[xParent] = yParent
+            return true
         }
 
-        val result = mutableListOf<Boolean>()
-        for (i in queries.indices) {
+        edges.forEach { edge -> if(!union(edge[0], edge[1])) result.add(edge) }
 
-            result.add(isRequired[queries[i][0]][queries[i][1]])
-        }
-        return result
-    }
-
-    private fun dfs(start: Int, current: Int, isRequired: Array<BooleanArray>, visited: BooleanArray) {
-        if (visited[current]) return
-
-        visited[current] = true
-
-        if (start != current) {
-            isRequired[start][current] = true
-        }
-
-        for (next in 0 until isRequired.size) {
-            if (isRequired[current][next]) {
-                dfs(start, next, isRequired, visited)
-            }
-        }
+        return result.last()
     }
 }
