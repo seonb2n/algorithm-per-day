@@ -1,20 +1,25 @@
 package kotlin
 
-// https://leetcode.com/problems/check-if-array-is-sorted-and-rotated/?envType=daily-question&envId=2025-02-02
+// https://leetcode.com/problems/maximum-ascending-subarray-sum/description/?envType=daily-question&envId=2025-02-04
 class Solution {
-    fun check(nums: IntArray): Boolean {
-        var rotations = 0
+    fun maxAscendingSum(nums: IntArray): Int {
+        var result = nums[0]
+        var sum = nums[0]
+        var prev = nums[0]
 
-        for (i in nums.indices) {
-            if (nums[i] > nums[(i + 1) % nums.size]) {
-                rotations++
-            }
-
-            if (rotations > 1) {
-                return false
+        for (i in 1 until nums.size) {
+            if (nums[i] > prev) {
+                sum += nums[i]
+                prev = nums[i]
+            } else {
+                result = maxOf(sum, result)
+                prev = nums[i]
+                sum = nums[i]
             }
         }
 
-        return true
+        result = maxOf(sum, result)
+
+        return result
     }
 }
