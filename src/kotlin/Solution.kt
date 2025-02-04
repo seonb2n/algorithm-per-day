@@ -1,25 +1,24 @@
 package kotlin
 
-// https://leetcode.com/problems/maximum-ascending-subarray-sum/description/?envType=daily-question&envId=2025-02-04
+// https://leetcode.com/problems/longest-strictly-increasing-or-strictly-decreasing-subarray/?envType=daily-question&envId=2025-02-03
 class Solution {
-    fun maxAscendingSum(nums: IntArray): Int {
-        var result = nums[0]
-        var sum = nums[0]
-        var prev = nums[0]
-
-        for (i in 1 until nums.size) {
-            if (nums[i] > prev) {
-                sum += nums[i]
-                prev = nums[i]
-            } else {
-                result = maxOf(sum, result)
-                prev = nums[i]
-                sum = nums[i]
-            }
-        }
-
-        result = maxOf(sum, result)
-
-        return result
-    }
+   fun longestMonotonicSubarray(nums: IntArray): Int {
+       var result = 1
+       var asc = 1
+       var desc = 1
+       for (i in 1 until nums.size) {
+           if (nums[i] > nums[i-1]) {
+               asc++
+               desc = 1
+           } else if (nums[i] < nums[i-1]) {
+               desc++
+               asc = 1
+           } else {
+               asc = 1
+               desc = 1
+           }
+           result = maxOf(result, asc, desc)
+       }
+       return result
+   }
 }
