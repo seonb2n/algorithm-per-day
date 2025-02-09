@@ -2,30 +2,28 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/design-a-number-container-system/?envType=daily-question&envId=2025-02-08
-class NumberContainers() {
-    // number 별 index 를 map 으로 기록
-    private val indexMap = mutableMapOf<Int, TreeSet<Int>>()
-    // index 별 number 를 map 으로 기록
-    private val container = mutableMapOf<Int, Int>()
+// https://leetcode.com/problems/count-number-of-bad-pairs/description/?envType=daily-question&envId=2025-02-09
+class Solution {
+    fun countBadPairs(nums: IntArray): Long {
+        // 전체 pair 를 계산
+        val totalPair: Long = (nums.size.toLong() * (nums.size - 1)) / 2
 
-    fun change(index: Int, number: Int) {
-        // 기존에 존재하던 숫자를 indexMap 에서 제거
-        val before = container[index]
-        if (before != null) {
-            indexMap[before]?.remove(index)
-            // Set이 비어있다면 맵에서 제거
-            if (indexMap[before]?.isEmpty() == true) {
-                indexMap.remove(before)
-            }
+        // good pair 의 개수 제거
+        var goodPair = 0L
+
+        // good pair 의 개수 세기
+        val goodPairMap = mutableMapOf<Int, Long>()
+
+        for (i in nums.indices) {
+            val now = nums[i] - i
+            goodPairMap[now] = goodPairMap.getOrDefault(now, 0) + 1
         }
 
-        // 새로운 숫자 추가
-        container[index] = number
-        indexMap.getOrPut(number) { TreeSet() }.add(index)
-    }
+        for (key in goodPairMap.keys) {
+            val now = goodPairMap[key]!!
+            goodPair += (now * (now - 1) / 2)
+        }
 
-    fun find(number: Int): Int {
-        return indexMap[number]?.first() ?: -1
+        return totalPair - goodPair
     }
 }
