@@ -2,24 +2,24 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/count-number-of-bad-pairs/description/?envType=daily-question&envId=2025-02-09
+// https://leetcode.com/problems/unique-paths/
 class Solution {
-    fun countBadPairs(nums: IntArray): Long {
-        // 전체 pair 를 계산
-        val totalPair: Long = (nums.size.toLong() * (nums.size - 1)) / 2
+    fun uniquePaths(m: Int, n: Int): Int {
+        // dp[i][j] 는 해당 위치까지 도달할 수 있는 unique 경로의 수
+        val dp = Array(m) { IntArray(n) }
 
-        // good pair 의 개수 제거
-        var goodPair = 0L
+        dp[0][0] = 1
 
-        // good pair 의 개수 세기
-        val goodPairMap = mutableMapOf<Int, Long>()
-
-        for (i in nums.indices) {
-            val now = nums[i] - i
-            val count = goodPairMap.getOrDefault(now, 0) + 1
-            goodPair += count - 1
-            goodPairMap[now] = count
+        fun getDp(i: Int, j: Int): Int {
+            if (i < 0 || j < 0 || i >= m || j >= n) {
+                return 0
+            }
+            if (dp[i][j] != 0) return dp[i][j]
+            dp[i][j] = getDp(i-1, j) + getDp(i, j-1)
+            return dp[i][j]
         }
-        return totalPair - goodPair
+
+        return getDp(m-1, n-1)
     }
+
 }
