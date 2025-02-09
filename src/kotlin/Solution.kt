@@ -16,14 +16,10 @@ class Solution {
 
         for (i in nums.indices) {
             val now = nums[i] - i
-            goodPairMap[now] = goodPairMap.getOrDefault(now, 0) + 1
+            val count = goodPairMap.getOrDefault(now, 0) + 1
+            goodPair += count - 1
+            goodPairMap[now] = count
         }
-
-        for (key in goodPairMap.keys) {
-            val now = goodPairMap[key]!!
-            goodPair += (now * (now - 1) / 2)
-        }
-
         return totalPair - goodPair
     }
 }
