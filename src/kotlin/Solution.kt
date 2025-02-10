@@ -2,24 +2,19 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/unique-paths/
+// https://leetcode.com/problems/clear-digits/?envType=daily-question&envId=2025-02-10
 class Solution {
-    fun uniquePaths(m: Int, n: Int): Int {
-        // dp[i][j] 는 해당 위치까지 도달할 수 있는 unique 경로의 수
-        val dp = Array(m) { IntArray(n) }
-
-        dp[0][0] = 1
-
-        fun getDp(i: Int, j: Int): Int {
-            if (i < 0 || j < 0 || i >= m || j >= n) {
-                return 0
+    fun clearDigits(s: String): String {
+        val charStack = Stack<Char>()
+        for (c in s.toCharArray()) {
+            if (c in '0'..'9') {
+                charStack.pop()
             }
-            if (dp[i][j] != 0) return dp[i][j]
-            dp[i][j] = getDp(i-1, j) + getDp(i, j-1)
-            return dp[i][j]
+            else {
+                charStack.add(c)
+            }
         }
 
-        return getDp(m-1, n-1)
+        return charStack.joinToString("")
     }
-
 }
