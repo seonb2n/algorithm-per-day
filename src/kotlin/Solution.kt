@@ -2,39 +2,26 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/max-sum-of-a-pair-with-equal-sum-of-digits/?envType=daily-question&envId=2025-02-12
+// https://leetcode.com/problems/minimum-operations-to-exceed-threshold-value-ii/?envType=daily-question&envId=2025-02-13
 class Solution {
-    fun maximumSum(nums: IntArray): Int {
-        fun sumDigit(digit: Int): Int {
-            val s = digit.toString()
-            var result = 0
-            for (c in s) {
-                result += c - '0'
-            }
-            return result
+    fun minOperations(nums: IntArray, k: Int): Int {
+        var opr = 0
+
+        val pq = PriorityQueue<Long>() { a,b -> a.compareTo(b) }
+        for (i in nums) {
+           pq.add(i.toLong())
         }
 
-        val maxMap = mutableMapOf<Int, Pair<Int, Int>>()
-        for (d in nums) {
-            val now = sumDigit(d)
-            if (maxMap.containsKey(now)) {
-                val (a, b) = maxMap[now]!!
-                when {
-                    d > a -> maxMap[now] = Pair(d, a)
-                    d > b -> maxMap[now] = Pair(a, d)
-                }
-            } else {
-                maxMap[now] = Pair(d, 0)
+        while (true) {
+            if (pq.peek() >= k || pq.size < 2) {
+                break
             }
+            val a = pq.poll()
+            val b = pq.poll()
+            pq.offer(a * 2 + b)
+            opr++
         }
 
-        var res = -1
-        for (key in maxMap.keys) {
-            val (a, b) = maxMap[key]!!
-            if (a != 0 && b != 0) {
-                res = maxOf(res, a + b)
-            }
-        }
-        return res
+        return opr
     }
 }
