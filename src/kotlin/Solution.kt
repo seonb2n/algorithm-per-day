@@ -6,17 +6,21 @@ import kotlin.collections.ArrayList
 // https://leetcode.com/problems/product-of-the-last-k-numbers/?envType=daily-question&envId=2025-02-14
 class ProductOfNumbers() {
 
-    private val numberList: ArrayList<Int> = ArrayList()
+    private val numberList = mutableListOf(1)
 
     fun add(num: Int) {
-        for (i in numberList.indices) {
-            numberList[i] = numberList[i] * num
+        if (num == 0) {
+            numberList.clear()
+            numberList.add(1)
+        } else {
+            numberList.add(numberList.last() * num)
         }
-        numberList.add(num)
     }
 
     fun getProduct(k: Int): Int {
-        return numberList[numberList.size - k]
+        val n = numberList.size - 1
+        if (k > n) return 0
+        return numberList[k] / numberList[n-k]
     }
 
 }
