@@ -1,27 +1,22 @@
 package kotlin
 
 import java.util.*
+import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/minimum-operations-to-exceed-threshold-value-ii/?envType=daily-question&envId=2025-02-13
-class Solution {
-    fun minOperations(nums: IntArray, k: Int): Int {
-        var opr = 0
+// https://leetcode.com/problems/product-of-the-last-k-numbers/?envType=daily-question&envId=2025-02-14
+class ProductOfNumbers() {
 
-        val pq = PriorityQueue<Long>() { a,b -> a.compareTo(b) }
-        for (i in nums) {
-           pq.add(i.toLong())
+    private val numberList: ArrayList<Int> = ArrayList()
+
+    fun add(num: Int) {
+        for (i in numberList.indices) {
+            numberList[i] = numberList[i] * num
         }
-
-        while (true) {
-            if (pq.peek() >= k || pq.size < 2) {
-                break
-            }
-            val a = pq.poll()
-            val b = pq.poll()
-            pq.offer(a * 2 + b)
-            opr++
-        }
-
-        return opr
+        numberList.add(num)
     }
+
+    fun getProduct(k: Int): Int {
+        return numberList[numberList.size - k]
+    }
+
 }
