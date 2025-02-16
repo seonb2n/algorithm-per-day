@@ -3,48 +3,46 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/find-the-punishment-number-of-an-integer/?envType=daily-question&envId=2025-02-15
+// https://leetcode.com/problems/construct-the-lexicographically-largest-valid-sequence/?envType=daily-question&envId=2025-02-16
 class Solution {
-    fun punishmentNumber(n: Int): Int {
-        var res = 0
-        for (i in 1 until n + 1) {
-            // multiple number 를 쪼개서 i 로 만들수 있는지 체크
-            if (canPartition(i)) {
-                res += i * i
-            }
-        }
-        return res
+    fun constructDistancedSequence(n: Int): IntArray {
+        val result = IntArray(n * 2 - 1)
+        backtrack(0, result, BooleanArray(n + 1), n)
+        return result
     }
 
-    fun canPartition(target: Int): Boolean {
-        val square = target * target
-        val numStr = square.toString()
+    private fun backtrack(pos: Int, result: IntArray, used: BooleanArray, n: Int): Boolean {
+        // 모든 위치를 채운 경우
+        if (pos == result.size) {
+            return true
+        }
+        // 이미 해당 위치가 채워졌다면 건너뛴다.
+        if (result[pos] != 0) return backtrack(pos + 1, result, used, n)
 
-        // 재귀적으로 모든 가능한 분할을 시도
-        fun dfs(index: Int, currentSum: Int): Boolean {
-            // 기저 사례: 문자열의 끝에 도달했을 때
-            if (index == numStr.length) {
-                return currentSum == target
-            }
-
-            // 현재 위치에서 시작하여 가능한 모든 길이의 부분 문자열을 시도
-            for (len in 1..numStr.length - index) {
-                val substring = numStr.substring(index, index + len)
-                // 첫 자리가 0인 경우 (01, 02 등) 건너뛰기
-                if (substring.length > 1 && substring[0] == '0') continue
-
-                val num = substring.toInt()
-                // 현재까지의 합이 목표값을 초과하면 더 이상 시도하지 않음
-                if (currentSum + num > target) break
-
-                // 다음 위치에서 재귀적으로 시도
-                if (dfs(index + len, currentSum + num)) {
-                    return true
+        // 큰 수부터 시도
+        for (num in n downTo 1) {
+            if (!used[num]) {
+               // 1 이면 1개만
+                if (num == 1) {
+                    result[pos] = 1
+                    used[1] = true
+                    if (backtrack(pos + 1, result, used, n)) return true
+                    result[pos] = 0
+                    used[1] = false
+                }
+                else if (pos + num < result.size && result[pos + num] == 0) {
+                    // num을 pos와 pos+num 위치에 배치
+                    result[pos] = num
+                    result[pos + num] = num
+                    used[num] = true
+                    if (backtrack(pos + 1, result, used, n)) return true
+                    // 실패시 원상복구
+                    result[pos] = 0
+                    result[pos + num] = 0
+                    used[num] = false
                 }
             }
-            return false
         }
-
-        return dfs(0, 0)
+        return false
     }
 }
