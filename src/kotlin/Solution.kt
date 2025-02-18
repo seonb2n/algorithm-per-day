@@ -3,26 +3,47 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/construct-the-lexicographically-largest-valid-sequence/?envType=daily-question&envId=2025-02-16
+// https://leetcode.com/problems/construct-smallest-number-from-di-string/?envType=daily-question&envId=2025-02-18
 class Solution {
-    fun numTilePossibilities(tiles: String): Int {
-        val result = mutableSetOf<String>()
-        val isUsed = BooleanArray(tiles.length)
-        backtrack(isUsed, "", tiles, result)
-        return result.size - 1
+    fun smallestNumber(pattern: String): String {
+        val isUsed = BooleanArray(pattern.length + 2)
+        // backtrack
+        for (i in 1 until isUsed.size) {
+            isUsed[i] = true
+            val result = backTrack(isUsed, pattern, 0, i.toString())
+            if (result != "") {
+                return result
+            }
+            isUsed[i] = false
+        }
+        return ""
     }
 
-    fun backtrack(isUsed: BooleanArray, now: String, tiles: String, result: MutableSet<String>) {
-        // 이미 포함되어 있으면 반환
-        if (result.contains(now)) return
-        result.add(now)
-        for (i in isUsed.indices) {
-            if (!isUsed[i]) {
-                val next = now + tiles[i]
+    private fun backTrack(isUsed: BooleanArray, pattern: String, nowIndex: Int, nowString: String): String {
+        // 끝까지 왔으면 반환
+        if (nowString.length == pattern.length + 1) {
+            return nowString
+        }
+        val p = pattern[nowIndex]
+        val q = nowString.last()
+        for (i in 1 until isUsed.size) {
+            if (p == 'I' && !isUsed[i] && q < '0' + i) {
                 isUsed[i] = true
-                backtrack(isUsed, next, tiles, result)
+                val result = backTrack(isUsed, pattern, nowIndex + 1, nowString + i.toString())
+                if (result != "") {
+                    return result
+                }
+                isUsed[i] = false
+            }
+            if (p == 'D' && !isUsed[i] && q > '0' + i) {
+                isUsed[i] = true
+                val result = backTrack(isUsed, pattern, nowIndex + 1, nowString + i.toString())
+                if (result != "") {
+                    return result
+                }
                 isUsed[i] = false
             }
         }
+        return ""
     }
 }
