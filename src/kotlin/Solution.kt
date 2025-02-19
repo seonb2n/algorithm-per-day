@@ -3,33 +3,36 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/construct-smallest-number-from-di-string/?envType=daily-question&envId=2025-02-18
+// https://leetcode.com/problems/the-k-th-lexicographical-string-of-all-happy-strings-of-length-n/?envType=daily-question&envId=2025-02-19
 class Solution {
-    fun smallestNumber(pattern: String): String {
-        val stack = Stack<Int>()
-        val sb = StringBuilder()
-        var current = 1
+    fun getHappyString(n: Int, k: Int): String {
+        val chars = charArrayOf('a', 'b', 'c')
+        var count = 0
+        var result = ""
 
-        for (c in pattern.toCharArray()) {
-            stack.push(current)
-            current++
+        fun backtrack(current: StringBuilder, n: Int, k: Int) {
+            if (result.isNotEmpty()) return
 
-            if (c == 'I') {
-                // stack 에 있는 값을 모두 sb 에 추가
-                while (!stack.empty()) {
-                    sb.append(stack.pop())
+            if (current.length == n) {
+                count++
+
+                if (count == k) {
+                    result = current.toString()
                 }
-            } else {
-                continue
+                return
+            }
+            // 가능한 조합 시도
+            for (c in chars) {
+                if (current.isEmpty() || current[current.length - 1] != c) {
+                    current.append(c)
+                    backtrack(current, n, k)
+                    current.deleteCharAt(current.length - 1)
+                }
             }
         }
-        stack.push(current)
 
-        // 남은 stack 값 추가
-        while (!stack.empty()) {
-            sb.append(stack.pop())
-        }
+        backtrack(StringBuilder(), n, k)
 
-        return sb.toString()
+        return result
     }
 }
