@@ -3,36 +3,20 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/the-k-th-lexicographical-string-of-all-happy-strings-of-length-n/?envType=daily-question&envId=2025-02-19
+// https://leetcode.com/problems/find-unique-binary-string/description/?envType=daily-question&envId=2025-02-20
 class Solution {
-    fun getHappyString(n: Int, k: Int): String {
-        val chars = charArrayOf('a', 'b', 'c')
-        var count = 0
-        var result = ""
-
-        fun backtrack(current: StringBuilder, n: Int, k: Int) {
-            if (result.isNotEmpty()) return
-
-            if (current.length == n) {
-                count++
-
-                if (count == k) {
-                    result = current.toString()
-                }
-                return
+    fun findDifferentBinaryString(nums: Array<String>): String {
+        val sorted = nums.sorted()
+        var min = 0
+        for (num in sorted) {
+            val now = num.toInt(2)
+            if (min == now) {
+                min++
             }
-            // 가능한 조합 시도
-            for (c in chars) {
-                if (current.isEmpty() || current[current.length - 1] != c) {
-                    current.append(c)
-                    backtrack(current, n, k)
-                    current.deleteCharAt(current.length - 1)
-                }
+            else if (min < now) {
+                return min.toString(2).padStart(nums.size, '0')
             }
         }
-
-        backtrack(StringBuilder(), n, k)
-
-        return result
+        return min.toString(2).padStart(nums.size, '0')
     }
 }
