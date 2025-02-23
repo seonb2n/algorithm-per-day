@@ -3,48 +3,56 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayList
 
-// https://leetcode.com/problems/recover-a-tree-from-preorder-traversal/description/?envType=daily-question&envId=2025-02-22
+// https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/?envType=daily-question&envId=2025-02-23
 class Solution {
-    var index = 0
+    fun constructFromPrePost(preorder: IntArray, postorder: IntArray): TreeNode? {
 
-    fun recoverFromPreorder(traversal: String): TreeNode? {
-        return dfs(traversal, 0)
+        if (preorder.isEmpty() || postorder.isEmpty()) return null
+        return construct(preorder, postorder, 0, preorder.size - 1, 0, postorder.size - 1)
     }
 
-    private fun dfs(traversal: String, depth: Int): TreeNode? {
-        var current = 0
-        var i = index
+    private fun construct(
+        preorder: IntArray, postorder: IntArray,
+        preStart: Int, preEnd: Int, postStart: Int, postEnd: Int
+    ): TreeNode? {
+        // 유효하지 않은 범위
+        if (preStart > preEnd || postStart > postEnd) return null
 
-        while (i < traversal.length && traversal[i] == '-') {
-            current++
-            i++
+        // 단일 노드
+        if (preStart == preEnd) {
+            return TreeNode(preorder[preStart])
         }
 
-        if (current != depth) return null
+        // 현재 서브트리의 루트 노드
+        val root = TreeNode(preorder[preStart])
 
-        // 숫자 값을 파싱
-        var num = 0
-        while (i < traversal.length && traversal[i].isDigit()) {
-            num = num * 10 + (traversal[i] - '0')
-            i++
+        // 왼쪽 서브트리의 루트
+        val leftRoot = preorder[preStart + 1]
+
+        // 후위 순위에서 왼쪽 서브트리 루트 찾기
+        var postLeftRoot = postStart
+        while (postorder[postLeftRoot] != leftRoot) {
+            postLeftRoot++
         }
 
-        // 현재 인덱스 업데이트
-        index = i
+        // 왼쪽 서브트리의 크기 계산
+        val leftSubTreeSize = postLeftRoot - postStart + 1
 
-        // 새 노드 생성
-        val node = TreeNode(num)
+        // 왼쪽 서브트리 구성
+        root.left = construct(preorder, postorder,
+            preStart + 1, preStart + leftSubTreeSize,
+            postStart, postLeftRoot)
 
-        // 왼쪽 자식 탐색
-        node.left = dfs(traversal, depth + 1)
+        // 오른쪽 서브트리 구성
+        root.right = construct(preorder, postorder,
+            preStart + leftSubTreeSize + 1, preEnd, postLeftRoot + 1, postEnd - 1
+            )
 
-        // 오른쪽 자식 탐색
-        node.right = dfs(traversal, depth + 1)
-
-        return node
+        return root
     }
 }
+
 class TreeNode(var `val`: Int) {
-         var left: TreeNode? = null
-         var right: TreeNode? = null
+     var left: TreeNode? = null
+     var right: TreeNode? = null
 }
