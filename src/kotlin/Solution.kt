@@ -2,27 +2,36 @@ package kotlin
 
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
+import kotlin.math.min
 
-// https://leetcode.com/problems/number-of-sub-arrays-with-odd-sum/?envType=daily-question&envId=2025-02-25
+// https://leetcode.com/problems/maximum-absolute-sum-of-any-subarray/?envType=daily-question&envId=2025-02-26
 class Solution {
-    fun numOfSubarrays(arr: IntArray): Int {
-        val MOD = 1_000_000_007
+    fun maxAbsoluteSum(nums: IntArray): Int {
         var result = 0
-        var sum = 0L
-        var evenCount = 1 // 빈 부분 배열은 짝수 합(0) 처리
-        var oddCount = 0
+        var mostPositive = 0
+        var mostNegative = 0
+        var sum = 0
 
-        for (i in arr.indices) {
-            sum += arr[i]
-            // 현재의 누적합이 짝수라면, 지금까지 존재하던 홀수 누적합의 개수를 더함
-            if (sum % 2 == 0L) {
-                result = (result + oddCount) % MOD
-                evenCount++
-            } else {
-                result = (result + evenCount) % MOD
-                oddCount++
+        for (i in nums.indices) {
+            sum += nums[i]
+
+            if (sum > 0) {
+                // 현재 양수 누적합에서 이전 최소 누적합을 뺀 절대값
+                result = maxOf(result, sum - mostNegative)
             }
+            else if (sum < 0) {
+                // 현재 음수 누적합에서 이전 최대 누적합을 뺀 절대값
+                result = maxOf(result, abs(sum - mostPositive))
+            }
+            else {
+                // sum이 0인 경우
+                result = maxOf(result, maxOf(mostPositive, abs(mostNegative)))
+            }
+            mostNegative = minOf(mostNegative, sum)
+            mostPositive = maxOf(mostPositive, sum)
         }
+
         return result
     }
 }
