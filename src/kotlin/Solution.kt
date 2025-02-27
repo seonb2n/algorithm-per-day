@@ -5,33 +5,34 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/maximum-absolute-sum-of-any-subarray/?envType=daily-question&envId=2025-02-26
+// https://leetcode.com/problems/length-of-longest-fibonacci-subsequence/?envType=daily-question&envId=2025-02-27
 class Solution {
-    fun maxAbsoluteSum(nums: IntArray): Int {
-        var result = 0
-        var mostPositive = 0
-        var mostNegative = 0
-        var sum = 0
+    fun lenLongestFibSubseq(arr: IntArray): Int {
+        // 백트래킹
+        val numSet = arr.toSet()
+        val n = arr.size
+        var maxLength = 0
 
-        for (i in nums.indices) {
-            sum += nums[i]
+        for (i in 0 until n - 1) {
+            for (j in i + 1 until n) {
+                var a = arr[i]
+                var b = arr[j]
 
-            if (sum > 0) {
-                // 현재 양수 누적합에서 이전 최소 누적합을 뺀 절대값
-                result = maxOf(result, sum - mostNegative)
+                var length = 2
+
+                while (numSet.contains(a + b)) {
+                    val next = a + b
+                    a = b
+                    b = next
+                    length++
+                }
+
+                if (length >= 3) {
+                    maxLength = maxOf(maxLength, length)
+                }
             }
-            else if (sum < 0) {
-                // 현재 음수 누적합에서 이전 최대 누적합을 뺀 절대값
-                result = maxOf(result, abs(sum - mostPositive))
-            }
-            else {
-                // sum이 0인 경우
-                result = maxOf(result, maxOf(mostPositive, abs(mostNegative)))
-            }
-            mostNegative = minOf(mostNegative, sum)
-            mostPositive = maxOf(mostPositive, sum)
         }
 
-        return result
+        return maxLength
     }
 }
