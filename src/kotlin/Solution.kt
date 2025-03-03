@@ -5,34 +5,40 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/length-of-longest-fibonacci-subsequence/?envType=daily-question&envId=2025-02-27
+// https://leetcode.com/problems/partition-array-according-to-given-pivot/description/?envType=daily-question&envId=2025-03-03
 class Solution {
-    fun lenLongestFibSubseq(arr: IntArray): Int {
-        // 백트래킹
-        val numSet = arr.toSet()
-        val n = arr.size
-        var maxLength = 0
+    fun pivotArray(nums: IntArray, pivot: Int): IntArray {
+        // queue 사용
+        val lessQueue = LinkedList<Int>()
+        val equalQueue = LinkedList<Int>()
+        val biggerQueue = LinkedList<Int>()
 
-        for (i in 0 until n - 1) {
-            for (j in i + 1 until n) {
-                var a = arr[i]
-                var b = arr[j]
-
-                var length = 2
-
-                while (numSet.contains(a + b)) {
-                    val next = a + b
-                    a = b
-                    b = next
-                    length++
-                }
-
-                if (length >= 3) {
-                    maxLength = maxOf(maxLength, length)
-                }
+        for (i in nums.indices) {
+            if (nums[i] < pivot) {
+                lessQueue.add(nums[i])
+            } else if (nums[i] > pivot) {
+                biggerQueue.add(nums[i])
+            }
+            else {
+                equalQueue.add(nums[i])
             }
         }
 
-        return maxLength
+        val result = IntArray(nums.size)
+        var index = 0
+        while (lessQueue.isNotEmpty()) {
+            result[index] = lessQueue.poll()
+            index++
+        }
+        while (equalQueue.isNotEmpty()) {
+            result[index] = equalQueue.poll()
+            index++
+        }
+        while (biggerQueue.isNotEmpty()) {
+            result[index] = biggerQueue.poll()
+            index++
+        }
+
+        return result
     }
 }
