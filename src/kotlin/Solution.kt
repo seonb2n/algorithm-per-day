@@ -5,40 +5,22 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/partition-array-according-to-given-pivot/description/?envType=daily-question&envId=2025-03-03
+// https://leetcode.com/problems/check-if-number-is-a-sum-of-powers-of-three/?envType=daily-question&envId=2025-03-04
 class Solution {
-    fun pivotArray(nums: IntArray, pivot: Int): IntArray {
-        // queue 사용
-        val lessQueue = LinkedList<Int>()
-        val equalQueue = LinkedList<Int>()
-        val biggerQueue = LinkedList<Int>()
+    fun checkPowersOfThree(n: Int): Boolean {
+        return checkAndPass(n)
+    }
 
-        for (i in nums.indices) {
-            if (nums[i] < pivot) {
-                lessQueue.add(nums[i])
-            } else if (nums[i] > pivot) {
-                biggerQueue.add(nums[i])
-            }
-            else {
-                equalQueue.add(nums[i])
-            }
+    fun checkAndPass(now: Int): Boolean {
+        if (now == 3 || now == 1) {
+            return true
         }
-
-        val result = IntArray(nums.size)
-        var index = 0
-        while (lessQueue.isNotEmpty()) {
-            result[index] = lessQueue.poll()
-            index++
+        if (now % 3 == 0) {
+            return checkAndPass(now / 3)
         }
-        while (equalQueue.isNotEmpty()) {
-            result[index] = equalQueue.poll()
-            index++
+        else if ((now - 1) % 3 == 0) {
+            return checkAndPass((now - 1) / 3)
         }
-        while (biggerQueue.isNotEmpty()) {
-            result[index] = biggerQueue.poll()
-            index++
-        }
-
-        return result
+        return false
     }
 }
