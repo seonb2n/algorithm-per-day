@@ -10,25 +10,25 @@ class Solution {
     fun findMissingAndRepeatedValues(grid: Array<IntArray>): IntArray {
         val n = grid.size
         val n2 = n * n
-        val set = mutableSetOf<Int>()
+        val isAppear = BooleanArray(n2 + 1)
+
+        val expectedSum = n2 * (n2 + 1) / 2
+        var sum = 0
 
         var twiceNumber = -1
-
-        for (i in 1..n2) {
-            set.add(i)
-        }
 
         for (arr in grid) {
             for (i in 0..n-1) {
                 val now = arr[i]
-                if (set.contains(now)) {
-                    set.remove(now)
+                sum += now
+                if (!isAppear[now]) {
+                    isAppear[now] = true
                 } else {
                     twiceNumber = now
                 }
             }
         }
 
-        return intArrayOf(twiceNumber, set.first())
+        return intArrayOf(twiceNumber, expectedSum - (sum - twiceNumber))
     }
 }
