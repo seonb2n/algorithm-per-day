@@ -5,30 +5,50 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/find-missing-and-repeated-values/?envType=daily-question&envId=2025-03-06
+// https://leetcode.com/problems/closest-prime-numbers-in-range/?envType=daily-question&envId=2025-03-07
 class Solution {
-    fun findMissingAndRepeatedValues(grid: Array<IntArray>): IntArray {
-        val n = grid.size
-        val n2 = n * n
-        val isAppear = BooleanArray(n2 + 1)
+    fun closestPrimes(left: Int, right: Int): IntArray {
+        val primes = findPrimesBetween(left, right)
+        if (primes.size < 2) {
+            return intArrayOf(-1, -1)
+        }
 
-        val expectedSum = n2 * (n2 + 1) / 2
-        var sum = 0
+        var minDiff = Int.MAX_VALUE
+        var result = intArrayOf(-1, -1)
 
-        var twiceNumber = -1
-
-        for (arr in grid) {
-            for (i in 0..n-1) {
-                val now = arr[i]
-                sum += now
-                if (!isAppear[now]) {
-                    isAppear[now] = true
-                } else {
-                    twiceNumber = now
-                }
+        for (i in 0 until primes.size - 1) {
+            val diff = primes[i + 1] - primes[i]
+            if (diff < minDiff) {
+                minDiff = diff
+                result = intArrayOf(primes[i], primes[i + 1])
             }
         }
 
-        return intArrayOf(twiceNumber, expectedSum - (sum - twiceNumber))
+        return result
+    }
+
+    private fun findPrimesBetween(left: Int, right: Int): List<Int> {
+        val primes = mutableListOf<Int>()
+
+        for (num in left..right) {
+            if (isPrime(num)) {
+                primes.add(num)
+            }
+        }
+
+        return primes
+    }
+
+    private fun isPrime(num: Int): Boolean {
+        if (num <= 1) return false
+        if (num <= 3) return true
+        if (num % 2 == 0 || num % 3 == 0) return false
+
+        val sqrt = Math.sqrt(num.toDouble()).toInt()
+
+        for (i in 3..sqrt step 2) {
+            if (num % i == 0) return false
+        }
+        return true
     }
 }
