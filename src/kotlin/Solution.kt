@@ -5,28 +5,59 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/minimum-recolors-to-get-k-consecutive-black-blocks/submissions/1566510838/?envType=daily-question&envId=2025-03-08
+// https://leetcode.com/problems/alternating-groups-ii/?envType=daily-question&envId=2025-03-09
 class Solution {
-    fun minimumRecolors(blocks: String, k: Int): Int {
-        //누적합 sum[i] 는 blocks 의 i 번째 까지 존재하는 white 의 개수
-        val n = blocks.length
-        val sum = IntArray(n+1)
-        for (i in 1..n) {
-            if (blocks[i-1] == 'W') {
-                sum[i] = sum[i-1] + 1
-            } else {
-                sum[i] = sum[i-1]
+    fun numberOfAlternatingGroups(colors: IntArray, k: Int): Int {
+        val n = colors.size
+
+        if (k == 1) {
+            return n
+        }
+
+        // 모든 위치에 대해서 타일이 alternating 인지 검사
+        val isAlternating = BooleanArray(n)
+
+        for (i in 0 until n) {
+            val current = colors[i]
+            val next = colors[(i + 1) % n]
+            isAlternating[i] = current != next
+        }
+
+        // 첫번째 윈도우 확인
+        var currentAlternating = true
+        for (i in 0 until k-1) {
+            if (!isAlternating[i]) {
+                currentAlternating = false
+                break
+            }
+        }
+        var count = if (currentAlternating) 1 else 0
+
+        // 윈도우 업데이트
+        for (start in 1 until n) {
+            val inIdx = (start + k - 2) % n
+
+            // 이전에 alternating 이면 새로 들어오는 쌍만 확인
+            if (currentAlternating) {
+                currentAlternating = isAlternating[inIdx]
+            }
+            // 이전이 alternating 이 아니면 전체 다시 확인
+            else {
+                currentAlternating = true
+                for (i in 0 until k-1) {
+                    val next = (start + i) % n
+                    if (!isAlternating[next]) {
+                        currentAlternating = false
+                        break
+                    }
+                }
+            }
+
+            if (currentAlternating) {
+                count++
             }
         }
 
-        // sum[i+k] - sum[i] 가 최소가 되는 값을 찾는다
-        var result = Int.MAX_VALUE
-        var i = 0
-        while (i + k < n + 1) {
-            result = minOf(result, sum[i+k] - sum[i])
-            i++
-        }
-
-        return result
+        return count
     }
 }
