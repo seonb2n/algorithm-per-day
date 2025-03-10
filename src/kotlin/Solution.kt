@@ -5,59 +5,73 @@ import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.min
 
-// https://leetcode.com/problems/alternating-groups-ii/?envType=daily-question&envId=2025-03-09
+// https://leetcode.com/problems/count-of-substrings-containing-every-vowel-and-k-consonants-ii/?envType=daily-question&envId=2025-03-10
 class Solution {
-    fun numberOfAlternatingGroups(colors: IntArray, k: Int): Int {
-        val n = colors.size
+    fun countOfSubstrings(word: String, k: Int): Long {
+        // 모음 표시 및 빈도수 추적을 위한 배열
+        val isVowel = BooleanArray(128) { false }
+        val frequencies = IntArray(128) { 0 }
 
-        if (k == 1) {
-            return n
-        }
+        // 모음 표시
+        isVowel['a'.code] = true
+        isVowel['e'.code] = true
+        isVowel['i'.code] = true
+        isVowel['o'.code] = true
+        isVowel['u'.code] = true
 
-        // 모든 위치에 대해서 타일이 alternating 인지 검사
-        val isAlternating = BooleanArray(n)
+        var response = 0L
+        var currentK = 0     // 현재 윈도우 내 자음 개수
+        var vowels = 0       // 현재 윈도우 내 서로 다른 모음 종류 수 (최대 5)
+        var extraLeft = 0    // 왼쪽으로 추가 확장 가능한 위치 수
+        var left = 0         // 왼쪽 포인터
 
-        for (i in 0 until n) {
-            val current = colors[i]
-            val next = colors[(i + 1) % n]
-            isAlternating[i] = current != next
-        }
+        // 오른쪽 포인터를 이동하며 윈도우 확장
+        for (right in word.indices) {
+            val rightChar = word[right].code
 
-        // 첫번째 윈도우 확인
-        var currentAlternating = true
-        for (i in 0 until k-1) {
-            if (!isAlternating[i]) {
-                currentAlternating = false
-                break
-            }
-        }
-        var count = if (currentAlternating) 1 else 0
-
-        // 윈도우 업데이트
-        for (start in 1 until n) {
-            val inIdx = (start + k - 2) % n
-
-            // 이전에 alternating 이면 새로 들어오는 쌍만 확인
-            if (currentAlternating) {
-                currentAlternating = isAlternating[inIdx]
-            }
-            // 이전이 alternating 이 아니면 전체 다시 확인
-            else {
-                currentAlternating = true
-                for (i in 0 until k-1) {
-                    val next = (start + i) % n
-                    if (!isAlternating[next]) {
-                        currentAlternating = false
-                        break
-                    }
+            // 현재 문자 처리
+            if (isVowel[rightChar]) {
+                // 모음인 경우
+                frequencies[rightChar]++
+                if (frequencies[rightChar] == 1) {
+                    vowels++ // 처음 등장한 모음이면 카운트 증가
                 }
+            } else {
+                // 자음인 경우
+                currentK++
             }
 
-            if (currentAlternating) {
-                count++
+            // 자음이 k개보다 많아진 경우, 왼쪽 포인터 이동
+            while (currentK > k) {
+                val leftChar = word[left].code
+                if (isVowel[leftChar]) {
+                    // 모음 제거
+                    frequencies[leftChar]--
+                    if (frequencies[leftChar] == 0) {
+                        vowels-- // 이 모음이 더 이상 없으면 카운트 감소
+                    }
+                } else {
+                    // 자음 제거
+                    currentK--
+                }
+                left++
+                extraLeft = 0 // 윈도우 변경으로 extraLeft 초기화
+            }
+
+            // 왼쪽으로 확장 가능한 경우 처리 (모음이 중복되어 있는 경우)
+            while (vowels == 5 && currentK == k && left < right &&
+                isVowel[word[left].code] && frequencies[word[left].code] > 1) {
+                extraLeft++
+                frequencies[word[left].code]--
+                left++
+            }
+
+            // 조건 만족 시 결과 증가
+            if (currentK == k && vowels == 5) {
+                response += (1 + extraLeft)
             }
         }
 
-        return count
+        return response
     }
 }
