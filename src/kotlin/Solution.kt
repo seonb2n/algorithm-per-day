@@ -1,44 +1,35 @@
 package kotlin
 
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.math.abs
-import kotlin.math.min
+import kotlin.math.floor
+import kotlin.math.sqrt
 
-// https://leetcode.com/problems/house-robber-iv/?envType=daily-question&envId=2025-03-15
+// https://leetcode.com/problems/minimum-time-to-repair-cars/description/?envType=daily-question&envId=2025-03-16
 class Solution {
-    fun minCapability(nums: IntArray, k: Int): Int {
-        // 이진 탐색
+    fun repairCars(ranks: IntArray, cars: Int): Long {
+        fun canRepair(minutes: Long): Boolean {
+            var count = 0L
+            for (r in ranks) {
+                count += floor(sqrt(minutes.toDouble() / r)).toLong()
 
-        fun checkCapa(capa: Int): Boolean {
-            var count = 0
-            var i = 0
-
-            while (i < nums.size) {
-                if (nums[i] <= capa) {
-                    count++
-                    i += 2
-                } else {
-                    i++
+                if (count >= cars) {
+                    return true
                 }
             }
-            return count >= k
+            return count >= cars
         }
 
-        var left = 1
-        var right = nums.maxOrNull() ?: Int.MAX_VALUE
+        var left = 1L
+        var right = (ranks.minOrNull()?.toLong() ?: 1L) * (cars.toLong() * cars.toLong())
 
         while (left < right) {
             val mid = (left + right) / 2
-
-            if (checkCapa(mid)) {
+            if (canRepair(mid)) {
                 right = mid
-            }
-            else {
+            } else {
                 left = mid + 1
             }
         }
         return left
     }
-
 }
