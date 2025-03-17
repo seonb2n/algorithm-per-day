@@ -7,20 +7,15 @@ import kotlin.math.sqrt
 // https://leetcode.com/problems/divide-array-into-equal-pairs/?envType=daily-question&envId=2025-03-17
 class Solution {
     fun divideArray(nums: IntArray): Boolean {
-        val numMap = mutableMapOf<Int, Int>()
+        val pairSet = mutableSetOf<Int>()
         for (num in nums) {
-            if (numMap.containsKey(num)) {
-                numMap[num] = numMap[num]!! + 1
+            if (pairSet.contains(num)) {
+                pairSet.remove(num)
             } else {
-                numMap[num] = 1
+                pairSet.add(num)
             }
         }
 
-        for (key in numMap.keys) {
-            if (numMap[key]!! % 2 != 0) {
-                return false
-            }
-        }
-        return true
+        return pairSet.size == 0
     }
 }
