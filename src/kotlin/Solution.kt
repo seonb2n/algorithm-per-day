@@ -4,32 +4,23 @@ import java.util.*
 import kotlin.math.floor
 import kotlin.math.sqrt
 
-// https://leetcode.com/problems/minimum-time-to-repair-cars/description/?envType=daily-question&envId=2025-03-16
+// https://leetcode.com/problems/divide-array-into-equal-pairs/?envType=daily-question&envId=2025-03-17
 class Solution {
-    fun repairCars(ranks: IntArray, cars: Int): Long {
-        fun canRepair(minutes: Long): Boolean {
-            var count = 0L
-            for (r in ranks) {
-                count += floor(sqrt(minutes.toDouble() / r)).toLong()
-
-                if (count >= cars) {
-                    return true
-                }
-            }
-            return count >= cars
-        }
-
-        var left = 1L
-        var right = (ranks.minOrNull()?.toLong() ?: 1L) * (cars.toLong() * cars.toLong())
-
-        while (left < right) {
-            val mid = (left + right) / 2
-            if (canRepair(mid)) {
-                right = mid
+    fun divideArray(nums: IntArray): Boolean {
+        val numMap = mutableMapOf<Int, Int>()
+        for (num in nums) {
+            if (numMap.containsKey(num)) {
+                numMap[num] = numMap[num]!! + 1
             } else {
-                left = mid + 1
+                numMap[num] = 1
             }
         }
-        return left
+
+        for (key in numMap.keys) {
+            if (numMap[key]!! % 2 != 0) {
+                return false
+            }
+        }
+        return true
     }
 }
