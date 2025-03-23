@@ -3,62 +3,68 @@ package kotlin
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.sqrt
 
 
-// https://leetcode.com/problems/count-the-number-of-complete-components/?envType=daily-question&envId=2025-03-22
+// https://leetcode.com/problems/number-of-ways-to-arrive-at-destination/description/?envType=daily-question&envId=2025-03-23
 class Solution {
-    fun countCompleteComponents(n: Int, edges: Array<IntArray>): Int {
-        var result = 0
+    fun countPaths(n: Int, roads: Array<IntArray>): Int {
+        // dfs
+        val isVisited = BooleanArray(n)
+
+        var minCost = Int.MAX_VALUE
+        var counter = 0
 
         val nodes = mutableListOf<Node>()
         for (i in 0 until n) {
             nodes.add(Node(i, mutableListOf()))
         }
+        for (road in roads) {
+            val left = road[0]
+            val right = road[1]
+            val cost = road[2]
 
-        for (edge in edges) {
-            val left = edge[0]
-            val right = edge[1]
-            nodes[left].addEdge(right)
-            nodes[right].addEdge(left)
+            nodes[left].add(right, cost)
+            nodes[right].add(left, cost)
         }
 
-        val isVisited = BooleanArray(n)
-
-        for (i in 0 until n) {
-            if (!isVisited[i]) {
-                val queue = LinkedList<Node>()
-                var edgeCount = 0
-                var nodeCount = 0
-
-                queue.add(nodes[i])
-                while (!queue.isEmpty()) {
-                    val now = queue.poll()
-                    isVisited[now.index] = true
-                    nodeCount++
-                    edgeCount += now.edges.size
-                    // 다음 탐색
-                    for (next in now.edges) {
-                        if (!isVisited[next]) {
-                            queue.add(nodes[next])
-                        }
-                    }
+        fun dfs(now: Int, cost: Int) {
+            if (minCost < cost) {
+                return
+            }
+            if (now == n - 1) {
+                if (cost < minCost) {
+                    minCost = cost
+                    counter = 1
                 }
+                else {
+                    counter++
+                }
+            }
 
-                if (nodeCount * (nodeCount - 1) / 2 == edgeCount / 2) {
-                    result++
+            val nowNode = nodes[now]
+            for (edge in nowNode.edges) {
+                if (!isVisited[edge.first]) {
+                    isVisited[edge.first] = true
+                    dfs(edge.first, cost + edge.second)
+                    isVisited[edge.first] = false
                 }
             }
         }
-        return result
+
+        isVisited[0] = true
+        dfs(0, 0)
+
+        return counter
     }
 
-    class Node(
+    data class Node(
         val index: Int,
-        val edges: MutableList<Int>
+        val edges: MutableList<Pair<Int, Int>>
     ) {
-        fun addEdge(i: Int) {
-            edges.add(i)
+        fun add(target: Int, cost: Int) {
+            edges.add(Pair(target, cost))
         }
     }
 }
