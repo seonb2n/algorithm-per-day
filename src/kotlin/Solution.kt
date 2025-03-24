@@ -6,24 +6,39 @@ import java.util.*
 class Solution {
     fun countDays(days: Int, meetings: Array<IntArray>): Int {
         // 누적합
-        val dayArray = IntArray(days + 1)
+        val events = mutableListOf<Pair<Int, Int>>()
 
         for (meet in meetings) {
             val start = meet[0]
             val end = meet[1]
-            dayArray[start]++
+
+            events.add(Pair(start, 1))
             if (end < days) {
-                dayArray[end + 1]--
+                events.add(Pair(end + 1, -1))
             }
         }
 
-        var now = 0
-        var result = -1
-        for (day in dayArray) {
-            now += day
-            if (now == 0) {
-                result++
+        events.sortBy { it.first }
+
+        var sum = 0
+        var result = 0
+        var lastDay = 1
+
+        for (event in events) {
+            val currentDay = event.first
+
+            // 현재 이벤트 이전의 날짜 동안 미팅이 없는지 확인
+            if (sum == 0) {
+                result += (currentDay - lastDay)
             }
+
+            sum += event.second
+            lastDay = currentDay
+        }
+
+        // 마지막 이벤트부터 days까지 확인
+        if (sum == 0 && lastDay <= days) {
+            result += (days + 1 - lastDay)
         }
 
         return result
