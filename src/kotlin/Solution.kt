@@ -2,30 +2,44 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/partition-labels/?envType=daily-question&envId=2025-03-30
+// https://leetcode.com/problems/remove-k-digits/
 class Solution {
-    fun partitionLabels(s: String): List<Int> {
-        // 글자별 위치를 기록해둠
-        val result = mutableListOf<Int>()
-        val lastMap = mutableMapOf<Char, Int>()
-
-        for (i in s.indices) {
-            lastMap[s[i]] = i
+    fun removeKdigits(num: String, k: Int): String {
+        // greedy
+        if (num.length <= k) {
+            return "0"
         }
+        val linkedList = LinkedList<Char>()
+        var remain = k
 
-        // 탐색
-        var start = 0
-        var end = 0
-        for (i in s.indices) {
-            end = maxOf(end, lastMap[s[i]]!!)
-
-            // 현재 인덱스가 end 면 파티션 완성
-            if (i == end) {
-                result.add(end - start + 1)
-                start = end + 1
+        for (digit in num) {
+            // 현재 숫자보다 큰 숫자가 있으면 제거
+            while (remain > 0 && linkedList.isNotEmpty() && linkedList.last > digit) {
+                linkedList.removeLast()
+                remain--
             }
+            linkedList.add(digit)
         }
 
-        return result
+        // 제거할 숫자가 남았으면 뒤부터 제거(오름차순으로 들어있으면 큰 수부터 제거해야한다)
+        while (remain > 0 && linkedList.isNotEmpty()) {
+            linkedList.removeLast()
+            remain--
+        }
+
+        val sb = StringBuilder()
+        // 앞에서부터 0 제거
+        while( linkedList.size > 0 && linkedList[0] == '0') {
+            linkedList.removeFirst()
+        }
+        if (linkedList.size == 0) {
+            return "0"
+        }
+
+        for (i in linkedList.indices) {
+            sb.append(linkedList[i])
+        }
+
+        return sb.toString()
     }
 }
