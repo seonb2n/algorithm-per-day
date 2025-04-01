@@ -2,38 +2,24 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/remove-k-digits/
+// https://leetcode.com/problems/solving-questions-with-brainpower/submissions/1593108016/?envType=daily-question&envId=2025-04-01
 class Solution {
-    fun removeKdigits(num: String, k: Int): String {
-        if (num.length <= k) {
-            return "0"
-        }
-        val deque = ArrayDeque<Char>()
-        var remain = k
+    fun mostPoints(questions: Array<IntArray>): Long {
+        // dp
+        val n = questions.size
+        val dp = LongArray(n) { -1L }
 
-        for (digit in num) {
-            // 현재 숫자보다 큰 숫자가 있으면 제거 (그리디)
-            while (remain > 0 && deque.isNotEmpty() && deque.last() > digit) {
-                deque.removeLast()
-                remain--
+        fun getDp(i: Int): Long {
+            if (i >= n) {
+                return 0L
             }
-            deque.addLast(digit)
-        }
-
-        // 아직 제거할 숫자가 남아있다면 뒤에서부터 제거
-        repeat(remain) {
-            if (deque.isNotEmpty()) {
-                deque.removeLast()
+            if (dp[i] != -1L) {
+                return dp[i]
             }
+
+            dp[i] = maxOf(questions[i][0] + getDp(i + questions[i][1] + 1), getDp(i + 1))
+            return dp[i]
         }
-
-        while (deque.isNotEmpty() && deque.first() == '0') {
-            deque.removeFirst()
-        }
-
-        val sb = StringBuilder()
-        deque.forEach { sb.append(it) }
-
-        return if (sb.isEmpty()) "0" else sb.toString()
+        return getDp(0)
     }
 }
