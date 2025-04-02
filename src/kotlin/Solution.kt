@@ -8,14 +8,19 @@ class Solution {
         // 단순 구현
         val n = nums.size
         var max = 0L
-        for (i in 0 until n) {
-            for (j in i+1 until n) {
+        // 시작 구간별 최댓값 구해두기
+        val start = IntArray(n)
+        start[n-1] = nums[n-1]
+        for (i in n-2 downTo 0) {
+            start[i] = maxOf(start[i + 1], nums[i])
+        }
+
+        for (i in 0 until n-2) {
+            for (j in i+1 until n-1) {
                 if (nums[i].toLong() - nums[j] < 0) {
                     continue
                 }
-                for (k in j+1 until n) {
-                    max = maxOf(max, (nums[i].toLong() - nums[j]) * nums[k])
-                }
+                max = maxOf(max, (nums[i].toLong() - nums[j]) * start[j+1])
             }
         }
         return max
