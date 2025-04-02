@@ -10,6 +10,9 @@ class Solution {
         var max = 0L
         for (i in 0 until n) {
             for (j in i+1 until n) {
+                if (nums[i].toLong() - nums[j] < 0) {
+                    continue
+                }
                 for (k in j+1 until n) {
                     max = maxOf(max, (nums[i].toLong() - nums[j]) * nums[k])
                 }
