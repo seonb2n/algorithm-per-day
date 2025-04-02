@@ -2,24 +2,19 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/solving-questions-with-brainpower/submissions/1593108016/?envType=daily-question&envId=2025-04-01
+// https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-i/?envType=daily-question&envId=2025-04-02
 class Solution {
-    fun mostPoints(questions: Array<IntArray>): Long {
-        // dp
-        val n = questions.size
-        val dp = LongArray(n) { -1L }
-
-        fun getDp(i: Int): Long {
-            if (i >= n) {
-                return 0L
+    fun maximumTripletValue(nums: IntArray): Long {
+        // 단순 구현
+        val n = nums.size
+        var max = 0L
+        for (i in 0 until n) {
+            for (j in i+1 until n) {
+                for (k in j+1 until n) {
+                    max = maxOf(max, (nums[i].toLong() - nums[j]) * nums[k])
+                }
             }
-            if (dp[i] != -1L) {
-                return dp[i]
-            }
-
-            dp[i] = maxOf(questions[i][0] + getDp(i + questions[i][1] + 1), getDp(i + 1))
-            return dp[i]
         }
-        return getDp(0)
+        return max
     }
 }
