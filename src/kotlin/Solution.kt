@@ -1,6 +1,6 @@
 package kotlin
 
-// https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-i/?envType=daily-question&envId=2025-04-02
+// https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-ii/description/?envType=daily-question&envId=2025-04-03
 class Solution {
     fun maximumTripletValue(nums: IntArray): Long {
         // 단순 구현
