@@ -1,38 +1,27 @@
 package kotlin
 
-// https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves/?envType=daily-question&envId=2025-04-04
+// https://leetcode.com/problems/sum-of-all-subset-xor-totals/description/?envType=daily-question&envId=2025-04-05
 class Solution {
-    fun lcaDeepestLeaves(root: TreeNode?): TreeNode? {
-        // dfs
-        fun dfs(node: TreeNode?): Result {
-            if (node == null) return Result(null, 0)
+    fun subsetXORSum(nums: IntArray): Int {
+        // backtrack
+        val n = nums.size
+        val isVisited = BooleanArray(n)
 
-            // 리프노드
-            if (node.left == null && node.right == null) return Result(node, 1)
+        var result = 0
 
-            val leftResult = dfs(node.left)
-            val rightResult = dfs(node.right)
-
-            // 왼쪽과 오른쪽의 깊이가 같으면 현재 노드가 LCA
-            if (leftResult.depth == rightResult.depth) {
-                return Result(node, leftResult.depth + 1)
-            }
-
-            // 다르면 더 깊은쪽을 반환
-            return if (leftResult.depth > rightResult.depth) {
-                Result(leftResult.node, leftResult.depth + 1)
-            } else {
-                Result(rightResult.node, rightResult.depth + 1)
+        fun backtrack(start: Int, now: Int) {
+            result += now
+            for (i in start until n) {
+                if (!isVisited[i]) {
+                    isVisited[i] = true
+                    backtrack(i + 1, now xor nums[i])
+                    isVisited[i] = false
+                }
             }
         }
 
-        return dfs(root).node
-    }
+        backtrack(0, 0)
 
-    data class Result(val node: TreeNode?, val depth: Int)
+        return result
+    }
 }
-
-class TreeNode(var `val`: Int) {
-         var left: TreeNode? = null
-         var right: TreeNode? = null
-    }
