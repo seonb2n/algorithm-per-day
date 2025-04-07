@@ -1,42 +1,32 @@
 package kotlin
 
-// https://leetcode.com/problems/largest-divisible-subset/?envType=daily-question&envId=2025-04-06
+// https://leetcode.com/problems/partition-equal-subset-sum/submissions/1599549077/?envType=daily-question&envId=2025-04-07
 class Solution {
-    fun largestDivisibleSubset(nums: IntArray): List<Int> {
-        //dp
-        if (nums.isEmpty()) return emptyList()
+    fun canPartition(nums: IntArray): Boolean {
+        val sum = nums.sum()
+
+        // 합이 홀수이면 두 부분으로 동일하게 나눌 수 없음
+        if (sum % 2 != 0) {
+            return false
+        }
+
+        val target = sum / 2
         val n = nums.size
-        nums.sort()
 
-        // dp[i]는 nums[i]를 마지막 원소로 하는 최대 부분집합의 크기
-        val dp = IntArray(n) { 1 }
-        // prev[i]는 nums[i]를 마지막 원소로 하는 최대 부분집합에서 이전 원소의 인덱스
-        val prev = IntArray(n) { -1 }
+        // DP 접근법: dp[i]는 합이 i가 가능한지 여부
+        val dp = BooleanArray(target + 1) { false }
+        dp[0] = true
 
-        var maxIdx = 0
-        for (i in 1 until n) {
-            for (j in 0 until i) {
-                // nums[i]가 nums[j]로 나누어 떨어지고, 기존 dp[i]보다 dp[j]+1이 크면 업데이트
-                if (nums[i] % nums[j] == 0 && dp[i] < dp[j] + 1) {
-                    dp[i] = dp[j] + 1
-                    prev[i] = j
+        for (num in nums) {
+            // 역순으로 순회하여 중복 계산 방지
+            for (j in target downTo num) {
+                // j-num 합이 가능하다면, j 합도 가능함
+                if (dp[j - num]) {
+                    dp[j] = true
                 }
             }
-
-            // 최대 크기의 부분집합 갱신
-            if (dp[i] > dp[maxIdx]) {
-                maxIdx = i
-            }
         }
 
-        // 최대 부분집합 재구성
-        val result = mutableListOf<Int>()
-        var currIdx = maxIdx
-        while (currIdx >= 0) {
-            result.add(nums[currIdx])
-            currIdx = prev[currIdx]
-        }
-
-        return result.reversed()
+        return dp[target]
     }
 }
