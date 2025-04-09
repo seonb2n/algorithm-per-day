@@ -1,19 +1,30 @@
 package kotlin
 
 
-// https://leetcode.com/problems/minimum-operations-to-make-array-values-equal-to-k/?envType=daily-question&envId=2025-04-09
+// https://leetcode.com/problems/sum-root-to-leaf-numbers/
 class Solution {
-    fun minOperations(nums: IntArray, k: Int): Int {
-        // nums 의 요소 중에 k 보다 작은게 1개라도 있으면 -1 반환
-        val steps = nums.toSet()
-        if (steps.any { it < k }) {
-            return -1
-        }
+    fun sumNumbers(root: TreeNode?): Int {
+        //dfs
         var result = 0
-        if (!steps.contains(k)) {
-            result++
+
+        if (root == null) {
+            return 0
         }
-        result += steps.count() -1
+
+        fun dfs(now: Int, node: TreeNode) {
+            val next = (now * 10 + node.`val`)
+            if (node.left == null && node.right == null) {
+                result += next
+            }
+            if (node.left != null) {
+                dfs(next, node.left)
+            }
+            if (node.right != null) {
+                dfs(next, node.right)
+            }
+        }
+
+        dfs(0, root)
 
         return result
     }
