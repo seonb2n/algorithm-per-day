@@ -1,22 +1,27 @@
 package kotlin
 
 
-// https://leetcode.com/problems/count-pairs-that-form-a-complete-day-ii/
+// https://leetcode.com/problems/minimum-path-sum/
 class Solution {
-    fun countCompleteDayPairs(hours: IntArray): Long {
-        // set 구성
-        val extras = IntArray(24)
+    fun minPathSum(grid: Array<IntArray>): Int {
+        // dp
+        val n = grid.size
+        val m = grid[0].size
 
-        for (hour in hours) {
-            extras[hour % 24]++
+        // dp[i][j] = 해당 위치까지 최소 경로로 올 수 있는 방법
+        val dp = Array(n) {IntArray(m) { -1 } }
+        dp[0][0] = grid[0][0]
+        fun getDp(i: Int, j: Int): Int {
+            if (i < 0 || j < 0 || i >= n || j >= m) {
+                return Int.MAX_VALUE
+            }
+            if (dp[i][j] != -1) {
+                return dp[i][j]
+            }
+            dp[i][j] = minOf(getDp(i - 1, j), getDp(i, j - 1)) + grid[i][j]
+            return dp[i][j]
         }
 
-        var result = extras[0].toLong() * (extras[0] - 1) / 2
-        result += extras[12].toLong() * (extras[12] - 1) / 2
-        for (i in 1 until 12) {
-            result += (extras[i].toLong() * extras[24-i])
-        }
-
-        return result
+        return getDp(n-1, m -1)
     }
 }
