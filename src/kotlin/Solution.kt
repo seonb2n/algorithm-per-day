@@ -1,27 +1,29 @@
 package kotlin
 
 
-// https://leetcode.com/problems/minimum-path-sum/
+// https://leetcode.com/problems/count-symmetric-integers/?envType=daily-question&envId=2025-04-11
 class Solution {
-    fun minPathSum(grid: Array<IntArray>): Int {
-        // dp
-        val n = grid.size
-        val m = grid[0].size
+    fun countSymmetricIntegers(low: Int, high: Int): Int {
+        var result = 0
 
-        // dp[i][j] = 해당 위치까지 최소 경로로 올 수 있는 방법
-        val dp = Array(n) {IntArray(m) { -1 } }
-        dp[0][0] = grid[0][0]
-        fun getDp(i: Int, j: Int): Int {
-            if (i < 0 || j < 0 || i >= n || j >= m) {
-                return Int.MAX_VALUE
+        for (i in low until high + 1) {
+            val s = i.toString()
+            val len = s.length
+            if (len % 2 != 0) {
+                continue
             }
-            if (dp[i][j] != -1) {
-                return dp[i][j]
+            var left = 0
+            for (j in 0 until len / 2) {
+                left += s[j].digitToInt()
             }
-            dp[i][j] = minOf(getDp(i - 1, j), getDp(i, j - 1)) + grid[i][j]
-            return dp[i][j]
+            var right = 0
+            for (j in len / 2 until len) {
+                right += s[j].digitToInt()
+            }
+            if (left == right) {
+                result++
+            }
         }
-
-        return getDp(n-1, m -1)
+        return result
     }
 }
