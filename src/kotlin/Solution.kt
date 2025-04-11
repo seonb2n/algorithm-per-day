@@ -12,18 +12,32 @@ class Solution {
             if (len % 2 != 0) {
                 continue
             }
-            var left = 0
-            for (j in 0 until len / 2) {
-                left += s[j].digitToInt()
-            }
-            var right = 0
-            for (j in len / 2 until len) {
-                right += s[j].digitToInt()
-            }
-            if (left == right) {
+
+            // 대칭 확인
+            if (isSymmetric(i, len)) {
                 result++
             }
         }
         return result
+    }
+
+    private fun isSymmetric(num: Int, len: Int): Boolean {
+        var n = num
+        var leftSum = 0
+        var rightSum = 0
+        val half = len / 2
+
+        // 오른쪽 절반 자릿수 합
+        repeat(half) {
+            rightSum += n % 10
+            n /= 10
+        }
+        // 왼쪽 절반 자릿수 합
+        repeat(half) {
+            leftSum += n % 10
+            n /= 10
+        }
+
+        return leftSum == rightSum
     }
 }
