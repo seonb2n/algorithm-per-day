@@ -1,43 +1,21 @@
 package kotlin
 
 
-// https://leetcode.com/problems/count-symmetric-integers/?envType=daily-question&envId=2025-04-11
+// https://leetcode.com/problems/count-good-numbers/submissions/1605208137/?envType=daily-question&envId=2025-04-13
 class Solution {
-    fun countSymmetricIntegers(low: Int, high: Int): Int {
-        var result = 0
+    fun countGoodNumbers(n: Long): Int {
+        val modulo = 1_000_000_007L
+        val even = (n + 1) / 2
+        val odd = n / 2
 
-        for (i in low until high + 1) {
-            val s = i.toString()
-            val len = s.length
-            if (len % 2 != 0) {
-                continue
-            }
-
-            // 대칭 확인
-            if (isSymmetric(i, len)) {
-                result++
-            }
-        }
-        return result
+        val result = pow(5L, even, modulo) * pow(4L, odd, modulo) % modulo
+        return result.toInt()
     }
 
-    private fun isSymmetric(num: Int, len: Int): Boolean {
-        var n = num
-        var leftSum = 0
-        var rightSum = 0
-        val half = len / 2
-
-        // 오른쪽 절반 자릿수 합
-        repeat(half) {
-            rightSum += n % 10
-            n /= 10
-        }
-        // 왼쪽 절반 자릿수 합
-        repeat(half) {
-            leftSum += n % 10
-            n /= 10
-        }
-
-        return leftSum == rightSum
+    fun pow(a: Long, b:Long, m: Long): Long {
+        if (b == 0L) return 1L
+        val half = pow(a, b / 2, m)
+        val result = half * half % m
+        return if (b % 2 == 0L) result else (result * a) % m
     }
 }
