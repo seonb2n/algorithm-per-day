@@ -2,38 +2,31 @@ package kotlin
 
 import kotlin.math.abs
 
-// https://leetcode.com/problems/find-duplicate-subtrees/description/
-/**
- * Example:
- * var ti = TreeNode(5)
- * var v = ti.`val`
- * Definition for a binary tree node.
-**/
-class TreeNode(var `val`: Int) {
-     var left: TreeNode? = null
-     var right: TreeNode? = null
- }
-
+// https://leetcode.com/problems/count-the-number-of-good-subarrays/?envType=daily-question&envId=2025-04-16
 class Solution {
-    fun findDuplicateSubtrees(root: TreeNode?): List<TreeNode?> {
-        val result = ArrayList<TreeNode?>()
-        val nodeMap = mutableMapOf<String, Pair<TreeNode?, Int>>()
+    fun countGood(nums: IntArray, k: Int): Long {
+        // 슬라이딩 윈도
+        var result = 0L
+        var left = 0
+        var pairCount = 0L
+        val pairMap = mutableMapOf<Int, Int>()
 
-        fun dfs(node: TreeNode?): String {
-            if (node == null) return "#"
-            val left = dfs(node.left)
-            val right = dfs(node.right)
-            val serialized = "${node.`val`},${left},${right}"
-            val current = nodeMap.getOrDefault(serialized, Pair(node, 0))
-            nodeMap[serialized] = Pair(node, current.second + 1)
+        for (right in nums.indices) {
+            val currentNum = nums[right]
+            val currentPair = pairMap.getOrDefault(currentNum, 0)
+            pairCount += currentPair
+            pairMap[currentNum] = currentPair + 1
 
-            if (current.second == 1) {
-                result.add(node)
+            while (pairCount >= k && left <= right) {
+                result += (nums.size - right)
+                val leftNum = nums[left]
+                val leftFreq = pairMap[leftNum]!!
+                pairMap[leftNum] = leftFreq - 1
+                pairCount -= (leftFreq - 1) // 제거되는 페어 수
+                left++
             }
-            return serialized
         }
 
-        dfs(root)
         return result
     }
 }
