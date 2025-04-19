@@ -9,29 +9,28 @@ class Solution {
         val m = boxGrid[0].size
         val result = Array(m) { CharArray(n) { '.' } }
 
-
         for (i in 0 until n) {
-            // 밑에서부터 탐색
-            for (j in m-1 downTo 0) {
-                val now = boxGrid[n-i-1][j]
-                if (now == '*') result[j][i] = '*'
-                if (now == '#') {
-                    // 중력 계산
-                    var bottom = j
-                    while (bottom + 1 < m) {
-                       if (result[bottom+1][i] == '.') {
-                           bottom++
-                       }
-                        else if (result[bottom][i] == '*') {
-                            break
-                        }
-                        else if (result[bottom][i] == '#') {
-                            break
-                        } else {
-                            break
-                        }
+            // 원본 행을 회전하여 결과에 채움
+            for (j in 0 until m) {
+                result[j][n - 1 - i] = boxGrid[i][j]
+            }
+        }
+
+        // 중력 적용
+        for (j in 0 until n) {
+            var bottom = m-1
+
+            for (i in m-1 downTo 0) {
+                when(result[i][j]) {
+                    '#' -> {
+                        result[i][j] = '.'
+                        // 가장 밑으로 돌 이동
+                        result[bottom][j] = '#'
+                        bottom--
                     }
-                    result[bottom][i] = now
+                    '*' -> {
+                        bottom = i - 1
+                    }
                 }
             }
         }
