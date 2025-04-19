@@ -2,32 +2,40 @@ package kotlin
 
 import kotlin.math.abs
 
-// https://leetcode.com/problems/count-the-number-of-fair-pairs/?envType=daily-question&envId=2025-04-19
+// https://leetcode.com/problems/rotating-the-box/
 class Solution {
-    fun countFairPairs(nums: IntArray, lower: Int, upper: Int): Long {
-        var result = 0L
-        nums.sort()
+    fun rotateTheBox(boxGrid: Array<CharArray>): Array<CharArray> {
+        val n = boxGrid.size
+        val m = boxGrid[0].size
+        val result = Array(m) { CharArray(n) { '.' } }
 
-        // nums[i] + nums[j] <= value인 페어의 수를 세는 함수
-        fun countLessThanOrEqual(nums: IntArray, value: Int): Long {
-            var count = 0L
-            var left = 0
-            var right = nums.size - 1
 
-            while (left < right) {
-                if (nums[left] + nums[right] <= value) {
-                    // left와 right 사이의 모든 j에 대해 (left, j) 쌍이 조건을 만족함
-                    count += (right - left).toLong()
-                    left++
-                } else {
-                    // 합이 너무 큼, right를 줄여야 함
-                    right--
+        for (i in 0 until n) {
+            // 밑에서부터 탐색
+            for (j in m-1 downTo 0) {
+                val now = boxGrid[n-i-1][j]
+                if (now == '*') result[j][i] = '*'
+                if (now == '#') {
+                    // 중력 계산
+                    var bottom = j
+                    while (bottom + 1 < m) {
+                       if (result[bottom+1][i] == '.') {
+                           bottom++
+                       }
+                        else if (result[bottom][i] == '*') {
+                            break
+                        }
+                        else if (result[bottom][i] == '#') {
+                            break
+                        } else {
+                            break
+                        }
+                    }
+                    result[bottom][i] = now
                 }
             }
-
-            return count
         }
 
-        return countLessThanOrEqual(nums, upper) - countLessThanOrEqual(nums, lower - 1)
+        return result
     }
 }
