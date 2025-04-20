@@ -2,35 +2,28 @@ package kotlin
 
 import kotlin.math.abs
 
-// https://leetcode.com/problems/rotating-the-box/
+// https://leetcode.com/problems/rabbits-in-forest/?envType=daily-question&envId=2025-04-20
 class Solution {
-    fun rotateTheBox(boxGrid: Array<CharArray>): Array<CharArray> {
-        val n = boxGrid.size
-        val m = boxGrid[0].size
-        val result = Array(m) { CharArray(n) { '.' } }
-
-        for (i in 0 until n) {
-            // 원본 행을 회전하여 결과에 채움
-            for (j in 0 until m) {
-                result[j][n - 1 - i] = boxGrid[i][j]
+    fun numRabbits(answers: IntArray): Int {
+        // 같은 숫자를 언급했으면 최소 n + 1 마리가 있다는 것
+        val map = mutableMapOf<Int, Int>()
+        var result = 0
+        for (a in answers) {
+            if (a == 0) {
+                result++
             }
-        }
-
-        // 중력 적용
-        for (j in 0 until n) {
-            var bottom = m-1
-
-            for (i in m-1 downTo 0) {
-                when(result[i][j]) {
-                    '#' -> {
-                        result[i][j] = '.'
-                        // 가장 밑으로 돌 이동
-                        result[bottom][j] = '#'
-                        bottom--
-                    }
-                    '*' -> {
-                        bottom = i - 1
-                    }
+            else if (!map.containsKey(a)) {
+                map[a] = 1
+                result += (a + 1)
+            }
+            else if (map.containsKey(a)) {
+                val found = map.getOrDefault(a, 0)
+                if (found < a + 1) {
+                    map[a] = found + 1
+                }
+                else {
+                    map[a] = 1
+                    result += (a + 1)
                 }
             }
         }
