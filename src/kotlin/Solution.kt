@@ -2,32 +2,39 @@ package kotlin
 
 import kotlin.math.abs
 
-// https://leetcode.com/problems/rabbits-in-forest/?envType=daily-question&envId=2025-04-20
+// https://leetcode.com/problems/count-and-say/?envType=daily-question&envId=2025-04-18
 class Solution {
-    fun numRabbits(answers: IntArray): Int {
-        // 같은 숫자를 언급했으면 최소 n + 1 마리가 있다는 것
-        val map = mutableMapOf<Int, Int>()
-        var result = 0
-        for (a in answers) {
-            if (a == 0) {
-                result++
-            }
-            else if (!map.containsKey(a)) {
-                map[a] = 1
-                result += (a + 1)
-            }
-            else if (map.containsKey(a)) {
-                val found = map.getOrDefault(a, 0)
-                if (found < a + 1) {
-                    map[a] = found + 1
+    fun countAndSay(n: Int): String {
+        if (n == 1) return "1"
+
+        fun compress(input: String): String {
+            var cursor = 0
+            val len = input.length
+            val sb = StringBuilder()
+            var now = input[cursor]
+            var count = 1
+            cursor++
+            while (cursor < len) {
+                val next = input[cursor]
+                if (now != next) {
+                    sb.append(count)
+                    sb.append(now)
+                    now = next
+                    count = 1
+                } else {
+                    count++
                 }
-                else {
-                    map[a] = 1
-                    result += (a + 1)
-                }
+                cursor++
             }
+            sb.append(count)
+            sb.append(now)
+            return sb.toString()
         }
 
+        var result = "11"
+        for (i in 2 until n) {
+            result = compress(result)
+        }
         return result
     }
 }
