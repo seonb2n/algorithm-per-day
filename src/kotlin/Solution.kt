@@ -3,40 +3,36 @@ package kotlin
 import java.util.PriorityQueue
 import kotlin.math.abs
 
-// https://leetcode.com/problems/alert-using-same-key-card-three-or-more-times-in-a-one-hour-period/
+// https://leetcode.com/problems/count-largest-group/?envType=daily-question&envId=2025-04-23
 class Solution {
-    fun alertNames(keyName: Array<String>, keyTime: Array<String>): List<String> {
-        val nameMap = HashMap<String, MutableList<Int>>()
-        for (i in keyTime.indices) {
-            val name = keyName[i]
-            val time = timeToNumber(keyTime[i])
-            nameMap.getOrPut(name) { mutableListOf() }.add(time)
+    fun countLargestGroup(n: Int): Int {
+        val digitMap = mutableMapOf<Int, Int>()
+        fun numberToDigitSum(n: Int): Int {
+            var result = 0
+            var now = n
+            while (now > 0) {
+                result += now % 10
+                now = now / 10
+            }
+            return result
         }
 
-        val result = mutableListOf<String>()
+        for (i in 1..n) {
+            val now = numberToDigitSum(i)
+            val count = digitMap.getOrDefault(now, 0)
+            digitMap[now] = count + 1
+        }
 
-        // 각 직원별로 확인
-        for ((name, times) in nameMap) {
-            // 시간 순으로 정렬
-            times.sort()
-
-            // 슬라이딩 윈도우로 1시간 내 3번 이상 사용했는지 확인
-            for (i in 2 until times.size) {
-                // 현재와 i-2번째 시간이 1시간 이내인지 확인
-                if (times[i] - times[i-2] <= 60) {
-                    result.add(name)
-                    break
-                }
+        var result = 0
+        var max = 0
+        for (key in digitMap.keys) {
+            if (digitMap[key]!! > max) {
+                max = digitMap[key]!!
+                result = 1
+            } else if (digitMap[key]!! == max) {
+                result++
             }
         }
-
-        return result.sorted()
-    }
-
-    private fun timeToNumber(time: String): Int {
-        val digits = time.split(":")
-        val hour = digits[0].toInt()
-        val min = digits[1].toInt()
-        return hour * 60 + min
+        return result
     }
 }
