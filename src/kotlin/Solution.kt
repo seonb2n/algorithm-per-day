@@ -3,24 +3,17 @@ package kotlin
 import java.util.*
 
 // https://leetcode.com/problems/domino-and-tromino-tiling/description/?envType=daily-question&envId=2025-05-05
+// https://leetcode.com/problems/build-array-from-permutation/?envType=daily-question&envId=2025-05-06
 class Solution {
-    fun numTilings(n: Int): Int {
-        if (n == 1) return 1
-        if (n == 2) return 2
+    fun buildArray(nums: IntArray): IntArray {
+        val n = nums.size
+        val result = IntArray(n)
 
-        val modulo = 1_000_000_007 // 10^9 + 7
-
-        // Long 타입 사용 (정수 오버플로우 방지)
-        val dp = LongArray(1001)
-        dp[1] = 1
-        dp[2] = 2
-        dp[3] = 5
-
-        for (i in 4..n) {
-            // 올바른 점화식 적용 (Long 타입으로 계산)
-            dp[i] = (dp[i-1] * 2 + dp[i-3]) % modulo
+        for (i in nums.indices) {
+            val now = nums[nums[i]]
+            result[i] = now
         }
 
-        return dp[n].toInt()
+        return result
     }
 }
