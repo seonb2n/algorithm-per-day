@@ -2,6 +2,7 @@ package kotlin
 
 import java.util.*
 import kotlin.collections.ArrayDeque
+import kotlin.math.min
 
 // https://leetcode.com/problems/find-minimum-time-to-reach-last-room-ii/?envType=daily-question&envId=2025-05-08
 class Solution {
@@ -27,8 +28,11 @@ class Solution {
             val now = deque.removeFirst()
 
             if (now.i == n - 1 && now.j == m - 1) {
-               return now.time
+               result = minOf(result, now.time)
+                continue
             }
+
+            if (now.time > minTime[now.i][now.j]) continue
 
             for (d in dir) {
                 val nextI = d[0] + now.i
