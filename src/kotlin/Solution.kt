@@ -4,34 +4,76 @@ import java.util.*
 import kotlin.collections.ArrayDeque
 import kotlin.math.min
 
-// https://leetcode.com/problems/finding-3-digit-even-numbers/?envType=daily-question&envId=2025-05-12
+
 class Solution {
-    fun findEvenNumbers(digits: IntArray): IntArray {
-        // 0~9의 빈도 계산
-        val freq = IntArray(10)
-        for (digit in digits) {
-            freq[digit]++
+    fun lengthAfterTransformations(s: String, t: Int, nums: List<Int>): Int {
+        val modulo = 1_000_000_007
+        val vector = IntArray(26)
+        for (c in s) {
+            val now = c - 'a'
+            vector[now]++
         }
 
-        // 결과 저장용 TreeSet (정렬 + 중복 제거)
-        val result = TreeSet<Int>()
-
-        // 가능한 모든 3자리 수 생성
-        for (i in 1..9) { // 첫 번째 자리는 0 불가
-            if (freq[i] == 0) continue
-            freq[i]--
-            for (j in 0..9) { // 두 번째 자리
-                if (freq[j] == 0) continue
-                freq[j]--
-                for (k in 0..8 step 2) { // 세 번째 자리는 짝수
-                    if (freq[k] == 0) continue
-                    result.add(i * 100 + j * 10 + k)
-                }
-                freq[j]++
+        // 변환행렬
+        // 연산 후, j 가 변환 후 i 로 몇개 나오는지
+        val matrix = Array(26) { LongArray(26) }
+        for (i in 0 until 26) {
+            val num = nums[i]
+            for (j in 1..num) {
+                val nextChar = (i + j) % 26
+                matrix[nextChar][i] = 1L
             }
-            freq[i]++
         }
 
-        return result.toIntArray()
+        // 행렬 거듭제곱 계산
+        val resultMatrix = matrixPow(matrix, t, modulo)
+
+        var result = 0L
+        for (i in 0 until 26) {
+            for (j in 0 until 26) {
+                result = (result + resultMatrix[i][j] * vector[j]) % modulo
+            }
+        }
+        return result.toInt()
+    }
+
+    // 행렬 곱셈
+    private fun multiplyMatrix(a: Array<LongArray>, b: Array<LongArray>, modulo: Int): Array<LongArray> {
+        val n = a.size
+        val result = Array(n) { LongArray(n) }
+
+        for (i in 0 until n) {
+            for (j in 0 until n) {
+                for (k in 0 until n) {
+                    result[i][j] = (result[i][j] + a[i][k] * b[k][j]) % modulo
+                }
+            }
+        }
+
+        return result
+    }
+
+    private fun matrixPow(matrix: Array<LongArray>, power: Int, modulo: Int): Array<LongArray> {
+        val n = matrix.size
+        var result = Array(n) { LongArray(n) }
+
+        // 단위 행렬로 초기화
+        for (i in 0 until n) {
+            result[i][i] = 1
+        }
+
+        var base = matrix
+        var exp = power
+
+        while (exp > 0) {
+            if (exp % 2 == 1) {
+                result = multiplyMatrix(result, base, modulo)
+            }
+
+            base = multiplyMatrix(base, base, modulo)
+            exp /= 2
+        }
+
+        return result
     }
 }
