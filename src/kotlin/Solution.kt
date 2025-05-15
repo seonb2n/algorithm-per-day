@@ -9,20 +9,14 @@ import kotlin.math.min
 class Solution {
     fun getLongestSubsequence(words: Array<String>, groups: IntArray): List<String> {
         val n = words.size
-        var result: List<String> = emptyList()
+        val result = mutableListOf<String>()
         // greedy
+        var last = groups[0]
+        result.add(words[0])
         for (i in 0 until n) {
-            val now = mutableListOf<String>()
-            var last = groups[i]
-            now.add(words[i])
-            for (j in i + 1 until n) {
-               if (groups[j] != last) {
-                   now.add(words[j])
-                   last = groups[j]
-               }
-            }
-            if (result.size < now.size) {
-                result = now
+            if (groups[i] != last) {
+                result.add(words[i])
+                last = groups[i]
             }
         }
         return result
