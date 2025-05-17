@@ -5,20 +5,35 @@ import kotlin.collections.ArrayDeque
 import kotlin.math.min
 
 
-// https://leetcode.com/problems/longest-unequal-adjacent-groups-subsequence-i/?envType=daily-question&envId=2025-05-15
+// https://leetcode.com/problems/sort-colors/description/?envType=daily-question&envId=2025-05-17
 class Solution {
-    fun getLongestSubsequence(words: Array<String>, groups: IntArray): List<String> {
-        val n = words.size
-        val result = mutableListOf<String>()
-        // greedy
-        var last = groups[0]
-        result.add(words[0])
-        for (i in 0 until n) {
-            if (groups[i] != last) {
-                result.add(words[i])
-                last = groups[i]
+    fun sortColors(nums: IntArray): Unit {
+        val counter = IntArray(3)
+
+        for (n in nums) {
+            if (n == 0) {
+                counter[0]++
+            }
+            else if (n == 1) {
+                counter[1]++
+            }
+            else if (n == 2) {
+                counter[2]++
             }
         }
-        return result
+        for (i in nums.indices) {
+            if (counter[0] > 0) {
+                nums[i] = 0
+                counter[0]--
+            }
+            else if (counter[1] > 0) {
+                nums[i] = 1
+                counter[1]--
+            }
+            else if (counter[2] > 0) {
+                nums[i] = 2
+                counter[2]--
+            }
+        }
     }
 }
