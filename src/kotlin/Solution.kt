@@ -14,14 +14,10 @@ class Solution {
         }
 
         // 누적합 구하기
-        val total = IntArray(nums.size + 1)
-        total[0] = sums[0]
-        for (i in 1..nums.size) {
-            total[i] = sums[i] + total[i - 1]
-        }
-
+        var current = 0
         for (i in nums.indices) {
-            if (nums[i] + total[i] > 0) {
+            current += sums[i]
+            if (nums[i] + current > 0) {
                 return false
             }
         }
