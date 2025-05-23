@@ -10,46 +10,38 @@ class Solution {
         val n = nums.size
         val graph = Array(n) { mutableListOf<Int>() }
 
-        for ((i, edge) in edges.withIndex()) {
-            graph[edge[0]].add(i)
-            graph[edge[1]].add(i)
+        for (edge in edges) {
+            graph[edge[0]].add(edge[1])
+            graph[edge[1]].add(edge[0])
         }
 
-        val used = BooleanArray(edges.size)
-        var maxSum = 0L
+        fun dfs(node: Int, parent: Int): LongArray {
+            var evenCount = nums[node].toLong()      // 홀수 XOR 노드 0개 (현재 노드 XOR 안됨)
+            var oddCount = (nums[node] xor k).toLong() // 홀수 XOR 노드 1개 (현재 노드 XOR됨)
 
-        fun dfs(edgeChoices: BooleanArray) {
-            val xorCount = IntArray(n)
-            for (i in edgeChoices.indices) {
-                if (edgeChoices[i]) {
-                    xorCount[edges[i][0]]++
-                    xorCount[edges[i][1]]++
+            // 각 자식 처리
+            for (child in graph[node]) {
+                if (child != parent) {
+                    val childResult = dfs(child, node)
+                    val childEven = childResult[0]  // 자식 서브트리에서 홀수 XOR 노드 0개
+                    val childOdd = childResult[1]   // 자식 서브트리에서 홀수 XOR 노드 1개
+
+                    val case1_even = evenCount + childEven  // 0 + 0 = 0
+                    val case1_odd = evenCount + childOdd    // 0 + 1 = 1
+
+                    val case2_even = oddCount + childOdd    // 1 + 1 = 2 (짝수)
+                    val case2_odd = oddCount + childEven    // 1 + 0 = 1
+
+                    evenCount = maxOf(case1_even, case2_even)
+                    oddCount = maxOf(case1_odd, case2_odd)
+
                 }
             }
 
-            // 최종 값들의 합 계산
-            var sum = 0L
-            for (i in 0 until n) {
-                val finalValue = if (xorCount[i] % 2 == 1) nums[i] xor k else nums[i]
-                sum += finalValue
-            }
-            maxSum = maxOf(maxSum, sum)
+            return longArrayOf(evenCount, oddCount)
         }
 
-        fun backtrack(edgeIdx: Int, choices: BooleanArray) {
-            if (edgeIdx == edges.size) {
-                dfs(choices)
-                return
-            }
-
-            backtrack(edgeIdx + 1, choices)
-
-            choices[edgeIdx] = true
-            backtrack(edgeIdx + 1, choices)
-            choices[edgeIdx] = false
-        }
-
-        backtrack(0, BooleanArray(edges.size))
-        return maxSum
+        val result = dfs(0, -1)
+        return result[0]
     }
 }
