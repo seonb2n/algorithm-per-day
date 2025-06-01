@@ -5,44 +5,42 @@ import kotlin.collections.ArrayDeque
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/find-closest-node-to-given-two-nodes/?envType=daily-question&envId=2025-05-30
+// https://leetcode.com/problems/distribute-candies-among-children-ii/?envType=daily-question&envId=2025-06-01
 class Solution {
-    fun closestMeetingNode(edges: IntArray, node1: Int, node2: Int): Int {
-        val n = edges.size
+    fun distributeCandies(n: Int, limit: Int): Long {
+        // 전체 경우 : n + 2 개의 공간에 2개의 막대기를 놓는 것
+        var total = combination(n + 2 , 2)
 
-        fun getDist(start: Int): IntArray {
-            val dist = IntArray(n) { -1 }
-            val visited = BooleanArray(n)
-
-            var current = start
-            var cost = 0
-
-            while (current != -1 && !visited[current]) {
-                visited[current] = true
-                dist[current] = cost
-                current = edges[current]
-                cost++
-            }
-
-            return dist
+        // 한명이 limit 을 초과하는 경우, 한명에게 이미 limit + 1 을 할당함
+        if (n > limit) {
+            total -= 3 * combination(n - limit -1 + 2, 2)
+        }
+        // 두명 limit 초과하는 경우 더함
+        if (n > 2 * limit) {
+            total += 3 * combination(n - 2 * limit - 2 + 2, 2)
+        }
+        // 세명 limit 초과 빼기
+        if (n > 3 * limit) {
+            total -= combination(n - 3 * limit - 3 + 2, 2)
         }
 
-        val dist1 = getDist(node1)
-        val dist2 = getDist(node2)
+        return total
+    }
 
-        var result = -1
-        var minMaxDist = Int.MAX_VALUE
-
-        for (i in 0 until n) {
-            if (dist1[i] != -1 && dist2[i] != -1) {  // 둘 다 도달 가능
-                val maxDist = maxOf(dist1[i], dist2[i])
-                if (maxDist < minMaxDist) {
-                    minMaxDist = maxDist
-                    result = i
-                }
-            }
+    fun combination(n: Int, r: Int): Long {
+       if (r > n || r < 0) {
+           return 0
+       }
+        if (r == 0 || r == n) {
+            return 1
         }
-
+        var result = 1L
+        for (i in n downTo n-r + 1) {
+            result *= i
+        }
+        for (i in r downTo 1) {
+            result /= i
+        }
         return result
     }
 }
