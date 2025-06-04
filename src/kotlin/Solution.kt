@@ -12,17 +12,15 @@ class Solution {
         val n = word.length
         if (numFriends == 1) return word
         var result = ""
+        val maxLength = n - numFriends + 1
 
         for (i in 0 until n) {
-            for (j in i + 1 ..n) {
-                val substring = word.substring(i, j)
-
-                // 나머지 생성 가능 체크
-                val remain = n - j + i
-                if (remain >= numFriends - 1) {
-                    if (substring > result) {
-                        result = substring
-                    }
+            // 가능한 최대 길이로 확인
+            val endIndex = minOf(n, i + maxLength)
+            if (endIndex > i) {
+                val subString = word.substring(i, endIndex)
+                if (subString > result) {
+                    result = subString
                 }
             }
         }
