@@ -6,47 +6,39 @@ import kotlin.collections.HashMap
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/lexicographically-smallest-equivalent-string/?envType=daily-question&envId=2025-06-05
+// https://leetcode.com/problems/using-a-robot-to-print-the-lexicographically-smallest-string/?envType=daily-question&envId=2025-06-06
 class Solution {
-    fun smallestEquivalentString(s1: String, s2: String, baseStr: String): String {
-        // union find
-        // 각 문자의 부모
-        val parent = IntArray(26) { it }
-
-        // 문자가 속한 그룹 찾기
-        fun find(x: Int): Int {
-            if (parent[x] != x) {
-                parent[x] = find(parent[x])
+    fun robotWithString(s: String): String {
+        var minResult = ""
+        fun backtrack(s: String, sIndex: Int, stack: MutableList<Char>, result: String) {
+            if (result >= minResult) {
+                return
             }
-            return parent[x]
-        }
 
-        // 그룹 합치기
-        fun union(x: Int, y: Int) {
-            val rootX = find(x)
-            val rootY = find(y)
-            if (rootX != rootY) {
-                if (rootX < rootY) {
-                    parent[rootY] = rootX
-                } else {
-                    parent[rootX] = rootY
+            if (sIndex == s.length && stack.isEmpty()) {
+                if (result < minResult) {
+                    minResult = result
                 }
+                return
+            }
+
+            // 선택 1: s에서 문자를 가져와 스택에 push (s가 남아있을 때)
+            if (sIndex < s.length) {
+                stack.add(s[sIndex])
+                backtrack(s, sIndex + 1, stack, result)
+                stack.removeAt(stack.size - 1) // 백트래킹: 상태 복원
+            }
+
+            // 선택 2: 스택에서 문자를 pop해서 결과에 추가 (스택이 비어있지 않을 때)
+            if (stack.isNotEmpty()) {
+                val poppedChar = stack.removeAt(stack.size - 1)
+                backtrack(s, sIndex, stack, result + poppedChar)
+                stack.add(poppedChar)
             }
         }
 
-        val n = s1.length
-        for (i in 0 until n) {
-            val char1 = s1[i] - 'a'
-            val char2 = s2[i] - 'a'
-            union(char1, char2)
-        }
-
-        // baseStr
-        val result = StringBuilder()
-        for (c in baseStr) {
-            val root = find(c - 'a')
-            result.append('a' + root)
-        }
-        return result.toString()
+        minResult = s + "z".repeat(s.length)
+        backtrack(s, 0, mutableListOf<Char>(), "")
+        return minResult
     }
 }
