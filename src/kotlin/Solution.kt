@@ -9,36 +9,39 @@ import kotlin.math.min
 // https://leetcode.com/problems/using-a-robot-to-print-the-lexicographically-smallest-string/?envType=daily-question&envId=2025-06-06
 class Solution {
     fun robotWithString(s: String): String {
-        var minResult = ""
-        fun backtrack(s: String, sIndex: Int, stack: MutableList<Char>, result: String) {
-            if (result >= minResult) {
-                return
-            }
+        val stack = Stack<Char>()
+        val freq = IntArray(26)
 
-            if (sIndex == s.length && stack.isEmpty()) {
-                if (result < minResult) {
-                    minResult = result
-                }
-                return
-            }
-
-            // 선택 1: s에서 문자를 가져와 스택에 push (s가 남아있을 때)
-            if (sIndex < s.length) {
-                stack.add(s[sIndex])
-                backtrack(s, sIndex + 1, stack, result)
-                stack.removeAt(stack.size - 1) // 백트래킹: 상태 복원
-            }
-
-            // 선택 2: 스택에서 문자를 pop해서 결과에 추가 (스택이 비어있지 않을 때)
-            if (stack.isNotEmpty()) {
-                val poppedChar = stack.removeAt(stack.size - 1)
-                backtrack(s, sIndex, stack, result + poppedChar)
-                stack.add(poppedChar)
-            }
+        for (c in s) {
+            freq[c - 'a']++
         }
 
-        minResult = s + "z".repeat(s.length)
-        backtrack(s, 0, mutableListOf<Char>(), "")
-        return minResult
+        val sb = StringBuilder()
+
+        fun smallestChar(): Char {
+            for (i in freq.indices) {
+                if (freq[i] > 0) {
+                    return 'a' + i
+                }
+            }
+            return 'a'
+        }
+
+        for (c in s) {
+            stack.push(c)
+            freq[c - 'a']--
+
+
+            // 현재 stack top 이 앞으로 나올 가장 작은 문자보다 작으면 지금 pop
+            while (!stack.empty() && stack.peek() <= smallestChar()) {
+                sb.append(stack.pop())
+            }
+        }
+        // 남은 마지막 추가
+        while (!stack.empty()) {
+            sb.append(stack.pop())
+        }
+
+        return sb.toString()
     }
 }
