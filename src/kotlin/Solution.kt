@@ -6,32 +6,46 @@ import kotlin.collections.HashMap
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/lexicographically-minimum-string-after-removing-stars/?envType=daily-question&envId=2025-06-07
+// https://leetcode.com/problems/lexicographical-numbers/?envType=daily-question&envId=2025-06-08
 class Solution {
-    fun clearStars(s: String): String {
-        val pq = PriorityQueue<Pair<Char, Int>>() { a, b ->
-            if (a.first != b.first) a.first.compareTo(b.first)
-            else b.second.compareTo(a.second)
+    fun lexicalOrder(n: Int): List<Int> {
+        val result = mutableListOf<Int>()
+
+        if (n < 10) {
+            for (i in 1 until n + 1) {
+                result.add(i)
+            }
+            return result
         }
 
-        val toRemove = mutableSetOf<Int>()
-
-        for (i in s.indices) {
-            if (s[i] == '*') {
-               val removed = pq.poll()
-                toRemove.add(removed.second)
-                toRemove.add(i)
-            } else {
-                pq.add(Pair(s[i], i))
+        fun dfs(now: Int) {
+            result.add(now)
+            val next = now * 10
+            if (next <= n) {
+                dfs(next)
+            }
+            // 자릿수가 바뀌기 전까지 더함
+            if (now % 10 == 0)  {
+                val limit = (now / 10 + 1) * 10
+                for (i in 1 until 10) {
+                    val plus = now + i
+                    if (plus > limit) {
+                        break
+                    }
+                    if (plus <= n) {
+                        dfs(plus)
+                    } else {
+                        break
+                    }
+                }
             }
         }
-        val sb = StringBuilder()
-        for (i in s.indices) {
-            if (i !in toRemove) {
-                sb.append(s[i])
-            }
+
+        for (i in 1 until 10) {
+            dfs(i)
         }
 
-        return sb.toString()
+        return result
     }
 }
+
