@@ -6,20 +6,17 @@ import kotlin.collections.HashMap
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/lexicographical-numbers/?envType=daily-question&envId=2025-06-08
+// https://leetcode.com/problems/k-th-smallest-in-lexicographical-order/?envType=daily-question&envId=2025-06-09
 class Solution {
-    fun lexicalOrder(n: Int): List<Int> {
+    fun findKthNumber(n: Int, k: Int): Int {
         val result = mutableListOf<Int>()
 
-        if (n < 10) {
-            for (i in 1 until n + 1) {
-                result.add(i)
-            }
-            return result
-        }
 
         fun dfs(now: Int) {
             result.add(now)
+            if (result.size > k) {
+                return
+            }
             val next = now * 10
             if (next <= n) {
                 dfs(next)
@@ -45,7 +42,7 @@ class Solution {
             dfs(i)
         }
 
-        return result
+        return result.get(k-1)
     }
 }
 
