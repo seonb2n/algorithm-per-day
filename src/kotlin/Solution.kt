@@ -3,35 +3,21 @@ package kotlin
 import java.util.*
 import kotlin.collections.ArrayDeque
 import kotlin.collections.HashMap
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/maximum-difference-between-even-and-odd-frequency-i/?envType=daily-question&envId=2025-06-10
+
+// https://leetcode.com/problems/maximum-difference-between-adjacent-elements-in-a-circular-array/?envType=daily-question&envId=2025-06-12
 class Solution {
-    fun maxDifference(s: String): Int {
-        val freq = IntArray(26)
-        for (c in s) {
-            freq[c - 'a']++
-        }
-
+    fun maxAdjacentDistance(nums: IntArray): Int {
         var max = 0
-        var min = Int.MAX_VALUE
-        for (i in freq.indices) {
-            val now = freq[i]
-            if (now != 0) {
-                if (now % 2 == 0) {
-                    if (now < min) {
-                        min = now
-                    }
-                }
-                else {
-                    if (now > max) {
-                        max = now
-                    }
-                }
-            }
-
+        val n = nums.size
+        max = abs( nums[n-1] - nums[0])
+        for (i in 0 until n) {
+            max = maxOf(max, abs(nums[i] - nums[i + 1]))
         }
-        return max - min
+
+        return max
     }
 }
