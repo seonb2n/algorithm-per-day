@@ -7,46 +7,50 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-
-
-// https://leetcode.com/problems/minimize-the-maximum-difference-of-pairs/?envType=daily-question&envId=2025-06-13
+// https://leetcode.com/problems/maximum-difference-by-remapping-a-digit/?envType=daily-question&envId=2025-06-14
 class Solution {
-    fun minimizeMax(nums: IntArray, p: Int): Int {
-        val n = nums.size
-
-        nums.sort()
-        // 주어진 min 으로 p 개의 쌍을 만들 수 있는지 체크
-        var left = 0
-        var right = nums[n - 1] - nums[0]
-
-        fun canFormPairs(mid: Int): Boolean {
-            var pairs = 0
-            var i = 0
-            while (i < n - 1) {
-                if (nums[i + 1] - nums[i] <= mid) {
-                    pairs++
-                    i += 2
-                    if (pairs == p) {
-                        return true
+    fun minMaxDifference(num: Int): Int {
+        val target = num.toString()
+        // 앞에서부터 9 가 아닌 숫자 remap
+        val max = StringBuilder()
+        for (i in target.indices) {
+            val now = target[i]
+            if (now != '9') {
+                for (c in target) {
+                    if (c == now) {
+                        max.append("9")
+                    } else {
+                        max.append(c)
                     }
                 }
-                else {
-                    i++
+                break
+            }
+        }
+        // max 가 비었다면 전체 9 로 구성됐으니 길이만큼 8 로 치환
+        if (max.isEmpty()) {
+            for (i in target.indices) {
+                max.append("9")
+            }
+        }
+
+        // 앞에서부터 0 이 아닌 숫자 remap
+        val min = StringBuilder()
+        for (i in target.indices) {
+            val now = target[i]
+            if (now != '0') {
+                for (c in target) {
+                    if (c == now) {
+                        min.append("0")
+                    } else {
+                        min.append(c)
+                    }
                 }
-            }
-            return pairs >= p
-        }
-
-        while (left < right) {
-            val mid = (left + right) / 2
-            // mid 개 만들 수 있는지
-            if (canFormPairs(mid)) {
-                right = mid
-            } else {
-                left = mid + 1
+                break
             }
         }
 
-        return left
+        println(max.toString().toInt())
+        println(min.toString().toInt())
+        return max.toString().toInt() - min.toString().toInt()
     }
 }
