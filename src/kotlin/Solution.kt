@@ -12,17 +12,18 @@ class Solution {
     fun maximumDifference(nums: IntArray): Int {
         val n = nums.size
         var max = -1
-        var min = Int.MAX_VALUE
-        for (i in 0 until n) {
-            if (min > nums[i]) {
+        var min = nums[0]
+
+        for (i in 1 until n) {
+            if (nums[i] < min) {
                 min = nums[i]
-                for (j in i + 1 until n) {
-                    if (nums[i] < nums[j]) {
-                        max = maxOf(nums[j] - nums[i], max)
-                    }
+            } else {
+                if (nums[i] > min) {
+                    max = maxOf(max, nums[i] - min)
                 }
             }
         }
+
         return max
     }
 }
