@@ -7,31 +7,19 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-
-// https://leetcode.com/problems/divide-array-into-arrays-with-max-difference/?envType=daily-question&envId=2025-06-18
+// https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/?envType=daily-question&envId=2025-06-19
 class Solution {
-    fun divideArray(nums: IntArray, k: Int): Array<IntArray> {
-        val n = nums.size / 3
+    fun partitionArray(nums: IntArray, k: Int): Int {
         nums.sort()
-
-        // greedy
-        val result = Array<IntArray>(n) { IntArray(3) }
-
-        var now = 0
-        while (now < nums.size - 2) {
-            val first = nums[now]
-            val second = nums[now + 1]
-            val third = nums[now + 2]
-
-            if (second - first <= k && third - first <= k) {
-                result[now / 3] = intArrayOf(first, second, third)
-            } else {
-                return emptyArray()
+        val n = nums.size
+        var result = 1
+        var min = nums[0]
+        for (i in 1 until n) {
+            if (nums[i] - min > k) {
+                result++
+                min = nums[i]
             }
-
-            now += 3
         }
-
         return result
     }
 }
