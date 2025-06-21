@@ -7,32 +7,35 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/maximum-manhattan-distance-after-k-changes/?envType=daily-question&envId=2025-06-20
+// https://leetcode.com/problems/minimum-deletions-to-make-string-k-special/?envType=daily-question&envId=2025-06-21
 class Solution {
-    fun maxDistance(s: String, k: Int): Int {
-        var north = 0
-        var south = 0
-        var east = 0
-        var west = 0
-        var result = 0
-        fun countManhattan(plus: Int, minus: Int, northSouth: Int): Int {
-            return abs(plus - minus) + northSouth * 2
+    fun minimumDeletions(word: String, k: Int): Int {
+        val freq = IntArray(26)
+
+        for (c in word) {
+            freq[c - 'a']++
         }
 
-        for (c in s) {
-            when (c) {
-                'N' -> north++
-                'S' -> south++
-                'E' -> east++
-                'W' -> west++
+        val frequencies = freq.filter { it > 0 }.sorted()
+        if (frequencies.size <= 1) return 0
+
+        var minDelete = Int.MAX_VALUE
+
+        // 빈도를 최소화하는 경우
+        for (minF in frequencies) {
+            // 현재 허용하는 최대 maxFreq
+            val maxFreq = minF + k
+            var deletions = 0
+            for (fe in frequencies) {
+                when {
+                    fe < minF -> deletions += fe // 전체 삭제
+                    fe > maxFreq -> deletions += fe - maxFreq // 초과 삭제
+                }
             }
 
-            // 현재 위치에서 상쇄
-            val northSouth = minOf(minOf(north, south), k)
-            val eastWest = minOf(minOf(east, west), k - northSouth)
-            val currentMax = countManhattan(north, south, northSouth) + countManhattan(east, west, eastWest)
-            result = maxOf(result, currentMax)
+            minDelete = minOf(minDelete, deletions)
         }
-        return result
+
+        return minDelete
     }
 }
