@@ -7,18 +7,31 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/?envType=daily-question&envId=2025-06-19
+// https://leetcode.com/problems/maximum-manhattan-distance-after-k-changes/?envType=daily-question&envId=2025-06-20
 class Solution {
-    fun partitionArray(nums: IntArray, k: Int): Int {
-        nums.sort()
-        val n = nums.size
-        var result = 1
-        var min = nums[0]
-        for (i in 1 until n) {
-            if (nums[i] - min > k) {
-                result++
-                min = nums[i]
+    fun maxDistance(s: String, k: Int): Int {
+        var north = 0
+        var south = 0
+        var east = 0
+        var west = 0
+        var result = 0
+        fun countManhattan(plus: Int, minus: Int, northSouth: Int): Int {
+            return abs(plus - minus) + northSouth * 2
+        }
+
+        for (c in s) {
+            when (c) {
+                'N' -> north++
+                'S' -> south++
+                'E' -> east++
+                'W' -> west++
             }
+
+            // 현재 위치에서 상쇄
+            val northSouth = minOf(minOf(north, south), k)
+            val eastWest = minOf(minOf(east, west), k - northSouth)
+            val currentMax = countManhattan(north, south, northSouth) + countManhattan(east, west, eastWest)
+            result = maxOf(result, currentMax)
         }
         return result
     }
