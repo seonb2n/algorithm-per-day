@@ -7,25 +7,24 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/divide-a-string-into-groups-of-size-k/?envType=daily-question&envId=2025-06-22
+// https://leetcode.com/problems/find-all-k-distant-indices-in-an-array/?envType=daily-question&envId=2025-06-24
 class Solution {
-    fun divideString(s: String, k: Int, fill: Char): Array<String> {
-        val result = ArrayList<String>()
-        val sb = StringBuilder()
-        for (c in s) {
-            if (sb.length == k) {
-                result.add(sb.toString())
-                sb.clear()
-            }
-            sb.append(c)
-        }
-        if (sb.isNotEmpty()) {
-            while (sb.length < k) {
-                sb.append(fill)
-            }
-            result.add(sb.toString())
-        }
+    fun findKDistantIndices(nums: IntArray, key: Int, k: Int): List<Int> {
+        val result = mutableListOf<Int>()
+        var lastAdded = -1
 
-        return result.toTypedArray()
+        for (i in nums.indices) {
+            if (nums[i] == key) {
+                val start = maxOf(0, lastAdded + 1, i-k)
+                val end = minOf(nums.size - 1, i + k)
+
+                for (j in start..end) {
+                    result.add(j)
+                    lastAdded = j
+                }
+            }
+        }
+        result.sorted()
+        return result
     }
 }
