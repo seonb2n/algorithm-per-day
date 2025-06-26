@@ -7,24 +7,31 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/find-all-k-distant-indices-in-an-array/?envType=daily-question&envId=2025-06-24
+// https://leetcode.com/problems/longest-binary-subsequence-less-than-or-equal-to-k/?envType=daily-question&envId=2025-06-26
 class Solution {
-    fun findKDistantIndices(nums: IntArray, key: Int, k: Int): List<Int> {
-        val result = mutableListOf<Int>()
-        var lastAdded = -1
+    fun longestSubsequence(s: String, k: Int): Int {
+        val n = s.length
+        var count = 0L
+        var power = 1L
+        var length = 0
 
-        for (i in nums.indices) {
-            if (nums[i] == key) {
-                val start = maxOf(0, lastAdded + 1, i-k)
-                val end = minOf(nums.size - 1, i + k)
-
-                for (j in start..end) {
-                    result.add(j)
-                    lastAdded = j
+        for (i in n-1 downTo 0) {
+            if (s[i] == '0') {
+                length++
+            } else {
+                if (power <= k && count + power <= k) {
+                    count += power
+                    length++
                 }
             }
+            power *= 2
+
+            if (power > k) {
+                length += s.substring(0, i).count { it == '0' }
+                break
+            }
         }
-        result.sorted()
-        return result
+
+        return length
     }
 }
