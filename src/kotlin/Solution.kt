@@ -7,31 +7,23 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/longest-binary-subsequence-less-than-or-equal-to-k/?envType=daily-question&envId=2025-06-26
+// https://leetcode.com/problems/find-the-original-typed-string-i/?envType=daily-question&envId=2025-07-01
 class Solution {
-    fun longestSubsequence(s: String, k: Int): Int {
-        val n = s.length
-        var count = 0L
-        var power = 1L
-        var length = 0
+    fun possibleStringCount(word: String): Int {
+        // 2개 이상의 letter 수 count
+        var result = 1
 
-        for (i in n-1 downTo 0) {
-            if (s[i] == '0') {
-                length++
+        var last = word[0]
+        val n = word.length
+        for (i in 1 until n) {
+            val now = word[i]
+            if (now != last) {
+                last = now
             } else {
-                if (power <= k && count + power <= k) {
-                    count += power
-                    length++
-                }
-            }
-            power *= 2
-
-            if (power > k) {
-                length += s.substring(0, i).count { it == '0' }
-                break
+                result++
             }
         }
 
-        return length
+        return result
     }
 }
