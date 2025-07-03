@@ -7,23 +7,20 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-// https://leetcode.com/problems/find-the-original-typed-string-i/?envType=daily-question&envId=2025-07-01
+// https://leetcode.com/problems/find-the-k-th-character-in-string-game-i/?envType=daily-question&envId=2025-07-03
 class Solution {
-    fun possibleStringCount(word: String): Int {
-        // 2개 이상의 letter 수 count
-        var result = 1
+    fun kthCharacter(k: Int): Char {
+        val sb = StringBuilder()
+        sb.append("a")
 
-        var last = word[0]
-        val n = word.length
-        for (i in 1 until n) {
-            val now = word[i]
-            if (now != last) {
-                last = now
-            } else {
-                result++
+        while (sb.length < k) {
+            val now = sb.toString()
+
+            for (c in now.toCharArray()) {
+                sb.append( ((c - 'a' + 1) % 26 + 'a'.code).toChar())
             }
         }
 
-        return result
+        return sb.toString()[k-1]
     }
 }
