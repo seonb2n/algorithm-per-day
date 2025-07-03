@@ -10,17 +10,17 @@ import kotlin.math.min
 // https://leetcode.com/problems/find-the-k-th-character-in-string-game-i/?envType=daily-question&envId=2025-07-03
 class Solution {
     fun kthCharacter(k: Int): Char {
-        val sb = StringBuilder()
-        sb.append("a")
+        val shifts = countOnes(k - 1)
+        return ('a' + shifts % 26)
+    }
 
-        while (sb.length < k) {
-            val now = sb.toString()
-
-            for (c in now.toCharArray()) {
-                sb.append( ((c - 'a' + 1) % 26 + 'a'.code).toChar())
-            }
+    private fun countOnes(n: Int): Int {
+        var count = 0
+        var num = n
+        while (num != 0) {
+            num = num and (num - 1)
+            count++
         }
-
-        return sb.toString()[k-1]
+        return count
     }
 }
