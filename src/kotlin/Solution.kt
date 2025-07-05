@@ -10,20 +10,20 @@ import kotlin.math.min
 // https://leetcode.com/problems/find-the-k-th-character-in-string-game-i/?envType=daily-question&envId=2025-07-03
 class Solution {
     fun findLucky(arr: IntArray): Int {
-        val counter = HashMap<Int, Int>()
-        for (i in arr.indices) {
-            val now = arr[i]
-            counter[now] = counter.getOrDefault(now, 0) + 1
-        }
+        val counter = IntArray(501)
 
-        var result = 0
-
-        for (key in counter.keys) {
-            if (key == counter.get(key)) {
-                if (result < key) result = key
+        for (num in arr) {
+            if (num > 0 && num <= 500) {
+                counter[num]++
             }
         }
 
-        return result
+        for (i in counter.indices.reversed()) {
+            if (counter[i] != 0 && counter[i] == i) {
+                return i
+            }
+        }
+
+        return -1
     }
 }
