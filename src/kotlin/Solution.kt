@@ -9,18 +9,21 @@ import kotlin.math.min
 
 // https://leetcode.com/problems/find-the-k-th-character-in-string-game-i/?envType=daily-question&envId=2025-07-03
 class Solution {
-    fun kthCharacter(k: Int): Char {
-        val shifts = countOnes(k - 1)
-        return ('a' + shifts % 26)
-    }
-
-    private fun countOnes(n: Int): Int {
-        var count = 0
-        var num = n
-        while (num != 0) {
-            num = num and (num - 1)
-            count++
+    fun findLucky(arr: IntArray): Int {
+        val counter = HashMap<Int, Int>()
+        for (i in arr.indices) {
+            val now = arr[i]
+            counter[now] = counter.getOrDefault(now, 0) + 1
         }
-        return count
+
+        var result = 0
+
+        for (key in counter.keys) {
+            if (key == counter.get(key)) {
+                if (result < key) result = key
+            }
+        }
+
+        return result
     }
 }
