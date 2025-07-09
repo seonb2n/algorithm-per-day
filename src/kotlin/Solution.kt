@@ -6,63 +6,31 @@ import java.util.*
 class Solution {
     fun maxFreeTime(eventTime: Int, k: Int, startTime: IntArray, endTime: IntArray): Int {
         val n = startTime.size
-        // 갭별 크기
-        val gaps = mutableListOf<Int>()
-        if (startTime[0] > 0) {
-            gaps.add(startTime[0])
-        }
-        gaps.add(startTime[0])
-        for (i in 0 until n-1) {
-            gaps.add(startTime[i + 1] - endTime[i])
-        }
-        if (eventTime > endTime[n - 1]) {
-            gaps.add(eventTime - endTime[n-1])
-        }
+        val gap = mutableListOf<Int>()
 
-        // 미팅별 지속시간
-        val meetingDuration = IntArray(n)
-        for (i in 0 until n) {
-            meetingDuration[i] = endTime[i] - startTime[i]
+        gap.add(startTime[0])
+        for (i in 1 until n) {
+            gap.add(startTime[i] - endTime[i-1])
         }
+        gap.add(eventTime - endTime[n-1])
 
-        var maxFreeTime = gaps.maxOf { it }
-        // K + 1 개의 연속된 gap 을 합쳐봄
-        // 마지막 시작점은 gaps.size - k - 1
-        for (i in 0..gaps.size - k - 1) {
-            // 해당 k 개의 미팅을 이동시킬 공간이 존재하는지 확인
-            // 0 ~ i-1 번째 gap 과 i + k + 1 ~ gaps.size-1 gap 에 공간이 존재하는지 확인
-            val nowEvents = meetingDuration.sliceArray(i until i+k)
-            val pq = PriorityQueue<Int>(Collections.reverseOrder())
-            pq.addAll(nowEvents.toList())
+        // 슬라이딩 윈도우 : k+1 개의 연속된 gap 의 최대 합
+        var max = 0
+        var currentSum = 0
+        var left = 0
+        var right = 0
 
-            // 왼쪽 gap들에서 배치 시도
-            for (j in 0 until i) {
-                if (pq.isEmpty()) {
-                    break
-                }
-                if (gaps[j] >= pq.peek()) {
-                    pq.poll()
-                }
+        while (right < gap.size) {
+            currentSum += gap[right]
+
+            // 윈도우 크기가 k+1 이 되면 윈도우 이동
+            if (right - left + 1 == k + 1) {
+                max = maxOf(max, currentSum)
+                currentSum -= gap[left]
+                left++
             }
-
-            // 오른쪽 gap들에서 배치 시도
-            for (j in i + k until gaps.size) {
-                if (pq.isEmpty()) {
-                    break
-                }
-                if (gaps[j] >= pq.peek()) {
-                    pq.poll()
-                }
-            }
-
-            if (pq.isEmpty()) {
-                var gapSum = 0
-                for (j in i until i + k + 1) {
-                    gapSum += gaps[j]
-                }
-                maxFreeTime = maxOf(maxFreeTime, gapSum)
-            }
+            right++
         }
-        return maxFreeTime
+        return max
     }
 }
