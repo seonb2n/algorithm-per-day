@@ -14,6 +14,18 @@ class Solution {
         }
         gap.add(eventTime - endTime[n-1])
 
+        // 위치별 최댓값
+        val leftMax = IntArray(gap.size) { 0 }
+        val rightMax = IntArray(gap.size) { 0 }
+
+        leftMax[0] = gap[0]
+        rightMax[n] = gap[n]
+
+        for (i in 1 until n + 1) {
+            leftMax[i] = maxOf(gap[i], leftMax[i-1])
+            rightMax[n-i] = maxOf(gap[n-i], rightMax[n-i+1])
+        }
+
         var max = 0
         var currentSum = 0
 
@@ -28,19 +40,15 @@ class Solution {
 
             var isMoveable = false
             // 왼쪽 확인
-            for (j in 0 until i) {
-               if (eventSize <= gap[j]) {
-                   isMoveable = true
-                   break
-               }
+            if (i-1 >= 0 && eventSize <= leftMax[i-1]) {
+                isMoveable = true
             }
+
             // 오른쪽 확인
-            for (j in i + 2 until n + 1) {
-                if (eventSize <= gap[j]) {
-                    isMoveable = true
-                    break
-                }
+            if (i+2 <= n && eventSize <= rightMax[i + 2]) {
+                isMoveable = true
             }
+
             if (isMoveable) {
                 currentSum += eventSize
             }
