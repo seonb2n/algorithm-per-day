@@ -2,9 +2,9 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/reschedule-meetings-for-maximum-free-time-i/?envType=daily-question&envId=2025-07-09
+// https://leetcode.com/problems/reschedule-meetings-for-maximum-free-time-ii/?envType=daily-question&envId=2025-07-10
 class Solution {
-    fun maxFreeTime(eventTime: Int, k: Int, startTime: IntArray, endTime: IntArray): Int {
+    fun maxFreeTime(eventTime: Int, startTime: IntArray, endTime: IntArray): Int {
         val n = startTime.size
         val gap = mutableListOf<Int>()
 
@@ -14,23 +14,39 @@ class Solution {
         }
         gap.add(eventTime - endTime[n-1])
 
-        // 슬라이딩 윈도우 : k+1 개의 연속된 gap 의 최대 합
         var max = 0
         var currentSum = 0
-        var left = 0
-        var right = 0
 
-        while (right < gap.size) {
-            currentSum += gap[right]
+        // event 를 옮겨봄
+        for (i in 0 until n) {
+            val eventSize = endTime[i] - startTime[i]
+            currentSum = gap[i] + gap[i+1]
 
-            // 윈도우 크기가 k+1 이 되면 윈도우 이동
-            if (right - left + 1 == k + 1) {
-                max = maxOf(max, currentSum)
-                currentSum -= gap[left]
-                left++
+            if (max > currentSum + eventSize) {
+                continue
             }
-            right++
+
+            var isMoveable = false
+            // 왼쪽 확인
+            for (j in 0 until i) {
+               if (eventSize <= gap[j]) {
+                   isMoveable = true
+                   break
+               }
+            }
+            // 오른쪽 확인
+            for (j in i + 2 until n + 1) {
+                if (eventSize <= gap[j]) {
+                    isMoveable = true
+                    break
+                }
+            }
+            if (isMoveable) {
+                currentSum += eventSize
+            }
+            max = maxOf(max, currentSum)
         }
+
         return max
     }
 }
