@@ -2,27 +2,28 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/maximum-matching-of-players-with-trainers/?envType=daily-question&envId=2025-07-13
+// https://leetcode.com/problems/convert-binary-number-in-a-linked-list-to-integer/description/?envType=daily-question&envId=2025-07-14
+/**
+ * Example:
+ * var li = ListNode(5)
+ * var v = li.`val`
+ * Definition for singly-linked list.
+ */
+ class ListNode(var `val`: Int) {
+      var next: ListNode? = null
+ }
+
 class Solution {
-    fun matchPlayersAndTrainers(players: IntArray, trainers: IntArray): Int {
-        players.sort()
-        trainers.sort()
-
+    fun getDecimalValue(head: ListNode?): Int {
         var result = 0
-        var pCursor = 0
-        var tCursor = 0
-
-        while (pCursor < players.size && tCursor < trainers.size) {
-            if (players[pCursor] <= trainers[tCursor]) {
-                result++
-                pCursor++
-                tCursor++
-            } else {
-                tCursor++
+        var now = head
+        while (now != null) {
+            result *= 2
+            if (now.`val` != 0) {
+                result += 1
             }
+            now = now.next
         }
-
-
 
         return result
     }
