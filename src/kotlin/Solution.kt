@@ -2,29 +2,35 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/convert-binary-number-in-a-linked-list-to-integer/description/?envType=daily-question&envId=2025-07-14
-/**
- * Example:
- * var li = ListNode(5)
- * var v = li.`val`
- * Definition for singly-linked list.
- */
- class ListNode(var `val`: Int) {
-      var next: ListNode? = null
- }
-
+// https://leetcode.com/problems/valid-word/?envType=daily-question&envId=2025-07-15
 class Solution {
-    fun getDecimalValue(head: ListNode?): Int {
-        var result = 0
-        var now = head
-        while (now != null) {
-            result *= 2
-            if (now.`val` != 0) {
-                result += 1
-            }
-            now = now.next
+    fun isValid(word: String): Boolean {
+        if (word.length < 3) {
+            return false
         }
 
-        return result
+        val vowels = mutableSetOf<Char>('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
+
+        var isVowel = false
+        var isConsonant = false
+
+        for (c in word) {
+            if (c in '0'..'9') {
+                continue
+            }
+            if (c in 'a'..'z' || c in 'A'..'Z') {
+                if (vowels.contains(c)) {
+                    isVowel = true
+                } else {
+                    isConsonant = true
+                }
+                continue
+            }
+            return false
+        }
+
+        println(isConsonant)
+
+        return isVowel && isConsonant
     }
 }
