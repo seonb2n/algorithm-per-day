@@ -1,32 +1,62 @@
 package kotlin
 
 import java.util.*
+import kotlin.math.abs
 
 
-// https://leetcode.com/problems/find-the-maximum-length-of-valid-subsequence-ii/?envType=daily-question&envId=2025-07-17
+// https://leetcode.com/problems/minimum-difference-in-sums-after-removal-of-elements/?envType=daily-question&envId=2025-07-18
 class Solution {
-    fun maximumLength(nums: IntArray, k: Int): Int {
+    fun minimumDifference(nums: IntArray): Long {
+        val n = nums.size / 3
+        // 앞에서부터 n 개를 담음. n + 1 번째부터 큰 순서대로 제거
+        val firstPQ = PriorityQueue<Int>(reverseOrder())
 
-        // dp[i][j] = i 를 만족하면서 k 로 끝나는 최대 길이
-        val dp = Array(k) { IntArray(k) }
-
-        for (num in nums) {
-            val remainder = num % k
-
-            for (target in 0 until k) {
-                // 이전 원소의 나머지 (prev + remain) % k == target
-                val prevRemainder = (target - remainder + k) % k
-                dp[target][remainder] = maxOf(dp[target][remainder], dp[target][prevRemainder] + 1)
-            }
+        for (i in 0 until n) {
+            firstPQ.offer(nums[i])
         }
 
-        var max = 0
-
-        for (i in 0 until k) {
-            for (j in 0 until k) {
-                max = maxOf(max, dp[i][j])
-            }
+        // 뒤에서부터 n 개를 담음. n + 1 번빼부터 작은 순서대로 제거
+        val secondPQ = PriorityQueue<Int>()
+        for (j in nums.size - 1 downTo nums.size - n) {
+            secondPQ.offer(nums[j])
         }
-        return max
+
+        for (i in n until n + n) {
+            val now = nums[i]
+
+            if (now <= firstPQ.peek() && secondPQ.peek() <= now) {
+                val firstGap = firstPQ.peek() - now
+                val secondGap = now - secondPQ.peek()
+                if (abs(firstGap) > abs(secondGap)) {
+                    firstPQ.poll()
+                    firstPQ.offer(now)
+                } else {
+                    secondPQ.poll()
+                    secondPQ.offer(now)
+                }
+            }
+            else if (now <= firstPQ.peek()) {
+                firstPQ.poll()
+                firstPQ.offer(now)
+            }
+            else if (secondPQ.peek() <= now) {
+                secondPQ.poll()
+                secondPQ.offer(now)
+            }
+            // 이 경우는 now 를 추가하는게 유용하지 않음
+
+        }
+        println(firstPQ.peek())
+        println(secondPQ.peek())
+
+        var first = 0L
+        while (firstPQ.isNotEmpty()) {
+            first += firstPQ.poll()
+        }
+        var second = 0L
+        while (secondPQ.isNotEmpty()) {
+            second += secondPQ.poll()
+        }
+        return first - second
     }
 }
