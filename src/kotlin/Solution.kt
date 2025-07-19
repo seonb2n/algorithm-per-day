@@ -3,54 +3,19 @@ package kotlin
 import java.util.*
 import kotlin.math.abs
 
-
-// https://leetcode.com/problems/minimum-difference-in-sums-after-removal-of-elements/?envType=daily-question&envId=2025-07-18
+// https://leetcode.com/problems/remove-sub-folders-from-the-filesystem/?envType=daily-question&envId=2025-07-19
 class Solution {
-    fun minimumDifference(nums: IntArray): Long {
-        val n = nums.size / 3
+    fun removeSubfolders(folder: Array<String>): List<String> {
+        folder.sort()
 
-        // 각 위치에서 왼쪽 파트의 최소 합
-        val leftMin = LongArray(3 * n)
-        // 각 위치에서 오른쪽 파트의 최대 합
-        val rightMax = LongArray(3 * n)
+        val result = mutableListOf<String>()
+        result.add(folder.get(0))
 
-        // 왼쪽에서 최소 n개 원소 찾기
-        val maxHeap = PriorityQueue<Int>(reverseOrder())
-        var sum = 0L
-
-        for (i in 0 until 2 * n) {
-            maxHeap.offer(nums[i])
-            sum += nums[i]
-
-            if (maxHeap.size > n) {
-                sum -= maxHeap.poll()
+        for (i in 1 until folder.size) {
+            if (folder[i].startsWith(result.last() + "/")) {
+                continue
             }
-
-            if (i >= n - 1) {
-                leftMin[i] = sum
-            }
-        }
-
-        // 오른쪽에서 최대 n개 원소 찾기
-        val minHeap = PriorityQueue<Int>()
-        sum = 0L
-
-        for (i in 3 * n - 1 downTo n) {
-            minHeap.offer(nums[i])
-            sum += nums[i]
-
-            if (minHeap.size > n) {
-                sum -= minHeap.poll()
-            }
-
-            if (i <= 2 * n) {
-                rightMax[i] = sum
-            }
-        }
-
-        var result = Long.MAX_VALUE
-        for (i in n - 1 until 2 * n) {
-            result = minOf(result, leftMin[i] - rightMax[i + 1])
+            result.add(folder[i])
         }
 
         return result
