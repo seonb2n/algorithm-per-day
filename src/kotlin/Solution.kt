@@ -8,55 +8,51 @@ import kotlin.math.abs
 class Solution {
     fun minimumDifference(nums: IntArray): Long {
         val n = nums.size / 3
-        // 앞에서부터 n 개를 담음. n + 1 번째부터 큰 순서대로 제거
-        val firstPQ = PriorityQueue<Int>(reverseOrder())
 
-        for (i in 0 until n) {
-            firstPQ.offer(nums[i])
-        }
+        // 각 위치에서 왼쪽 파트의 최소 합
+        val leftMin = LongArray(3 * n)
+        // 각 위치에서 오른쪽 파트의 최대 합
+        val rightMax = LongArray(3 * n)
 
-        // 뒤에서부터 n 개를 담음. n + 1 번빼부터 작은 순서대로 제거
-        val secondPQ = PriorityQueue<Int>()
-        for (j in nums.size - 1 downTo nums.size - n) {
-            secondPQ.offer(nums[j])
-        }
+        // 왼쪽에서 최소 n개 원소 찾기
+        val maxHeap = PriorityQueue<Int>(reverseOrder())
+        var sum = 0L
 
-        for (i in n until n + n) {
-            val now = nums[i]
+        for (i in 0 until 2 * n) {
+            maxHeap.offer(nums[i])
+            sum += nums[i]
 
-            if (now <= firstPQ.peek() && secondPQ.peek() <= now) {
-                val firstGap = firstPQ.peek() - now
-                val secondGap = now - secondPQ.peek()
-                if (abs(firstGap) > abs(secondGap)) {
-                    firstPQ.poll()
-                    firstPQ.offer(now)
-                } else {
-                    secondPQ.poll()
-                    secondPQ.offer(now)
-                }
+            if (maxHeap.size > n) {
+                sum -= maxHeap.poll()
             }
-            else if (now <= firstPQ.peek()) {
-                firstPQ.poll()
-                firstPQ.offer(now)
-            }
-            else if (secondPQ.peek() <= now) {
-                secondPQ.poll()
-                secondPQ.offer(now)
-            }
-            // 이 경우는 now 를 추가하는게 유용하지 않음
 
+            if (i >= n - 1) {
+                leftMin[i] = sum
+            }
         }
-        println(firstPQ.peek())
-        println(secondPQ.peek())
 
-        var first = 0L
-        while (firstPQ.isNotEmpty()) {
-            first += firstPQ.poll()
+        // 오른쪽에서 최대 n개 원소 찾기
+        val minHeap = PriorityQueue<Int>()
+        sum = 0L
+
+        for (i in 3 * n - 1 downTo n) {
+            minHeap.offer(nums[i])
+            sum += nums[i]
+
+            if (minHeap.size > n) {
+                sum -= minHeap.poll()
+            }
+
+            if (i <= 2 * n) {
+                rightMax[i] = sum
+            }
         }
-        var second = 0L
-        while (secondPQ.isNotEmpty()) {
-            second += secondPQ.poll()
+
+        var result = Long.MAX_VALUE
+        for (i in n - 1 until 2 * n) {
+            result = minOf(result, leftMin[i] - rightMax[i + 1])
         }
-        return first - second
+
+        return result
     }
 }
