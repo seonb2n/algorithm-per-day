@@ -3,26 +3,38 @@ package kotlin
 import java.util.*
 import kotlin.math.abs
 
-// https://leetcode.com/problems/delete-characters-to-make-fancy-string/?envType=daily-question&envId=2025-07-21
+// https://leetcode.com/problems/maximum-erasure-value/?envType=daily-question&envId=2025-07-22
 class Solution {
-    fun makeFancyString(s: String): String {
-        var nowChar = '0'
-        var counter = 0
+    fun maximumUniqueSubarray(nums: IntArray): Int {
+        var max = nums[0]
+        val n = nums.size
+        var left = 0
+        var right = 1
 
-        val sb = StringBuilder()
-        for (c in s) {
-            if (c == nowChar) {
-                if (counter < 2) {
-                    counter++
-                    sb.append(c)
-                }
+        val numSet = mutableSetOf<Int>()
+        numSet.add(nums[0])
+        var now = nums[0]
+
+        while (right < n) {
+            val point = nums[right]
+            if (!numSet.contains(point)) {
+                now += point
+                max = maxOf(max, now)
+                right++
+                numSet.add(point)
             } else {
-                nowChar = c
-                counter = 1
-                sb.append(c)
+                // left cursor 이동
+                while (left <= right && nums[left] != point) {
+                    numSet.remove(nums[left])
+                    now -= nums[left]
+                    left++
+                }
+                numSet.remove(nums[left])
+                now -= nums[left]
+                left++
             }
         }
 
-        return sb.toString()
+        return max
     }
 }
