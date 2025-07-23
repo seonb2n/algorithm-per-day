@@ -3,38 +3,57 @@ package kotlin
 import java.util.*
 import kotlin.math.abs
 
-// https://leetcode.com/problems/maximum-erasure-value/?envType=daily-question&envId=2025-07-22
+
+// https://leetcode.com/problems/maximum-score-from-removing-substrings/?envType=daily-question&envId=2025-07-23
 class Solution {
-    fun maximumUniqueSubarray(nums: IntArray): Int {
-        var max = nums[0]
-        val n = nums.size
-        var left = 0
-        var right = 1
+    fun maximumGain(s: String, x: Int, y: Int): Int {
+        // greedy
+        var result = 0
 
-        val numSet = mutableSetOf<Int>()
-        numSet.add(nums[0])
-        var now = nums[0]
-
-        while (right < n) {
-            val point = nums[right]
-            if (!numSet.contains(point)) {
-                now += point
-                max = maxOf(max, now)
-                right++
-                numSet.add(point)
-            } else {
-                // left cursor 이동
-                while (left <= right && nums[left] != point) {
-                    numSet.remove(nums[left])
-                    now -= nums[left]
-                    left++
+        fun removeAB(input: String): String {
+            val stack = Stack<Char>()
+            for (c in input) {
+                if (stack.isNotEmpty() && stack.peek() == 'a' && c == 'b') {
+                    stack.pop()
+                    result += x
+                } else {
+                    stack.push(c)
                 }
-                numSet.remove(nums[left])
-                now -= nums[left]
-                left++
             }
+
+            val sb = StringBuilder()
+            while (stack.isNotEmpty()) {
+                sb.append(stack.pop())
+            }
+
+            return sb.toString().reversed()
         }
 
-        return max
+        fun removeBA(input: String): String {
+            val stack = Stack<Char>()
+            for (c in input) {
+                if (stack.isNotEmpty() && stack.peek() == 'b' && c == 'a') {
+                    stack.pop()
+                    result += y
+                } else {
+                    stack.push(c)
+                }
+            }
+
+            val sb = StringBuilder()
+            while (stack.isNotEmpty()) {
+                sb.append(stack.pop())
+            }
+
+            return sb.toString().reversed()
+        }
+
+        if (x > y) {
+            removeBA(removeAB(s))
+        } else {
+            removeAB(removeBA(s))
+        }
+
+        return result
     }
 }
