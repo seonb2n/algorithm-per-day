@@ -3,27 +3,28 @@ package kotlin
 import java.util.*
 import kotlin.math.abs
 
-// https://leetcode.com/problems/count-number-of-maximum-bitwise-or-subsets/?envType=daily-question&envId=2025-07-28
+// https://leetcode.com/problems/smallest-subarrays-with-maximum-bitwise-or/?envType=daily-question&envId=2025-07-29
 class Solution {
-    fun countMaxOrSubsets(nums: IntArray): Int {
-        // or 의 maximum 은 전체의 or
-        var maxOrValue = 0
-        for (num in nums) {
-            maxOrValue = maxOrValue or num
+    fun smallestSubarrays(nums: IntArray): IntArray {
+        val n = nums.size
+        val result = IntArray(n)
+
+        fun backtrack(now: Int, maxLen: Int, nowIndex: Int, start: Int): Int {
+            if (nowIndex == n) return maxLen
+
+            val next = now or nums[nowIndex]
+            if (now < next) {
+                val nextMaxLen = nowIndex - start + 1
+                return backtrack(next, nextMaxLen, nowIndex + 1, start)
+            } else {
+                return backtrack(now, maxLen, nowIndex + 1, start)
+            }
         }
 
-        // backtrack
-        return backtrack(nums, 0, 0, maxOrValue)
-    }
-
-    fun backtrack(nums: IntArray, index: Int, current: Int, max: Int): Int {
-        if (index == nums.size) {
-            return if (current == max) 1 else 0
+        for (i in 0 until n) {
+            result[i] = backtrack(nums[i], 1, i + 1, i)
         }
-        // 현재를 제외하고 달성이 가능한 경우의 수
-        val countWithout = backtrack(nums, index + 1, current, max)
-        // 현재를 포함해서 달성이 가능한 경우의 수
-        val countWith = backtrack(nums, index + 1, current or nums[index], max)
-        return countWithout + countWith
+
+        return result
     }
 }
