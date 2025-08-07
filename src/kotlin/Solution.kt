@@ -2,37 +2,16 @@ package kotlin
 
 import java.util.*
 
-// https://leetcode.com/problems/fruits-into-baskets-iii/?envType=daily-question&envId=2025-08-06
+// https://leetcode.com/problems/group-anagrams/
 class Solution {
-    fun numOfUnplacedFruits(fruits: IntArray, baskets: IntArray): Int {
-        val capacityMap = TreeMap<Int, PriorityQueue<Int>>()
+    fun groupAnagrams(strs: Array<String>): List<List<String>> {
+        val map = mutableMapOf<String, MutableList<String>>()
 
-        for (i in baskets.indices) {
-            capacityMap.computeIfAbsent(baskets[i]) { PriorityQueue<Int>() }.offer(i)
+        for (s in strs) {
+            val now = s.toCharArray().sorted().joinToString("")
+            map.getOrPut(now) { mutableListOf() }.add(s)
         }
 
-        var counter = 0
-
-        for (f in fruits) {
-            val possible = capacityMap.tailMap(fruit)
-
-            var minIndex = Int.MAX_VALUE
-            var min = -1
-
-            for ((capacity, indices) in possible) {
-                if (indices.isNotEmpty() && indices.peek() < minIndex) {
-                    minIndex = indices.peek()
-                    min = capacity
-                }
-            }
-
-            if (min < Int.MAX_VALUE) {
-                capacityMap[min]!!.poll()
-            } else {
-                counter++
-            }
-        }
-
-        return counter
+        return map.values.toList()
     }
 }
