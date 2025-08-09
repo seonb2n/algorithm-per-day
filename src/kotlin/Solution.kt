@@ -1,26 +1,33 @@
 package kotlin
 
 import java.util.*
+import kotlin.math.ceil
 
-// https://leetcode.com/problems/powx-n/
+// https://leetcode.com/problems/soup-servings/?envType=daily-question&envId=2025-08-08
 class Solution {
-    fun myPow(x: Double, n: Int): Double {
-        fun pow(base: Double, exp: Long): Double {
-            if (exp == 0L) return 1.0
-            if (exp == 1L) return base
-            if (exp == -1L) return 1.0 / base
+    fun soupServings(n: Int): Double {
+        if (n > 5000) return 1.0
 
-            val half = pow(base, exp / 2)
+        val units = ceil(n.toDouble() / 25).toInt()
+        val cache = Array(units + 1) { DoubleArray(units + 1) { -1.0 } }
 
-            return if (exp % 2 == 0L) {
-                half * half
-            } else if (exp > 0) {
-                half * half * base
-            } else {
-                half * half / base
-            }
+        fun calcProb(a: Int, b: Int): Double {
+            if (a <= 0 && b <= 0) return 0.5
+            if (a <= 0) return 1.0
+            if (b <= 0) return 0.0
+
+            if (cache[a][b] != -1.0) return cache[a][b]
+
+            val prob = 0.25 * (
+                    calcProb(a - 4, b) + calcProb(a - 3, b - 1) + calcProb(a - 2, b - 2) + calcProb(a - 1, b - 3)
+                    )
+            cache[a][b] = prob
+            return prob
         }
 
-        return pow(x, n.toLong())
+        return calcProb(units, units)
     }
 }
+
+
+
