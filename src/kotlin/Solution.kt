@@ -3,30 +3,53 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-//https://leetcode.com/problems/reordered-power-of-2/?envType=daily-question&envId=2025-08-10
+// https://leetcode.com/problems/ways-to-express-an-integer-as-sum-of-powers/?envType=daily-question&envId=2025-08-12
 class Solution {
-    fun reorderedPowerOf2(n: Int): Boolean {
-        // n 의 각 자릿수 세기
-        fun countDigit(target: Int): IntArray {
-            val digits = IntArray(10)
-            var num = target
-            while (num > 0) {
-                digits[num % 10]++
-                num /= 10
+    fun numberOfWays(n: Int, x: Int): Int {
+        val MOD = 1000000007
+        var k = 2
+
+        val xMap = mutableMapOf<Int, Int>()
+        xMap[1] = 1
+        while (true) {
+            var temp = k
+            for (i in 1 until x) {
+                temp *= k
             }
-            return digits
+            xMap[k] = temp
+
+            if (temp > n) {
+                break
+            } else {
+                k++
+            }
         }
 
-        val origin = countDigit(n)
+        // dp[i][j] = j번째 수까지 사용해서 합 i를 만드는 방법의 수
+        val dp = Array(n + 1) { IntArray(k + 1) { -1 } }
 
-        var counter = 1
-
-        while (counter <= 1000000000) {
-            if (countDigit(counter) contentEquals origin) {
-                return true
-            }
-            counter *= 2
+        for (j in 0 until k) {
+            dp[0][j] = 1
         }
-        return false
+
+        fun findDp(i: Int, j: Int): Int {
+            if (i < 0 || j < 0) return 0
+            if (i == 0) return 1
+
+            if (dp[i][j] != -1) return dp[i][j]
+
+            // j번째 수를 사용하지 않는 경우
+            dp[i][j] = findDp(i, j - 1)
+
+            // j번째 수를 사용하는 경우
+            xMap[j]?.let { power ->
+                if (i >= power) {
+                    dp[i][j] = (dp[i][j] + findDp(i - power, j - 1)) % MOD
+                }
+            }
+            return dp[i][j]
+        }
+
+        return findDp(n, k - 1)
     }
 }
