@@ -7,14 +7,6 @@ import kotlin.math.ceil
 class Solution {
     fun isPowerOfThree(n: Int): Boolean {
         if (n <= 0) return false
-        var target = n
-        while (target > 1) {
-            if (target % 3 == 0) {
-                target /= 3
-            } else {
-                return false
-            }
-        }
-        return true
+        return 1162261467 % n == 0
     }
 }
