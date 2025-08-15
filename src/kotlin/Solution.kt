@@ -3,34 +3,15 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/largest-3-same-digit-number-in-string/?envType=daily-question&envId=2025-08-14
+// https://leetcode.com/problems/power-of-four/submissions/1735612570/?envType=daily-question&envId=2025-08-15
 class Solution {
-    fun largestGoodInteger(num: String): String {
-        var counter = 0
-        var now = 'a'
-        var max = ""
+    fun isPowerOfFour(n: Int): Boolean {
+        if (n <= 0) return false
+        val binary = Integer.toBinaryString(n)
 
-        for (c in num) {
-            if (now == c) {
-                counter++
-            } else {
-                now = c
-                counter = 1
-            }
+        if (binary.count { it == '1' } != 1) return false
 
-            if (counter == 3) {
-                if (max == "") {
-                    max = "$c$c$c"
-                } else {
-                    val temp = "$c$c$c"
-                    if (max.toInt() < temp.toInt()) {
-                        max = temp
-                    }
-                }
-                counter = 0
-            }
-        }
-
-        return max
+        val position = binary.length - 1
+        return position % 2 == 0
     }
 }
