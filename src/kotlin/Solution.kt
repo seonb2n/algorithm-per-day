@@ -3,15 +3,21 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/power-of-four/submissions/1735612570/?envType=daily-question&envId=2025-08-15
+// https://leetcode.com/problems/maximum-69-number/?envType=daily-question&envId=2025-08-16
 class Solution {
-    fun isPowerOfFour(n: Int): Boolean {
-        if (n <= 0) return false
-        val binary = Integer.toBinaryString(n)
+    fun maximum69Number (num: Int): Int {
+        val str = num.toString()
+        val sb = StringBuilder()
+        var isChanged = false
+        for (c in str) {
+            if (c == '6' && !isChanged) {
+                sb.append('9')
+                isChanged = true
+            } else {
+                sb.append(c)
+            }
+        }
 
-        if (binary.count { it == '1' } != 1) return false
-
-        val position = binary.length - 1
-        return position % 2 == 0
+        return sb.toString().toInt()
     }
 }
