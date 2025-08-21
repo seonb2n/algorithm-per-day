@@ -3,40 +3,38 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/count-square-submatrices-with-all-ones/?envType=daily-question&envId=2025-08-20
+// https://leetcode.com/problems/count-submatrices-with-all-ones/?envType=daily-question&envId=2025-08-21
 class Solution {
-    fun countSquares(matrix: Array<IntArray>): Int {
-        val n = matrix.size
-        val m = matrix[0].size
-        val min = minOf(n, m)
+    fun numSubmat(mat: Array<IntArray>): Int {
+        val n = mat.size
+        val m = mat[0].size
+        // dp[i][j] = 오른쪽 아래 모서리가 i,j 인 모든 1 로 이루어진 직사각형
+        val dp = Array(n) { IntArray(m) }
 
+        // i,j 까지 세로로 연속된 1의 개수
+        val height = Array(n) { IntArray(m) }
         var result = 0
 
-        fun checkSize(j: Int, k: Int, size: Int): Boolean {
-            if (j+size > n || k + size > m) return false
+        for (i in 0 until n) {
+            for (j in 0 until m) {
+                if (mat[i][j] == 0) {
+                    height[i][j] = 0
+                    dp[i][j] = 0
+                } else {
+                    height[i][j] = if (i == 0) 1 else height[i-1][j] + 1
 
-            for (a in j until j+size) {
-                for (b in k until k+size) {
-                    if (matrix[a][b] == 0) {
-                        return false
-                    }
-                }
-            }
-            return true
-        }
+                    dp[i][j] = height[i][j] // 세로 * 1 짜리 직사각형들
 
-        for (i in 1 until min + 1) {
-            // 크기가 i 인 square 찾기
-            for (j in 0 until n) {
-                for (k in 0 until m) {
-                    val start = matrix[j][k]
-                    if (start == 0) {
-                        continue
-                    }
-                    if (checkSize(j, k, i)) {
-                        result++
+                    var minHeight = height[i][j]
+
+                    // 왼쪽으로 이동하면서 직사각형 추가
+                    for (k in j-1 downTo 0) {
+                        if (mat[i][k] == 0) break
+                        minHeight = minOf(minHeight, height[i][k])
+                        dp[i][j] += minHeight
                     }
 
+                    result += dp[i][j]
                 }
             }
         }
