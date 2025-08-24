@@ -3,28 +3,50 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/find-the-minimum-area-to-cover-all-ones-i/submissions/1745276447/?envType=daily-question&envId=2025-08-22
+// https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element/?envType=daily-question&envId=2025-08-24
 class Solution {
-    fun minimumArea(grid: Array<IntArray>): Int {
-        var minRow = Int.MAX_VALUE
-        var maxRow = Int.MIN_VALUE
-        var minCol = Int.MAX_VALUE
-        var maxCol = Int.MIN_VALUE
-
-        val n = grid.size
-        val m = grid[0].size
-
-        for (i in 0 until n) {
-            for (j in 0 until m) {
-                if (grid[i][j] == 1) {
-                    minRow = minOf(minRow, i)
-                    maxRow = maxOf(maxRow, i)
-                    minCol = minOf(minCol, j)
-                    maxCol = maxOf(maxCol, j)
+    fun longestSubarray(nums: IntArray): Int {
+        var isZero = false
+        val sums = mutableListOf<Int>()
+        for (n in nums) {
+            if (n == 0) {
+                isZero = true
+                sums.add(n)
+            } else {
+                if (sums.size > 0) {
+                    val last = sums.last()
+                    if (last > 0) {
+                        sums.removeLast()
+                        sums.add(last + 1)
+                    } else {
+                        sums.add(1)
+                    }
+                } else {
+                    sums.add(1)
                 }
+
             }
         }
 
-        return (maxRow - minRow + 1) * (maxCol - minCol + 1)
+        if (!isZero) {
+            return nums.size - 1
+        }
+
+        var max = sums[0]
+        if (sums.size == 2) {
+            max = sums[0] + sums[1]
+        }
+
+        for (i in 1 until sums.size-1) {
+            if (sums[i] == 0) {
+                val now = sums[i-1] + sums[i] + sums[i+1]
+                max = maxOf(max, now)
+            } else {
+                max = maxOf(max, sums[i])
+            }
+        }
+
+        return max
+
     }
 }
