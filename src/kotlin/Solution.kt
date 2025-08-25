@@ -3,28 +3,36 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element/?envType=daily-question&envId=2025-08-24
+// https://leetcode.com/problems/diagonal-traverse/?envType=daily-question&envId=2025-08-25
 class Solution {
-    fun longestSubarray(nums: IntArray): Int {
-        var left = 0
-        var zeroCount = 0
-        var maxLength = 0
+    fun findDiagonalOrder(mat: Array<IntArray>): IntArray {
+        val m = mat.size
+        val n = mat[0].size
 
-        for (right in nums.indices) {
-            if (nums[right] == 0) {
-                zeroCount++
-            }
+        val result = IntArray(m * n)
+        var index = 0
 
-            while (zeroCount > 1) {
-                if (nums[left] == 0) {
-                    zeroCount--
+        for (d in 0 until m + n - 1) {
+            val elements = mutableListOf<Int>()
+
+            for (i in 0 until m) {
+                val j = d - i
+                if (j >= 0 && j < n) {
+                    elements.add(mat[i][j])
                 }
-                left++
             }
 
-            maxLength = maxOf(maxLength, right - left)
+            // 짝수면 역순
+            if (d % 2 == 0) {
+                elements.reverse()
+            }
+
+            for (e in elements) {
+                result[index++] = e
+            }
         }
 
-        return maxLength
+
+        return result
     }
 }
