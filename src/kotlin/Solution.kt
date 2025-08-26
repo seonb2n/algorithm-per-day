@@ -3,36 +3,23 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/diagonal-traverse/?envType=daily-question&envId=2025-08-25
+// https://leetcode.com/problems/maximum-area-of-longest-diagonal-rectangle/?envType=daily-question&envId=2025-08-26
 class Solution {
-    fun findDiagonalOrder(mat: Array<IntArray>): IntArray {
-        val m = mat.size
-        val n = mat[0].size
+    fun areaOfMaxDiagonal(dimensions: Array<IntArray>): Int {
+        var max = 0
+        var longest = 0
 
-        val result = IntArray(m * n)
-        var index = 0
-
-        for (d in 0 until m + n - 1) {
-            val elements = mutableListOf<Int>()
-
-            for (i in 0 until m) {
-                val j = d - i
-                if (j >= 0 && j < n) {
-                    elements.add(mat[i][j])
-                }
+        for (d in dimensions) {
+            val now = d[0] * d[0] + d[1] * d[1]
+            if (now > longest) {
+                longest = now
+                max = d[0] * d[1]
             }
-
-            // 짝수면 역순
-            if (d % 2 == 0) {
-                elements.reverse()
-            }
-
-            for (e in elements) {
-                result[index++] = e
+            else if (now == longest) {
+                max = maxOf(d[0] * d[1], max)
             }
         }
 
-
-        return result
+        return max
     }
 }
