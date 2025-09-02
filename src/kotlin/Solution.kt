@@ -3,32 +3,45 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/maximum-average-pass-ratio/?envType=daily-question&envId=2025-09-01
+// https://leetcode.com/problems/find-the-number-of-ways-to-place-people-i/?envType=daily-question&envId=2025-09-02
 class Solution {
-    fun maxAverageRatio(classes: Array<IntArray>, extraStudents: Int): Double {
-        fun gain(passes: Int, total: Int): Double {
-            return (passes + 1).toDouble() / (total + 1) - passes.toDouble() / total
+    fun numberOfPairs(points: Array<IntArray>): Int {
+        val n = points.size
+        if (n < 2) return 0
+
+        val sorted = points.sortedWith(compareBy<IntArray> { it[0] }.thenByDescending { it[1] })
+
+        var count = 0
+
+        for (i in 0 until n) {
+            for (j in i + 1 until n) {
+                val x1 = sorted[i][0]
+                val y1 = sorted[i][1]
+                val x2 = sorted[j][0]
+                val y2 = sorted[j][1]
+
+                if (y1 >= y2) {
+                    var hasPointIn = false
+
+                    for (k in 0 until n) {
+                        if (k == i || k == j) continue
+
+                        val x3 = sorted[k][0]
+                        val y3 = sorted[k][1]
+
+                        if (x3 in x1..x2 && y3 in y2..y1) {
+                            hasPointIn = true
+                            break
+                        }
+                    }
+
+                    if (!hasPointIn) {
+                        count++
+                    }
+                }
+            }
         }
 
-        val pq: PriorityQueue<Node> = PriorityQueue { a, b -> b.gap.compareTo(a.gap) }
-
-        for (c in classes) {
-            pq.offer(Node(c[0], c[1], gain(c[0], c[1])))
-        }
-
-        for (i in 0 until extraStudents) {
-            val current = pq.poll()
-            pq.offer(Node(current.passes + 1, current.total + 1, gain(current.passes + 1, current.total + 1)))
-        }
-
-        var result = 0.0
-
-        while (pq.isNotEmpty()) {
-            val node = pq.poll()
-            result += node.passes.toDouble() / node.total
-        }
-        return result / classes.size
+        return count
     }
-
-    data class Node(val passes: Int, val total: Int, val gap: Double)
 }
