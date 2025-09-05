@@ -3,15 +3,23 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/find-closest-person/?envType=daily-question&envId=2025-09-04
+// https://leetcode.com/problems/minimum-operations-to-make-the-integer-zero/?envType=daily-question&envId=2025-09-05
 class Solution {
-    fun findClosest(x: Int, y: Int, z: Int): Int {
-        val first = abs(x - z)
-        val second = abs(y - z)
+    fun makeTheIntegerZero(num1: Int, num2: Int): Int {
+        for (k in 1..50) {
+            val target = num1.toLong() - num2.toLong() * k
+            if (canMake(target, k)) {
+                return k
+            }
+        }
 
-        if (first == second) return 0
-        if (first > second) return 2
-        if (first < second) return 1
-        return 0
+        return -1
+    }
+
+    // 2 의 i 승인 수들의 조합으로 만들 수 있는지.
+    private fun canMake(target: Long, k: Int): Boolean {
+        if (target <= 0) return false
+        val bit = target.countOneBits()
+        return bit <= k && k <= target
     }
 }
