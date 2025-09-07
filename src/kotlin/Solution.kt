@@ -3,23 +3,29 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/minimum-operations-to-make-the-integer-zero/?envType=daily-question&envId=2025-09-05
+// https://leetcode.com/problems/find-n-unique-integers-sum-up-to-zero/?envType=daily-question&envId=2025-09-07
 class Solution {
-    fun makeTheIntegerZero(num1: Int, num2: Int): Int {
-        for (k in 1..50) {
-            val target = num1.toLong() - num2.toLong() * k
-            if (canMake(target, k)) {
-                return k
+    fun sumZero(n: Int): IntArray {
+        val result = IntArray(n)
+
+        if (n % 2 == 0) {
+            var start = (-1) * (n / 2)
+            for (i in 0 until n) {
+                result[i] = start
+                start++
+                if (start == 0) {
+                    start++
+                }
+            }
+        } else {
+            var start = (-1) * (n / 2)
+            for (i in 0 until n) {
+                result[i] = start
+                start++
             }
         }
 
-        return -1
-    }
 
-    // 2 의 i 승인 수들의 조합으로 만들 수 있는지.
-    private fun canMake(target: Long, k: Int): Boolean {
-        if (target <= 0) return false
-        val bit = target.countOneBits()
-        return bit <= k && k <= target
+        return result
     }
 }
