@@ -3,25 +3,24 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/find-n-unique-integers-sum-up-to-zero/?envType=daily-question&envId=2025-09-07
+// https://leetcode.com/problems/convert-integer-to-the-sum-of-two-no-zero-integers/?envType=daily-question&envId=2025-09-08
 class Solution {
-    fun sumZero(n: Int): IntArray {
-        val result = IntArray(n)
+    fun getNoZeroIntegers(n: Int): IntArray {
+        val result = IntArray(2)
+        result[0] = 1
+        result[1] = n - 1
 
-        if (n % 2 == 0) {
-            var start = (-1) * (n / 2)
-            for (i in 0 until n) {
-                result[i] = start
-                start++
-                if (start == 0) {
-                    start++
-                }
-            }
-        } else {
-            var start = (-1) * (n / 2)
-            for (i in 0 until n) {
-                result[i] = start
-                start++
+
+        fun checkHasZero(a: Int): Boolean {
+            return a.toString().contains("0")
+        }
+
+        while(result[0] <= result[1]) {
+            if (!checkHasZero(result[0]) && !checkHasZero(result[1])) {
+                break
+            } else {
+                result[0]++
+                result[1]--
             }
         }
 
