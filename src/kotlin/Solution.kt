@@ -3,41 +3,34 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/minimum-number-of-people-to-teach/submissions/1765842232/?envType=daily-question&envId=2025-09-10
+// https://leetcode.com/problems/sort-vowels-in-a-string/?envType=daily-question&envId=2025-09-11
 class Solution {
-    fun minimumTeachings(n: Int, languages: Array<IntArray>, friendships: Array<IntArray>): Int {
-        val userLanguages = languages.map { it.toSet() }
+    fun sortVowels(s: String): String {
+        val vowels = setOf('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
 
-        val cannotCommunicate = mutableListOf<Pair<Int, Int>>()
-
-        for (f in friendships) {
-            val user1 = f[0] - 1
-            val user2 = f[1] - 1
-
-            if (userLanguages[user1].intersect(userLanguages[user2]).isEmpty()) {
-                cannotCommunicate.add(Pair(user1, user2))
+        val vowelList = mutableListOf<Char>()
+        for (char in s) {
+            if (char in vowels) {
+                vowelList.add(char)
             }
         }
 
-        var result = Int.MAX_VALUE
+        vowelList.sort()
 
-        for (lang in 1..n) {
-            // 언어의 가르침이 필요한 사용자
-            val needToTeach = mutableSetOf<Int>()
+        val sb = StringBuilder()
+        var vowelIndex = 0
 
-            for ((u1, u2) in cannotCommunicate) {
-                if (lang !in userLanguages[u1] && lang !in userLanguages[u2]) {
-                    needToTeach.add(u1)
-                    needToTeach.add(u2)
-                } else if (lang !in userLanguages[u1]) {
-                    needToTeach.add(u1)
-                } else if (lang !in userLanguages[u2]) {
-                    needToTeach.add(u2)
-                }
+        for (char in s) {
+            if (char in vowels) {
+                // vowel인 경우 정렬된 리스트에서 순서대로 가져옴
+                sb.append(vowelList[vowelIndex])
+                vowelIndex++
+            } else {
+                // consonant인 경우 원래 문자 그대로 유지
+                sb.append(char)
             }
-
-            result = minOf(result, needToTeach.size)
         }
-        return if (result == Int.MAX_VALUE) 0 else result
+
+        return sb.toString()
     }
 }
