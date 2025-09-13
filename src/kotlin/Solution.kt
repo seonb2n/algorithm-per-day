@@ -7,22 +7,17 @@ import kotlin.math.ceil
 class Solution {
     fun maxFreqSum(s: String): Int {
         val counter = mutableMapOf<Char, Int>()
+        val vowels = setOf('a', 'e', 'i', 'o', 'u')
+        var vMax = 0
+        var cMax = 0
 
         for (c in s) {
             val now = counter.getOrDefault(c, 0)
             counter[c] = now + 1
-        }
-
-        val vowles = setOf('a', 'e', 'i', 'o', 'u')
-
-        var vMax = 0
-        var cMax = 0
-
-        for (key in counter.keys) {
-            if (vowles.contains(key)) {
-                vMax = maxOf(vMax, counter[key]!!)
+            if (vowels.contains(c)) {
+                vMax = maxOf(vMax, now + 1)
             } else {
-                cMax = maxOf(cMax, counter[key]!!)
+                cMax = maxOf(cMax, now + 1)
             }
         }
 
