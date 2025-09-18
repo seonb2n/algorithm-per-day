@@ -3,70 +3,69 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/design-a-food-rating-system/?envType=daily-question&envId=2025-09-17
-class FoodRatings(foods: Array<String>, cuisines: Array<String>, ratings: IntArray) {
-
-    // cuisine 별 음식 정렬
-    private val cuisineToMaxHeap = mutableMapOf<String, PriorityQueue<Food>>()
-    // 음식 rating
-    private val foodToRating = mutableMapOf<String, Int>()
-    // 음식이 속한 cuisine
-    private val foodToCuisine = mutableMapOf<String, String>()
-
-    // 음식 데이터 클래스 (평점 높은 순, 같으면 사전순으로 정렬)
-    data class Food(val name: String, val rating: Int) : Comparable<Food> {
-        override fun compareTo(other: Food): Int {
-            return if (rating != other.rating) {
-                other.rating - rating
-            } else {
-                name.compareTo(other.name)
-            }
-        }
+// https://leetcode.com/problems/design-task-manager/?envType=daily-question&envId=2025-09-18
+class TaskManager(tasks: List<List<Int>>) {
+    // 전역 우선순위 큐 (priority, taskId) - 최대 힙
+    private val globalQueue = PriorityQueue<Pair<Int, Int>> { a, b ->
+        if (a.first != b.first) b.first.compareTo(a.first) // 우선순위 내림차순
+        else b.second.compareTo(a.second) // taskId 내림차순
     }
+
+    private val taskMap = mutableMapOf<Int, Pair<Int, Int>>()
 
     init {
-        for (i in foods.indices) {
-            val food = foods[i]
-            val cuisine = cuisines[i]
-            val rating = ratings[i]
-
-            if (cuisine !in cuisineToMaxHeap) {
-                cuisineToMaxHeap[cuisine] = PriorityQueue()
-            }
-
-            cuisineToMaxHeap[cuisine]!!.offer(Food(food, rating))
-            foodToRating[food] = rating
-            foodToCuisine[food] = cuisine
+        for (task in tasks) {
+            val (userId, taskId, priority) = task
+            add(userId, taskId, priority)
         }
     }
 
-    fun changeRating(food: String, newRating: Int) {
-        val cuisine = foodToCuisine[food]!!
-        foodToRating[food] = newRating
+    fun add(userId: Int, taskId: Int, priority: Int) {
+        globalQueue.offer(Pair(priority, taskId))
 
-        cuisineToMaxHeap[cuisine]!!.offer(Food(food, newRating))
+        taskMap[taskId] = Pair(userId, priority)
     }
 
-    fun highestRated(cuisine: String): String {
-        val heap = cuisineToMaxHeap[cuisine]!!
+    fun edit(taskId: Int, newPriority: Int) {
+        val (userId, _) = taskMap[taskId]!!
+        taskMap[taskId] = Pair(userId, newPriority)
+        // 새로운 우선순위로 전역 큐에 추가 (기존 항목은 lazy deletion으로 처리)
+        globalQueue.offer(Pair(newPriority, taskId))
+    }
 
-        while (heap.isNotEmpty()) {
-            val top = heap.peek()
-            // 최신 평점과 일치하면 반환
-            if (foodToRating[top.name] == top.rating) {
-                return top.name
+    fun rmv(taskId: Int) {
+        taskMap.remove(taskId)
+    }
+
+    fun execTop(): Int {
+        // 전역 큐의 최상단이 유효한 작업이 될 때까지 정리
+        while (globalQueue.isNotEmpty()) {
+            val (priority, taskId) = globalQueue.peek()
+
+            // 맵에 존재하고 우선순위가 일치하는지 확인
+            val mapEntry = taskMap[taskId]
+            if (mapEntry != null && mapEntry.second == priority) {
+                // 유효한 작업 발견 - 실행
+                globalQueue.poll()
+                val userId = mapEntry.first
+                taskMap.remove(taskId)
+                return userId
             } else {
-                heap.poll()  // 오래된 항목이라 제거
+                // 무효한 작업이므로 큐에서 제거
+                globalQueue.poll()
             }
         }
 
-        return ""
+        // 실행할 작업이 없는 경우
+        return -1
     }
 }
 
 /**
- * Your FoodRatings object will be instantiated and called as such:
- * var obj = FoodRatings(foods, cuisines, ratings)
- * obj.changeRating(food,newRating)
- * var param_2 = obj.highestRated(cuisine)
+ * Your TaskManager object will be instantiated and called as such:
+ * var obj = TaskManager(tasks)
+ * obj.add(userId,taskId,priority)
+ * obj.edit(taskId,newPriority)
+ * obj.rmv(taskId)
+ * var param_4 = obj.execTop()
  */
