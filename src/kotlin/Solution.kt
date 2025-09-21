@@ -3,34 +3,108 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/design-spreadsheet/?envType=daily-question&envId=2025-09-19
-class Spreadsheet(rows: Int) {
+// https://leetcode.com/problems/implement-router/?envType=daily-question&envId=2025-09-20
+class Router(memoryLimit: Int) {
 
-    val cellMap: MutableMap<String, Int> = mutableMapOf<String, Int>()
+    private val packetSet = mutableSetOf<Packet>()
+    private val packetQueue = LinkedList<Packet>()
+    private val limit = memoryLimit
 
-    fun setCell(cell: String, value: Int) {
-        cellMap[cell] = value
+    private val destinationLists = mutableMapOf<Int, MutableList<Packet>>()
+
+    fun addPacket(source: Int, destination: Int, timestamp: Int): Boolean {
+        val next = Packet(source, destination, timestamp)
+
+        if (packetSet.contains(next)) {
+            return false
+        }
+
+        if (packetQueue.size >= limit) {
+            val oldest = packetQueue.poll()
+            removeFromDestinationList(oldest)
+            packetSet.remove(oldest)
+        }
+
+        packetQueue.add(next)
+        packetSet.add(next)
+        addToDestinationList(next)
+        return true
     }
 
-    fun resetCell(cell: String) {
-        cellMap[cell] = 0
+    fun forwardPacket(): IntArray {
+        val packet = packetQueue.poll()
+        if (packet == null) {
+            return intArrayOf()
+        }
+
+        packetSet.remove(packet)
+        removeFromDestinationList(packet)
+        return intArrayOf(packet.source, packet.destination, packet.timestamp)
     }
 
-    fun getValue(formula: String): Int {
-        val exp = formula.substring(1)
-        val nums = exp.split("+")
 
-        val first = if (nums[0].contains(Regex(".*[A-Z].*"))) cellMap.getOrDefault(nums[0], 0) else nums[0].toInt()
-        val second = if (nums[1].contains(Regex(".*[A-Z].*"))) cellMap.getOrDefault(nums[1], 0) else nums[1].toInt()
-        return first + second
+    fun getCount(destination: Int, startTime: Int, endTime: Int): Int {
+        val packetList = destinationLists[destination] ?: return 0
+
+        val startIndex = findFirstGreaterOrEqual(packetList, startTime)
+        if (startIndex >= packetList.size) return 0
+
+        val endIndex = findLastLessOrEqual(packetList, endTime)
+        if (endIndex < 0) return 0
+
+        return if (endIndex >= startIndex) endIndex - startIndex + 1 else 0
     }
 
+    private fun addToDestinationList(packet: Packet) {
+        val list = destinationLists.computeIfAbsent(packet.destination) { mutableListOf() }
+        list.add(packet)
+    }
+
+    private fun removeFromDestinationList(packet: Packet) {
+        val list = destinationLists[packet.destination] ?: return
+        list.remove(packet)
+
+        if (list.isEmpty()) {
+            destinationLists.remove(packet.destination)
+        }
+    }
+
+    private fun findFirstGreaterOrEqual(list: List<Packet>, target: Int): Int {
+        var left = 0
+        var right = list.size
+
+        while (left < right) {
+            val mid = (left + right) / 2
+            if (list[mid].timestamp >= target) {
+                right = mid
+            } else {
+                left = mid + 1
+            }
+        }
+
+        return left
+    }
+
+    private fun findLastLessOrEqual(list: List<Packet>, target: Int): Int {
+        var left = -1
+        var right = list.size - 1
+
+        while (left < right) {
+            val mid = (left + right + 1) / 2
+            if (list[mid].timestamp <= target) {
+                left = mid
+            } else {
+                right = mid - 1
+            }
+        }
+
+        return left
+    }
+
+
+    private data class Packet(
+        val source: Int,
+        val destination: Int,
+        val timestamp: Int
+    )
 }
-/**
- * Your TaskManager object will be instantiated and called as such:
- * var obj = TaskManager(tasks)
- * obj.add(userId,taskId,priority)
- * obj.edit(taskId,newPriority)
- * obj.rmv(taskId)
- * var param_4 = obj.execTop()
- */
