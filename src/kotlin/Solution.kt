@@ -3,25 +3,22 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/largest-triangle-area/submissions/1784079192/?envType=daily-question&envId=2025-09-27ㅑ
+// https://leetcode.com/problems/largest-perimeter-triangle/?envType=daily-question&envId=2025-09-28
 class Solution {
-    fun largestTriangleArea(points: Array<IntArray>): Double {
-        var maxArea = 0.0
-        val n = points.size
+    fun largestPerimeter(nums: IntArray): Int {
+        nums.sort()
 
-        for (i in 0 until n) {
-            for (j in i + 1 until n) {
-                for (k in j + 1 until n) {
-                    val (x1, y1) = points[i]
-                    val (x2, y2) = points[j]
-                    val (x3, y3) = points[k]
+        var max = 0
 
-                    val area = 0.5 * abs(x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2))
-                    maxArea = max(maxArea, area)
-                }
+        for (i in 2 until nums.size) {
+            val c = nums[i]
+            val left = i-2
+            val right = i-1
+            if (nums[left] + nums[right] > c) {
+                max = maxOf(max, nums[left] + nums[right] + c)
             }
         }
 
-        return maxArea
+        return max
     }
 }
