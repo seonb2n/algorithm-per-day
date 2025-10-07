@@ -3,77 +3,43 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/pacific-atlantic-water-flow/?envType=daily-question&envId=2025-10-05
+// https://leetcode.com/problems/avoid-flood-in-the-city/?envType=daily-question&envId=2025-10-07
 class Solution {
-    fun pacificAtlantic(heights: Array<IntArray>): List<List<Int>> {
-        val n = heights.size
-        val m = heights[0].size
-        val pacificReachable = Array(n) { BooleanArray(m) }
-        val atlanticReachable = Array(n) { BooleanArray(m) }
+    fun avoidFlood(rains: IntArray): IntArray {
+        val ans = IntArray(rains.size)
+        // key: 호수 번호, value: 마지막으로 비가 내린 날짜(인덱스)
+        val fullLakes = mutableMapOf<Int, Int>()
+        // 물을 말릴 수 있는 날들의 인덱스를 오름차순으로 저장
+        val dryDays = TreeSet<Int>()
 
-        val upKeys = arrayOf(1, 0, -1, 0)
-        val leftKeys = arrayOf(0, 1, 0, -1)
+        for (i in rains.indices) {
+            val lake = rains[i]
 
-        // pacific 구하기
-        val queue = LinkedList<Cell>()
-        for (i in 0 until n) {
-            queue.add(Cell(i, 0))
-        }
-        for (j in 1 until m) {
-            queue.add(Cell(0, j))
-        }
+            if (lake == 0) {
+                // 비가 오지 않는 날은 건조쿠폰 저장
+                dryDays.add(i)
+                ans[i] = 1
+            } else {
+                ans[i] = -1
 
-        while (queue.isNotEmpty()) {
-            val now = queue.poll()
-            pacificReachable[now.i][now.j] = true
+                // 홍수 위기
+                if (fullLakes.containsKey(lake)) {
+                    // 이 호수에 마지막으로 비가 온 날(lastRainDay) 이후에 사용 가능한 쿠폰이 있을지
+                    val lastRainDay = fullLakes[lake]!!
 
-            // 4방향 탐색
-            for (i in 0 until 4) {
-                val nextI = now.i + upKeys[i]
-                val nextJ = now.j + leftKeys[i]
-                if (nextI in 0 until n && nextJ in 0 until m) {
-                    if (heights[nextI][nextJ] >= heights[now.i][now.j] && !pacificReachable[nextI][nextJ]) {
-                        queue.add(Cell(nextI, nextJ))
-                    }
+                    // dryDays에서 lastRainDay보다 크거나 같은 첫 번째 날을 찾습니다.
+                    val nextDryDay = dryDays.ceiling(lastRainDay)
+                        ?: // 사용 가능한 건조 쿠폰이 없으면 홍수를 막을 수 없습니다.
+                        return IntArray(0)
+
+                    ans[nextDryDay] = lake
+                    dryDays.remove(nextDryDay)
+                    fullLakes[lake] = i
+                } else {
+                    fullLakes[lake] = i
                 }
             }
         }
-
-        // atlantic 구하기
-        for (i in 0 until n) {
-            queue.add(Cell(i, m-1))
-        }
-        for (j in 0 until m) {
-            queue.add(Cell(n-1,j))
-        }
-
-        while (queue.isNotEmpty()) {
-            val now = queue.poll()
-            atlanticReachable[now.i][now.j] = true
-
-            for (i in 0 until 4) {
-                val nextI = now.i + upKeys[i]
-                val nextJ = now.j + leftKeys[i]
-                if (nextI in 0 until n && nextJ in 0 until m) {
-                    if (heights[nextI][nextJ] >= heights[now.i][now.j] && !atlanticReachable[nextI][nextJ]) {
-                        queue.add(Cell(nextI, nextJ))
-                    }
-                }
-            }
-        }
-
-        val result = mutableListOf<List<Int>>()
-
-        for (i in 0 until n) {
-            for (j in 0 until m) {
-                if (atlanticReachable[i][j] && pacificReachable[i][j]) {
-                    result.add(listOf(i, j))
-                }
-            }
-        }
-
-        return result
+        return ans
     }
-
-    data class Cell(val i: Int, val j: Int)
 }
