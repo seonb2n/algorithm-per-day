@@ -3,23 +3,20 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/successful-pairs-of-spells-and-potions/?envType=daily-question&envId=2025-10-08
+// https://leetcode.com/problems/water-bottles/?envType=daily-question&envId=2025-10-01
 class Solution {
-    fun successfulPairs(spells: IntArray, potions: IntArray, success: Long): IntArray {
-        potions.sort()
+    fun numWaterBottles(numBottles: Int, numExchange: Int): Int {
+        var result = 0
 
-        val n = spells.size
-        val m = potions.size
-        val result = IntArray(n)
-
-        for (i in 0 until n) {
-            for (j in 0 until m) {
-                if (spells[i].toLong() * potions[j].toLong() >= success) {
-                    result[i] = m - j
-                    break
-                }
-            }
+        fun dfs(full: Int, empty: Int) {
+            result += full
+            val newFull = (full + empty) / numExchange
+            val newEmpty = (full + empty) % numExchange
+            if (newFull == 0) return
+            dfs(newFull, newEmpty)
         }
+
+        dfs(numBottles, 0)
 
         return result
     }
