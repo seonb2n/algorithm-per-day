@@ -3,35 +3,19 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/find-resultant-array-after-removing-anagrams/?envType=daily-question&envId=2025-10-13
+// https://leetcode.com/problems/final-value-of-variable-after-performing-operations/?envType=daily-question&envId=2025-10-20
 class Solution {
-    fun removeAnagrams(words: Array<String>): List<String> {
-        val wordList = words.toMutableList()
-
-        while (true) {
-            var isRemoved = false
-            var deleteIndex = -1
-            var former = ""
-
-
-            for (i in wordList.indices) {
-                val sortedWord = wordList[i].toCharArray().sorted().joinToString("")
-                if (former == sortedWord) {
-                    isRemoved = true
-                    deleteIndex = i
-                    break
-                } else {
-                    former = sortedWord
-                }
-            }
-
-            if (isRemoved) {
-                wordList.removeAt(deleteIndex)
-            } else {
-                break
+    fun finalValueAfterOperations(operations: Array<String>): Int {
+        var result = 0
+        for (opr in operations) {
+            when(opr) {
+                "++X" -> result++
+                "X++" -> result++
+                "X--" -> result--
+                "--X" -> result--
             }
         }
 
-        return wordList
+        return result
     }
 }
