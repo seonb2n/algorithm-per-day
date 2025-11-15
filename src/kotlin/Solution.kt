@@ -3,32 +3,30 @@ package kotlin
 import java.util.*
 import kotlin.math.ceil
 
-// https://leetcode.com/problems/find-x-sum-of-all-k-long-subarrays-i/?envType=daily-question&envId=2025-11-04
+// https://leetcode.com/problems/count-the-number-of-substrings-with-dominant-ones/?envType=daily-question&envId=2025-11-15
 class Solution {
-    fun findXSum(nums: IntArray, k: Int, x: Int): IntArray {
-        val len = nums.size - k + 1
-        val result = IntArray(len)
+    fun numberOfSubstrings(s: String): Int {
+        val n = s.length
+        var count = 0
 
-        for (i in 0 until len) {
-            val map = mutableMapOf<Int, Int>()
+        for (i in 0 until n) {
+            var zeros = 0
+            var ones = 0
 
-            for (j in i until i + k) {
-                map[nums[j]] = map.getOrDefault(nums[j], 0) + 1
+            for (j in i until n) {
+                if (s[j] == '0') {
+                    zeros++
+                } else {
+                    ones++
+                }
+
+                // ones >= zeros²인지 확인
+                if (ones >= zeros * zeros) {
+                    count++
+                }
             }
-
-            val sorted = map.entries.sortedWith(
-                compareByDescending<Map.Entry<Int, Int>> { it.value }
-                    .thenByDescending { it.key }
-            )
-
-            var now = 0
-            for (entry in sorted.take(x)) {
-                now += entry.key * entry.value
-            }
-
-            result[i] = now
         }
 
-        return result
+        return count
     }
 }
