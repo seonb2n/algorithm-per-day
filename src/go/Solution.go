@@ -1,27 +1,27 @@
 package main
 
-// https://leetcode.com/problems/partition-labels/submissions/1590841099/?envType=daily-question&envId=2025-03-30
-func partitionLabels(s string) []int {
-	result := []int{}
-	lastMap := make(map[rune]int)
+// https://leetcode.com/problems/score-of-parentheses/?envType=daily-question&envId=2026-10-05
+func scoreOfParentheses(s string) int {
+    i := 0
 
-	for i, char := range s {
-		lastMap[char] = i
-	}
+    var dfs func() int
+    dfs = func() int {
+        score := 0
 
-	start := 0
-	end := 0
+        for i < len(s) && s[i] != ')' {
+            i++ // '(' 건너뜀
+            inner := dfs()
+            i++ // ')' 건너뜀
+            
+            if inner == 0 {
+                score++ // "()" 를 만난 것
+            } else {
+                score += 2 * inner // "(A)" 를 만난 것
+            }
+        }
 
-	for i, char := range s {
-		if lastMap[char] > end {
-			end = lastMap[char]
-		}
+        return score
+    }
 
-		if i == end {
-			result = append(result, end-start+1)
-			start = end + 1
-		}
-	}
-
-	return result
+    return dfs()
 }
